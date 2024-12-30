@@ -1,27 +1,19 @@
-add golangci
-use https://go-blueprint.dev/ to comeup with project blueprint
+# Resources Used:
 
-add sitemap
-
-documentation:
-install direnv & run `direnv allow`
-
-if google client details are unavailable use test user login
-make sure that air reloads when libs changes
-move landing.svg as an inline element
-
-Resources:
 fonts:
 icons: feather
 illustrations: https://illustrationkit.com/illustrations/halo
 
-add title property or daisyui tooltip to all links and buttons
-
 # TODO:
 
-add license file, and other google files
+add github related files (contribute.md, etc)
+add golangci
+add sitemap
+remove direnv and have taskfile use the .env
+make sure that air reloads when libs changes
+add title property or daisyui tooltip to all links and buttons
 
-## Getting Started
+## Getting Started (Documentation)
 
 You can run the application locally either using Kubernetes or by running commands directly. Follow these steps:
 
