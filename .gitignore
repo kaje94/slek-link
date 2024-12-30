@@ -1,0 +1,37 @@
+# macOS files.
+.DS_Store
+
+# Environment files.
+.env
+
+# Generated folders.
+bin
+dist-ssr
+dist
+pb_data
+
+# Node modules.
+node_modules
+
+# Temp folders.
+.parcel-cache
+tmp
+
+# Logs.
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Devbox
+.devbox
+
+# Templ generated files
+*_templ.go
+*_templ.txt
+
+# VS code temp tiles
+__debug_*

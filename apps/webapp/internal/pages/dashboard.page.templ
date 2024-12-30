@@ -1,0 +1,121 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/angelofallars/htmx-go"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+)
+
+func HandleDashboardsPage(c echo.Context) error {
+	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
+	if err != nil {
+		return err
+	}
+	indexTemplate := components.RootLayout(
+		"Dashboard | slek.link - Manage and Track Your Links",
+		"Access your slek.link dashboard to view, manage, and track the performance of your shortened links. Simplify your workflow with powerful link analytics and easy link management tools.",
+		dashboardBodyContent(userInfo),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+type ListItem struct {
+	Id      string
+	Created string
+	FullUrl string
+	Name    string
+	Slug    string
+	State   string
+}
+
+var testData []ListItem
+
+templ dashboardBodyContent(userInfo common_types.UserInfo) {
+	@components.InnerLayout(userInfo) {
+		@components.BreadCrumb([]components.BreadcrumbItem{
+			components.BreadcrumbItem{Label: "Home", Link: "/"},
+			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
+		})
+		@dashboardWithContent()
+		// @dashboardEmpty()
+	}
+}
+
+templ dashboardEmpty() {
+	<div class="flex flex-1 flex-col h-full items-center justify-center">
+		<div class="max-w-lg h-full flex flex-col gap-4 justify-center items-center">
+			<div class="opacity-50">
+				@components.EmptyIllustration()
+			</div>
+			<h3 class="text-center w-4/5 mt-10 opacity-80">
+				You have not yet created any short links. Get started by shortening
+				your first long URL.
+			</h3>
+			<button class="btn btn-primary w-3/5">Shorten new Link</button>
+		</div>
+	</div>
+}
+
+templ listItemCol(label string, value string, index int) {
+	<div class={ "flex gap-1 line-clamp-1 h-6 break-all", templ.KV("justify-end text-right md:justify-start md:text-left", index % 2 == 1) }>
+		<span class={ "md:hidden block font-extralight", templ.KV("text-right md:text-left", index % 2 == 1) }>
+			{ label }:
+		</span>
+		{ value }
+	</div>
+}
+
+templ dashboardWithContent() {
+	<div class="flex justify-between flex-col sm:flex-row-reverse gap-4">
+		<button
+			class="btn btn-primary"
+		>
+			Shorten new Link
+		</button>
+		<label class="input input-bordered flex items-center gap-2">
+			<input type="text" class="grow" placeholder="Search"/>
+			@components.SearchIcon()
+		</label>
+	</div>
+	<div class="bg-base-content bg-opacity-10 flex flex-col gap-[1px] my-2">
+		<div class="md:grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 font-extralight bg-base-100 hidden">
+			<div>Name</div>
+			<div>Created</div>
+			<div>State</div>
+			<div>Slug</div>
+		</div>
+		for _, item := range testData {
+			<a
+				class="grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 hover:bg-base-200 duration-200 cursor-pointer bg-base-100 line-clamp-1 items-center overflow-visible"
+				href={ templ.SafeURL(fmt.Sprintf("/dashboard/%s", item.Id)) }
+			>
+				@listItemCol("Name", item.Name, 0)
+				@listItemCol("Created", item.Created, 1)
+				@listItemCol("State", item.State, 2)
+				@listItemCol("Slug", item.Slug, 3)
+				<div class="flex justify-end items-center gap-0.5 col-span-full md:col-span-1 order-first md:order-none">
+					<button title="Edit Link" class="btn hover:btn-accent btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100">
+						<span class="hidden md:block">Edit</span>
+						@components.EditIcon()
+					</button>
+					<button title="Delete Link" class="btn hover:btn-error btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100">
+						<span class="hidden md:block">Delete</span>
+						@components.TrashIcon()
+					</button>
+				</div>
+			</a>
+		}
+	</div>
+}
+
+func init() {
+	testData = []ListItem{
+		ListItem{Id: "1", Created: "Today", FullUrl: "http://localhost:8080/dashboard", Name: "Test1", Slug: "/test-1", State: "Active"},
+		ListItem{Id: "2", Created: "2 Days Ago", FullUrl: "http://localhost:8080/dashboaasdasrd", Name: "Test2", Slug: "/test-2", State: "Disabled"},
+		ListItem{Id: "3", Created: "1 Month Ago", FullUrl: "http://localhost:8080/dashbodasfaard", Name: "Test3", Slug: "/test-3", State: "Expired"},
+	}
+}

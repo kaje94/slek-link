@@ -1,0 +1,24 @@
+{
+  "name": "slek-link-webapp",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "parcel build ./scripts.js ./styles.scss --dist-dir ./public/dist",
+    "dev": "parcel build ./scripts.js ./styles.scss --dist-dir ./public/dist --no-optimize --no-cache",
+    "watch": "parcel watch ./scripts.js ./styles.scss --dist-dir ./public/dist  --watch-dir ../internal --no-cache"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.4.15",
+    "daisyui": "^4.12.14",
+    "alpinejs": "^3.14.3",
+    "htmx.org": "^1.9.12"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.13.1",
+    "autoprefixer": "^10.4.20",
+    "parcel": "^2.13.1",
+    "postcss": "^8.4.49"
+  },
+  "trustedDependencies": [
+    "@parcel/watcher"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "slek.link - Simplify Your URLs",
+  "short_name": "slek.link",
+  "description": "Shorten URLs for free with slek.link. Create custom links, track performance analytics, and simplify your digital interactions with secure URL shortening.",
+  "keywords": "URL shortener, free link shortener, custom links, link analytics, link tracking",
+  "background_color": "#171212",
+  "theme_color": "#19362C",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": ".",
+  "icons": [
+    {
+      "src": "manifest-touch-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+package components
+
+type BreadcrumbItem struct {
+	Label string
+	Link  string
+}
+
+templ BreadCrumb(items []BreadcrumbItem) {
+	<div class="breadcrumbs text-sm px-2">
+		<ul>
+			for _, item := range items {
+				if item.Link != "" {
+					<li>
+						<a href={ templ.SafeURL(item.Link) }>{ item.Label }</a>
+					</li>
+				} else {
+					<li>{ item.Label }</li>
+				}
+			}
+		</ul>
+	</div>
+}

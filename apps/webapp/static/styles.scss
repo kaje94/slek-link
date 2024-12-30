@@ -1,0 +1,21 @@
+/* Importing ubuntu 700 as display font and full spectrum of josefin-sans font */
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@100..700&family=Ubuntu:wght@700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Alpine.js styles */
+[x-cloak] {
+  display: none !important;
+}
+
+body {
+  font-family: "Josefin Sans", sans-serif;
+  font-optical-sizing: auto;
+}
+
+.display-font {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}

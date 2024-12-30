@@ -1,0 +1,91 @@
+package components
+
+import (
+	"github.com/kaje94/slek-link/common/pkg/config"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"strings"
+	"unicode"
+)
+
+templ Navbar(userInfo common_types.UserInfo) {
+	@navbar(userInfo, true)
+}
+
+templ NavbarWithoutShadow(userInfo common_types.UserInfo) {
+	@navbar(userInfo, false)
+}
+
+templ navbar(userInfo common_types.UserInfo, showShadow bool) {
+	<div class={ "navbar rounded-full", templ.KV("shadow-md", showShadow) }>
+		<div class="flex-1">
+			<a class="btn btn-ghost text-xl" href="/">
+				<span class="flex gap-0.5">
+					<span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+						slek
+					</span>
+					<span class="text-accent font-extrabold">.</span>
+					<span class="font-thin italic">link</span>
+				</span>
+			</a>
+		</div>
+		<div class="flex-none">
+			if userInfo.Email == "" {
+				<a href="/login" class="btn btn-outline flex items-center gap-3 px-5 bg-base-300 border-base-content border-opacity-75">
+					if (config.Config.WebAppConfig.GoogleClientId != "" && config.Config.WebAppConfig.GoogleClientSecret != "") {
+						<span class="w-5 h-5 ">
+							@GoogleIcon()
+						</span>
+					}
+					<span class="pt-0.5 font-medium">Sign In</span>
+				</a>
+			} else {
+				<div class="dropdown dropdown-end">
+					<div
+						tabindex="0"
+						role="button"
+						class="btn btn-ghost btn-circle avatar"
+					>
+						if userInfo.Picture == "" {
+							<span class="w-10 h-10 rounded-full border-[1px] content-center text-base display-font border-base-content">{ generateInitialsFromName(userInfo.Name) }</span>
+						} else {
+							<div class="w-10 rounded-full border-[1px] border-accent">
+								<img alt={ userInfo.Name } src={ userInfo.Picture } loading="lazy" height="40" width="40"/>
+							</div>
+						}
+					</div>
+					<ul
+						tabindex="0"
+						class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-2xl"
+					>
+						<li class="disabled"><a>{ userInfo.Name }</a></li>
+						<li>
+							<a href="/dashboard">Dashboard</a>
+						</li>
+						<li>
+							<a href="/logout">Sign Out</a>
+						</li>
+					</ul>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+func generateInitialsFromName(name string) string {
+	if name == "" {
+		return ""
+	}
+
+	words := strings.FieldsFunc(name, func(r rune) bool {
+		return unicode.IsSpace(r) || r == '.'
+	})
+
+	initials := ""
+	for _, word := range words {
+		if len(initials) < 2 && len(word) > 0 && unicode.IsUpper(rune(word[0])) {
+			initials += string(word[0])
+		}
+	}
+
+	return initials
+}

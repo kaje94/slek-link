@@ -1,0 +1,109 @@
+package pages
+
+import (
+	"github.com/angelofallars/htmx-go"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+)
+
+func HandleLinkDetailsPage(c echo.Context) error {
+	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
+	if err != nil {
+		return err
+	}
+	indexTemplate := components.RootLayout(
+		"Link Details | slek.link - Track and Analyze Your Link's Performance",
+		"Dive into detailed analytics for your shortened link on slek.link. Monitor clicks, track user behavior, and gain insights to optimize your link's performance.",
+		linkDetailsBodyContent(userInfo),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+templ linkDetailsBodyContent(userInfo common_types.UserInfo) {
+	@components.InnerLayout(userInfo) {
+		@components.BreadCrumb([]components.BreadcrumbItem{
+			components.BreadcrumbItem{Label: "Home", Link: "/"},
+			components.BreadcrumbItem{Label: "Dashboard", Link: "/dashboard"},
+			components.BreadcrumbItem{Label: "Link Details", Link: ""},
+		})
+		<div class="flex justify-between gap-4 flex-wrap p-1 items-center mb-4">
+			<h3 class="text-4xl display-font">
+				Link Namdas jkd alsjd lsa dlsadj lasjde
+			</h3>
+			<div class="flex justify-end gap-2">
+				<button class="btn btn-outline">
+					<span class="mb-0.5">
+						@components.EditIcon()
+					</span>
+					Edit
+				</button>
+				<button class="btn btn-error btn-outline">
+					<span class="mb-0.5">
+						@components.TrashIcon()
+					</span>
+					Delete
+				</button>
+			</div>
+		</div>
+		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content bg-opacity-10">
+			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
+				@statLinkSection("Original URL", "https://www.google.com/search?q=react+charrts&oq=react+charrts&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIJCAEQABgNGIAEMgkIAhAAGA0YgAQyCQgDEAAYDRiABDIJCAQQABgNGIAEMgkIBRAAGA0YgAQyCQgGEAAYDRiABDIJCAcQABgNGIAEMgkICBAAGA0YgAQyCQgJEAAYDRiABNIBCDI5NDBqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8", "")
+				@statLinkSection("Short URL", "http://localhost:8080/details", "")
+			</div>
+			@statSection("Total Clicks", "21k", "Past 12 months")
+			@statSection("Unique Clicks", "16k", "Past 12 months")
+			@statSection("Created", "2 Months ago", "Created on 02/10/2024")
+			@statSection("Status", "Active", "")
+			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
+				@statChartSection("Clicks Trend", "Clicks over the past 12 months")
+				@statChartSection("Clicks by Country", "Top countries where the users who clicked on the link are from")
+			</div>
+		</div>
+	}
+}
+
+templ statSection(title, value, desc string) {
+	@statSectionWrap() {
+		<div>{ title }</div>
+		<div class="text-3xl line-clamp-1 font-bold break-all">{ value }</div>
+		@statDesc(desc)
+	}
+}
+
+templ statLinkSection(title, value, desc string) {
+	@statSectionWrap() {
+		<div>{ title }</div>
+		<div class="gap-2 flex items-center">
+			<div class="text-lg line-clamp-1 break-all link-hover cursor-pointer hover:underline">
+				{ value }
+			</div>
+			<button class="btn btn-xs mb-1">
+				@components.CopyIcon()
+			</button>
+		</div>
+		@statDesc(desc)
+	}
+}
+
+templ statChartSection(title, desc string) {
+	@statSectionWrap() {
+		<div>{ title }</div>
+		@statDesc(desc)
+		<div class="my-1 bg-base-content bg-opacity-30 aspect-video"></div>
+	}
+}
+
+templ statDesc(desc string) {
+	if desc != "" {
+		<div class="text-sm font-extralight line-clamp-1">{ desc } </div>
+	}
+}
+
+templ statSectionWrap() {
+	<div class="p-2 md:p-4 xl:p-6 bg-base-100">
+		{ children... }
+	</div>
+}

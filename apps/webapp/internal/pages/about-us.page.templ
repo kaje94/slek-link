@@ -1,0 +1,126 @@
+package pages
+
+import (
+	"github.com/angelofallars/htmx-go"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+)
+
+func HandleAboutUsPage(c echo.Context) error {
+	indexTemplate := components.RootLayout(
+		"About Us | slek.link - Simplify Your Digital Sharing",
+		"Discover how slek.link simplifies URL sharing with powerful link management and analytics tools. Learn about our mission to make the web more accessible.",
+		aboutUsBodyContent(utils.GetUserFromCtx(c)),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+templ aboutUsBodyContent(userInfo common_types.UserInfo) {
+	@components.InnerLayout(userInfo) {
+		<header>
+			<h1 class="text-5xl">About Us</h1>
+		</header>
+		<section class="flex flex-col gap-6">
+			<article>
+				<p>
+					At slek.link, we are on a mission to transform how you connect,
+					share, and engage online. We believe that links are more than just
+					web addresses—they're bridges to opportunities, stories, and growth.
+					Our platform empowers individuals and businesses to create short,
+					meaningful URLs that not only save time but also enhance user
+					experiences. With slek.link, every click becomes a step towards
+					simplicity and efficiency.
+				</p>
+			</article>
+			<article>
+				<h2 class="text-2xl font-bold">Who We Are</h2>
+				<p>
+					Sleek. Smart. Secure. At slek.link, these aren’t just
+					buzzwords—they’re the principles we live by. We are a passionate
+					team of innovators and problem solvers who understand the power of
+					effective digital communication. Whether you’re a content creator,
+					marketer, or a casual user, we are dedicated to providing tools that
+					adapt to your unique needs. Our commitment is to help you stand out
+					in a crowded digital landscape.
+				</p>
+			</article>
+			<article>
+				<h2 class="text-2xl font-bold">What We Offer</h2>
+				<ul class="list-disc pl-3">
+					<li>
+						<strong>Effortless Link Shortening:</strong> Convert lengthy,
+						unwieldy URLs into sleek, professional links that are easy to
+						share.
+					</li>
+					<li>
+						<strong>Custom Branding:</strong> Create links that reflect your
+						personal or professional identity, leaving a lasting impression.
+					</li>
+					<li>
+						<strong>Advanced Analytics:</strong> Gain actionable insights with
+						data on clicks, locations, referral sources, devices, and
+						engagement trends.
+					</li>
+					<li>
+						<strong>Performance Metrics:</strong> Access detailed stats and
+						summary reports to understand how your URLs are performing. Use
+						this data to optimize your strategies and make data-driven
+						decisions.
+					</li>
+					<li>
+						<strong>User-Friendly Interface:</strong> Navigate our platform
+						effortlessly, no matter your level of technical expertise.
+					</li>
+					<li>
+						<strong>Robust Security:</strong> Safeguard your links and data
+						with industry-leading security standards.
+					</li>
+					<li>
+						<strong>Link Management Tools:</strong> Organize, track, and
+						manage all your links in one place for maximum productivity.
+					</li>
+					<li>
+						<strong>Scalability:</strong> Whether you’re an individual or an
+						enterprise, slek.link scales with your needs.
+					</li>
+				</ul>
+			</article>
+			<article>
+				<h2 class="text-2xl font-bold">Our Vision</h2>
+				<p>
+					At slek.link, we envision a world where the exchange of information
+					is seamless, meaningful, and impactful. We believe that every link
+					has the potential to tell a story, and we’re here to make sure that
+					story reaches its audience effectively. Our vision is to be the
+					go-to solution for simplifying digital connections and empowering
+					users to achieve their goals, one link at a time.
+				</p>
+			</article>
+			<article>
+				<h2 class="text-2xl font-bold">Why Choose slek.link?</h2>
+				<p>
+					The internet is vast, and standing out can be challenging. With
+					slek.link, you gain a partner dedicated to your success. From
+					offering customization that enhances your brand identity to
+					providing insights that help you grow, we’re here to support you
+					every step of the way. Plus, Slek.link is completely free to use,
+					ensuring that everyone, regardless of their budget, can access
+					powerful tools to simplify their online presence.
+				</p>
+			</article>
+			<article>
+				<h2 class="text-2xl font-bold">Join the Journey</h2>
+				<p>
+					By choosing slek.link, you’re not just adopting a tool—you’re
+					becoming part of a movement that values innovation, creativity, and
+					reliability. Let’s transform how you share, connect, and thrive
+					online. Start your journey with slek.link today and discover the
+					difference!
+				</p>
+			</article>
+		</section>
+	}
+}

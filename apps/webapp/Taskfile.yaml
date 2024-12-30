@@ -1,0 +1,68 @@
+version: "3"
+output: "prefixed"
+tasks:
+  format:
+    desc: Format webapp code(templ & Go files)
+    cmds:
+      - templ fmt .
+      - go fmt ./...
+  build:
+    desc: Build webapp(including templ & static files)
+    cmds:
+      - bun run --cwd ./static build
+      - templ generate
+      - go build -o ./bin/main cmd/main.go
+  dev:
+    desc: Start dev sever for webapp
+    deps: [dev-pre-start]
+    cmds:
+      - go run cmd/main.go
+  dev-pre-start:
+    desc: Generate templ and static files
+    cmds:
+      - templ generate
+      - bun run --cwd ./static dev
+  watch:
+    desc: Run all watchers concurrently
+    deps: [watch-templ, watch-server, watch-static, sync-assets]
+  watch-templ:
+    desc: Start templ proxy and watch for changes
+    summary: Start a proxy server, watch for changes in .templ files and recreate _templ.go files on change, then send reload event to browser.
+    cmds:
+      - templ generate --watch --proxy="http://localhost:7999" --proxybind="localhost" --proxyport="$WEBAPP_PORT" --open-browser=false
+  watch-server:
+    desc: Watch and re-run go server
+    summary: Run air command to detect any go file changes to re-build and re-run the server.
+    env:
+      # IS_LOCAL_PROXY will be used to run the server on port 7999 and the templ proxy on WEBAPP_PORT
+      # Learn more about templ proxy: https://templ.guide/commands-and-tools/live-reload#built-in
+      IS_LOCAL_PROXY: true
+    cmds:
+      - |
+        air \
+        --build.cmd "go build -o ./tmp/main cmd/main.go" \
+        --build.bin "tmp/main" \
+        --build.delay "100" \
+        --build.exclude_dir "static,tmp" \
+        --build.exclude_regex  "_test\\.go,_templ\\.go" \
+        --build.include_ext "go" \
+        --build.stop_on_error "false" \
+        --misc.clean_on_exit true \
+        --tmp_dir tmp
+  watch-static:
+    summary: Watch and rebuild static assets
+    desc: Watch and regenerate the static css files
+    cmds:
+      - bun run --cwd ./static watch
+  sync-assets:
+    desc: Watch and sync assets delivered by templ proxy
+    summary: Watch for any js or css change in the public/ folder, then notify templ to reload the browser via templ proxy.
+    cmds:
+      - |
+        air \
+        --build.cmd "templ generate --notify-proxy --proxybind localhost --proxyport $WEBAPP_PORT" \
+        --build.bin "true" \
+        --build.delay "1000" \
+        --build.exclude_dir "internal" \
+        --build.include_dir "static/public" \
+        --build.include_ext "js,css,svg,png,jpeg,jpg,json"

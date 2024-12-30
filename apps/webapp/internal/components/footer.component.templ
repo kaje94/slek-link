@@ -1,0 +1,25 @@
+package components
+
+import (
+	"strconv"
+	"time"
+)
+
+templ Footer() {
+	<footer class="footer footer-center bg-base-neutral-dark border-t-2 border-t-base-200 text-base-content rounded pt-1">
+		<div class="container p-4 mx-auto flex md:flex-row flex-col justify-between items-center gap-4 md:gap-6">
+			<aside>
+				<p>
+					Copyright © { strconv.Itoa(time.Now().Year() ) } - All right reserved by slek.link
+				</p>
+			</aside>
+			<nav class="flex flex-wrap justify-center gap-2 md:gap-4">
+				<a class="link link-hover" href="/about-us">About Us</a>
+				<a class="link link-hover" href="/contact-us">Contact Us</a>
+				<a class="link link-hover" href="/faqs">FAQs</a>
+				<a class="link link-hover" href="/privacy-policy">Privacy Policy</a>
+				<a class="link link-hover" href="/terms-and-conditions">Terms & Conditions</a>
+			</nav>
+		</div>
+	</footer>
+}

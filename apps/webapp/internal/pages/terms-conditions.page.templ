@@ -1,0 +1,167 @@
+package pages
+
+import (
+	"github.com/angelofallars/htmx-go"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+)
+
+func HandleTermsConditionsPage(c echo.Context) error {
+	indexTemplate := components.RootLayout(
+		"Terms & Conditions | slek.link - User Agreement",
+		"Review the terms and conditions for using slek.link. Learn about your rights, responsibilities, and our commitment to providing a reliable service.",
+		termsConditionsBodyContent(utils.GetUserFromCtx(c)),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+templ termsConditionsBodyContent(userInfo common_types.UserInfo) {
+	@components.InnerLayout(userInfo) {
+		<header>
+			<h1 class="text-5xl">Terms & Conditions</h1>
+			<p class="font-thin">
+				By using slek.link, you agree to the following terms and conditions.
+			</p>
+		</header>
+		<section class="flex flex-col gap-6">
+			<article id="introduction">
+				<h2 class="text-xl font-bold">Introduction</h2>
+				<p>
+					These Terms and Conditions govern the use of the slek.link platform
+					and services. By accessing or using the slek.link website or any
+					services provided by slek.link, you agree to comply with and be
+					bound by these Terms and Conditions.
+				</p>
+			</article>
+			<article id="user-eligibility">
+				<h2 class="text-xl font-bold">User Eligibility</h2>
+				<p>
+					You must be at least 13 years old to use slek.link. By using our
+					services, you represent and warrant that you are eligible to do so
+					and that you will comply with these Terms and Conditions.
+				</p>
+			</article>
+			<article id="account-creation">
+				<h2 class="text-xl font-bold">Account Creation</h2>
+				<p>
+					To use the features provided by slek.link, you must log in through
+					Google authentication. No additional personal information is
+					required. You are responsible for maintaining the confidentiality of
+					your account and Google login credentials.
+				</p>
+			</article>
+			<article id="prohibited-activities">
+				<h2 class="text-xl font-bold">Prohibited Activities</h2>
+				<p>
+					You agree not to use slek.link for any illegal or harmful purposes.
+					Specifically, you shall not:
+				</p>
+				<ul class="list-disc pl-3">
+					<li>Engage in fraudulent activities.</li>
+					<li>
+						Distribute harmful, offensive, or illegal content through the
+						platform.
+					</li>
+					<li>
+						Attempt to interfere with or disrupt the functioning of slek.link.
+					</li>
+					<li>
+						Access or use accounts that do not belong to you without
+						authorization.
+					</li>
+				</ul>
+			</article>
+			<article id="intellectual-property">
+				<h2 class="text-xl font-bold">Intellectual Property</h2>
+				<p>
+					All content, trademarks, logos, and intellectual property related to
+					slek.link are the property of slek.link or its licensors. You may
+					not use, copy, modify, or distribute any content or intellectual
+					property without prior written consent from slek.link.
+				</p>
+			</article>
+			<article id="link-usage">
+				<h2 class="text-xl font-bold">Link Usage</h2>
+				<p>By using slek.link to shorten URLs, you agree to the following:</p>
+				<ul class="list-disc pl-3">
+					<li>
+						The links you create may not be used for illegal, harmful, or
+						malicious purposes.
+					</li>
+					<li>
+						You are solely responsible for the content of the links you create
+						and share.
+					</li>
+					<li>
+						Slek.link is not responsible for the content of any third-party
+						websites linked through shortened URLs.
+					</li>
+				</ul>
+			</article>
+			<article id="privacy-policy">
+				<h2 class="text-xl font-bold">Privacy Policy</h2>
+				<p>
+					By using slek.link, you acknowledge that you have read and agree to
+					our Privacy Policy, which governs how we collect, use, and protect
+					your information.
+				</p>
+			</article>
+			<article id="service-availability">
+				<h2 class="text-xl font-bold">Service Availability</h2>
+				<p>
+					We strive to maintain the availability of slek.link at all times.
+					However, we cannot guarantee that the service will be uninterrupted,
+					secure, or error-free. We may temporarily suspend or modify the
+					service for maintenance or other reasons without notice.
+				</p>
+			</article>
+			<article id="limitation-of-liability">
+				<h2 class="text-xl font-bold">Limitation of Liability</h2>
+				<p>
+					Slek.link shall not be liable for any damages arising from your use
+					of the platform, including but not limited to loss of data, loss of
+					revenue, or any indirect, incidental, or consequential damages.
+				</p>
+			</article>
+			<article id="indemnification">
+				<h2 class="text-xl font-bold">Indemnification</h2>
+				<p>
+					You agree to indemnify and hold harmless slek.link, its affiliates,
+					employees, and agents from any claims, damages, liabilities, and
+					expenses arising out of your use of the platform or violation of
+					these Terms and Conditions.
+				</p>
+			</article>
+			<article id="changes-to-terms">
+				<h2 class="text-xl font-bold">Changes to These Terms</h2>
+				<p>
+					We reserve the right to update these Terms and Conditions at any
+					time. When we do, we will post the updated terms on this page and
+					update the "Effective Date" at the top of the page. You are
+					responsible for reviewing these Terms regularly to stay informed of
+					any changes.
+				</p>
+			</article>
+			<article id="termination">
+				<h2 class="text-xl font-bold">Termination</h2>
+				<p>
+					Slek.link may suspend or terminate your account and access to the
+					platform at its sole discretion if you violate these Terms and
+					Conditions. Upon termination, you will no longer have access to your
+					account and any data associated with it.
+				</p>
+			</article>
+			<article id="contact-us">
+				<h2 class="text-xl font-bold">Contact Us</h2>
+				<p>
+					If you have any questions about these Terms and Conditions or our
+					services, please contact us via the{ " " }
+					<a href="/contact-us" class="link link-hover font-bold">Contact Us</a> page.
+				</p>
+			</article>
+		</section>
+	}
+}

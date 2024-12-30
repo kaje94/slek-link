@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.13.6/.schema/devbox.schema.json",
+  "packages": [
+    "go@1.23.3",
+    "templ@0.2.793",
+    "air@1.61.1",
+    "bun@1.1.34",
+    "golangci-lint@1.58.2",
+    "go-task@latest"
+  ],
+  "env": {
+    "NIX_HARDENING_ENABLE": ""
+  },
+  "shell": {
+    "init_hook": ["devbox run init"],
+    "scripts": {
+      "init": [
+        "bun install --cwd ./apps/webapp/static",
+        "templ generate -lazy"
+      ],
+      "webapp:format": ["task webapp:format"],
+      "webapp:build": ["task webapp:build"],
+      "webapp:dev": ["task webapp:dev"],
+      "webapp:watch": ["task webapp:watch"]
+    }
+  }
+}

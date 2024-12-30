@@ -1,0 +1,57 @@
+package pages
+
+import (
+	"github.com/angelofallars/htmx-go"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+)
+
+func HandleLandingPage(c echo.Context) error {
+	userInfo := utils.GetUserFromCtx(c)
+	indexTemplate := components.RootLayout(
+		"slek.link - Simplify Your URLs",
+		"Shorten URLs for free with slek.link. Create custom links, track performance analytics, and simplify your digital interactions with secure URL shortening.",
+		landingBodyContent(userInfo),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+templ landingBodyContent(userInfo common_types.UserInfo) {
+	<main class="min-h-screen relative bg-gradient-to-t lg:bg-gradient-to-tr to-base-100 from-base-neutral-dark">
+		<img
+			src="/images/landing-bg-pattern.svg"
+			class="w-full h-full absolute top-0 left-0 z-0 object-cover"
+		/>
+		<div class="container mx-auto py-5 z-10 relative">
+			@components.NavbarWithoutShadow(userInfo)
+			<div class="min-h-[calc(100vh-120px)] my-2 grid lg:grid-cols-2 p-4">
+				<div class="content-center flex flex-col gap-4 justify-center items-center sm:items-start pb-10">
+					<h1 class="flex flex-col text-7xl md:text-8xl xl:text-9xl items-center display-font sm:items-start tracking-wide">
+						<span>Shorten</span>
+						<span>Share</span>
+						<span>Succeed</span>
+					</h1>
+					<h2 class="md:text-2xl text-xl font-extralight text-center sm:text-start mt-4 md:mt-6 px-4 sm:px-0 tracking-wider">
+						Transform long URLs into clean, trackable links that perform
+					</h2>
+					<div class="join join-vertical sm:join-horizontal w-full my-6 md:my-8 max-w-sm md:max-w-2xl">
+						<input
+							class="input input-bordered join-item input-md md:input-lg input-primary w-full placeholder:text-center sm:placeholder:text-start"
+							placeholder="Paste your long URL"
+						/>
+						<button class="btn join-item rounded-r-full btn-md md:btn-lg btn-primary">
+							Shorten URL
+						</button>
+					</div>
+				</div>
+				<div class="content-center py-24 pl-12 hidden lg:flex justify-end">
+					@components.LaunchIllustration()
+				</div>
+			</div>
+		</div>
+	</main>
+	@components.Footer()
+}

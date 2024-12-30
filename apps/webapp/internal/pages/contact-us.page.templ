@@ -1,0 +1,85 @@
+package pages
+
+import (
+	"github.com/angelofallars/htmx-go"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+)
+
+func HandleContactUsPage(c echo.Context) error {
+	indexTemplate := components.RootLayout(
+		"Contact Us | slek.link - Get Support or Ask Questions",
+		"Need help? Contact the slek.link support team for inquiries, assistance, or feedback. We're here to make your URL shortening experience seamless.",
+		contactUsBodyContent(utils.GetUserFromCtx(c)),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+templ contactUsBodyContent(userInfo common_types.UserInfo) {
+	@components.InnerLayout(userInfo) {
+		<header>
+			<h1 class="text-5xl">Contact Us</h1>
+		</header>
+		<section class="flex flex-col gap-6">
+			<article>
+				<h2 class="text-xl font-bold">Customer Support Hours</h2>
+				<p>
+					Our dedicated support team is available to assist you during the
+					following hours: Monday - Friday: 8.00 AM - 8.00 PM
+				</p>
+			</article>
+			<article>
+				<h2 class="text-xl font-bold">Frequently Asked Questions</h2>
+				<p>
+					Before reaching out, check our{ " " }
+					<a href="/faqs" class="link link-hover">
+						FAQ
+					</a>{ " " }
+					section for quick answers to common questions.
+				</p>
+			</article>
+			<article>
+				<h2 class="text-xl font-bold">Privacy Assurance </h2>
+				<p>
+					We respect your privacy. Your information will only be used for the
+					purpose of responding to your inquiry.
+				</p>
+			</article>
+			<p class="font-thin">
+				Please use the form below to reach out to us. We"ll get back to you as
+				soon as possible. We value your inquiries and are committed to
+				providing swift assistance.
+			</p>
+			<div class="grid lg:grid-cols-2 gap-4 mt-4 lg:mt-8 items-center">
+				<div class="flex flex-col gap-4">
+					<input
+						type="text"
+						class="input input-bordered"
+						placeholder="Name"
+					/>
+					<input
+						type="text"
+						class="input  input-bordered"
+						placeholder="user@email.com"
+					/>
+					<input
+						type="text"
+						class="input  input-bordered"
+						placeholder="Subject"
+					/>
+					<textarea
+						class="textarea textarea-bordered min-h-32"
+						placeholder="Your Message..."
+					></textarea>
+					<button class="btn btn-primary w-full">Submit</button>
+				</div>
+				<div class="p-10 hidden lg:block">
+					@components.ContactUsIllustration()
+				</div>
+			</div>
+		</section>
+	}
+}

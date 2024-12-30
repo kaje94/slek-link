@@ -1,0 +1,6 @@
+version: "3"
+
+includes:
+  webapp:
+    taskfile: ./apps/webapp/Taskfile.yaml
+    dir: ./apps/webapp

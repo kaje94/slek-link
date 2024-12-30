@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "jetpack-io.devbox",
+    "golang.go",
+    "bradlc.vscode-tailwindcss",
+    "mkhl.direnv",
+    "a-h.templ",
+    "task.vscode-task"
+  ]
+}

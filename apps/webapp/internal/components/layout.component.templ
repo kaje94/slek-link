@@ -1,0 +1,39 @@
+package components
+
+import common_types "github.com/kaje94/slek-link/common/pkg/types"
+
+templ RootLayout(title string, description string, bodyContent templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="theme-color" content="#19362C"/>
+			<title>{ title }</title>
+			<meta name="keywords" content="URL shortener, free link shortener, custom links, link analytics, link tracking"/>
+			<meta name="description" content={ description }/>
+			<link rel="manifest" href="/manifest.webmanifest"/>
+			<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+			<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+			<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+			<link rel="icon" href="/favicon.png" sizes="any"/>
+			<link href="/dist/styles.css" rel="stylesheet"/>
+		</head>
+		<body>
+			@bodyContent
+			<script src="/dist/scripts.js"></script>
+		</body>
+	</html>
+}
+
+templ InnerLayout(userInfo common_types.UserInfo) {
+	<main class="min-h-screen">
+		<div class="container mx-auto py-5 flex flex-col">
+			@NavbarWithoutShadow(userInfo)
+			<div class="min-h-[calc(100vh-120px)] my-2 p-4 flex flex-col gap-4 flex-1">
+				{ children... }
+			</div>
+		</div>
+	</main>
+	@Footer()
+}

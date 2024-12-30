@@ -1,0 +1,147 @@
+package pages
+
+import (
+	"github.com/angelofallars/htmx-go"
+	"github.com/kaje94/slek-link/common/pkg/config"
+	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+	"strconv"
+)
+
+func HandleFaqsPage(c echo.Context) error {
+	indexTemplate := components.RootLayout(
+		"FAQs | slek.link - Your Questions Answered",
+		"Find answers to common questions about slek.link. Learn how to shorten URLs, track performance, and get the most out of our free URL shortening service.",
+		faqsBodyContent(utils.GetUserFromCtx(c)),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+templ faqsBodyContent(userInfo common_types.UserInfo) {
+	@components.InnerLayout(userInfo) {
+		<header>
+			<h1 class="text-5xl">Frequently Asked Questions</h1>
+		</header>
+		<section class="flex flex-col gap-6">
+			<article id="what-is-slek-link">
+				<h2 class="text-xl font-bold">What is slek.link?</h2>
+				<p>
+					Slek.link is a free platform that allows you to shorten long URLs
+					into sleek, shareable links. It also provides tools for custom
+					branding, analytics, and link management.
+				</p>
+			</article>
+			<article id="is-slek-link-free">
+				<h2 class="text-xl font-bold">Is slek.link really free?</h2>
+				<p>
+					Yes, slek.link is completely free to use, with the ability to
+					shorten up to { strconv.Itoa((config.Config.MaxLinksPerUser)) } links. We believe that everyone should
+					have access to tools that simplify their online interactions without
+					worrying about cost.
+				</p>
+			</article>
+			<article id="how-to-shorten-url">
+				<h2 class="text-xl font-bold">
+					How do I create a shortened URL?
+				</h2>
+				<p>
+					Creating a shortened URL is simple. Just paste your long URL into
+					the input field on our homepage, click the “Shorten” button, and
+					you’ll receive your sleek link instantly!
+				</p>
+			</article>
+			<article id="analytics">
+				<h2 class="text-xl font-bold">
+					Does slek.link provide analytics?
+				</h2>
+				<p>
+					Yes, slek.link offers advanced analytics for every link you create.
+					You can track clicks, geographic locations, referral sources, and
+					device types. These stats help you understand your audience and
+					optimize your strategies.
+				</p>
+			</article>
+			<article id="security">
+				<h2 class="text-xl font-bold">
+					How secure are the links I create?
+				</h2>
+				<p>
+					At slek.link, we prioritize security. Your links and data are
+					protected with industry-standard encryption and safeguards to ensure
+					your information stays secure.
+				</p>
+			</article>
+			<article id="account-needed">
+				<h2 class="text-xl font-bold">
+					Do I need an account to use slek.link?
+				</h2>
+				<p>
+					Yes, you need to log in via Google to use slek.link. This ensures a
+					secure and personalized experience for all users.
+				</p>
+			</article>
+			<article id="performance-tracking">
+				<h2 class="text-xl font-bold">
+					Can I track the performance of my links over time?
+				</h2>
+				<p>
+					Yes, you can monitor the performance of your links with detailed
+					analytics and summaries provided by slek.link. These insights help
+					you make data-driven decisions.
+				</p>
+			</article>
+			<article id="link-limit">
+				<h2 class="text-xl font-bold">
+					Is there a limit to the number of links I can create?
+				</h2>
+				<p>
+					Yes, you can shorten up to { strconv.Itoa((config.Config.MaxLinksPerUser)) } links for free. If you need more,
+					please check our pricing plans for additional features.
+				</p>
+			</article>
+			<article id="contact-support">
+				<h2 class="text-xl font-bold">How can I contact support?</h2>
+				<p>
+					You can contact our support team via the{ " " }
+					<a href="/contact-us">Contact Us</a> page. We are here to help with
+					any issues or inquiries.
+				</p>
+			</article>
+			<article id="how-long-do-shortened-links-last">
+				<h2 class="text-xl font-bold">
+					How long do shortened links last?
+				</h2>
+				<p>
+					Shortened links on slek.link do not expire unless manually deleted.
+					Your links are available as long as you need them.
+				</p>
+			</article>
+			<article id="can-i-delete-my-links">
+				<h2 class="text-xl font-bold">Can I delete my links?</h2>
+				<p>
+					Yes, if you have an account, you can manage and delete any links you
+					no longer need from your dashboard.
+				</p>
+			</article>
+			<article id="can-i-export-my-stats">
+				<h2 class="text-xl font-bold">Can I export my link stats?</h2>
+				<p>
+					Currently, exporting link stats is not available, but we are working
+					on this feature for the future.
+				</p>
+			</article>
+			<article id="is-there-any-ads-on-shortened-links">
+				<h2 class="text-xl font-bold">
+					Is there any ads on shortened links?
+				</h2>
+				<p>
+					No, we do not display any ads on the shortened URLs. Your links will
+					remain clean and professional.
+				</p>
+			</article>
+		</section>
+	}
+}
