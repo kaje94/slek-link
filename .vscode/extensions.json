@@ -5,6 +5,7 @@
     "bradlc.vscode-tailwindcss",
     "mkhl.direnv",
     "a-h.templ",
-    "task.vscode-task"
+    "task.vscode-task",
+    "starfederation.datastar-vscode"
   ]
 }

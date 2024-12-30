@@ -6,6 +6,8 @@ require (
 	github.com/a-h/templ v0.2.793
 	github.com/angelofallars/htmx-go v0.5.0
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/starfederation/datastar v0.21.4
+	github.com/Jeffail/gabs/v2 v2.7.0
 )
 
 require (

@@ -49,6 +49,10 @@ func RunServer() error {
 	// Handle API endpoints.
 	router.GET("/api/hello-world", handlers.ShowContentAPIHandler)
 
+	// TODO: Remove once data-star testing is over
+	sessionStore := sessions.NewSession(store, "temp")                      // TODO: Remove once data-star testing is over
+	pages.SetupExamplesTemplCounter(*router.Router(), sessionStore.Store()) // TODO: Remove once data-star testing is over
+
 	// Create a new server instance with options from environment variables.
 	// For more information, see https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/
 	server := http.Server{

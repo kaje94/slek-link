@@ -12,6 +12,7 @@ add sitemap
 remove direnv and have taskfile use the .env
 make sure that air reloads when libs changes
 add title property or daisyui tooltip to all links and buttons
+remove htmx and alpinejs
 
 ## Getting Started (Documentation)
 
