@@ -19,7 +19,7 @@ func GetDbFromCtx(c echo.Context) (*gorm.DB, error) {
 }
 
 func GetUserFromCtx(c echo.Context) (userInfo models.User) {
-	session, ok := c.Get(SESSION_CONTEXT_KEY).(*sessions.Session)
+	session, ok := c.Get(string(SESSION_CONTEXT_KEY)).(*sessions.Session)
 	if !ok {
 		return models.User{}
 	}
@@ -31,7 +31,7 @@ func GetUserFromCtx(c echo.Context) (userInfo models.User) {
 }
 
 func GetUserFromCtxWithRedirect(c echo.Context) (userInfo models.User, err error) {
-	session, ok := c.Get(SESSION_CONTEXT_KEY).(*sessions.Session)
+	session, ok := c.Get(string(SESSION_CONTEXT_KEY)).(*sessions.Session)
 	if !ok {
 		// TODO: better to redirect towards a more meaningful page
 		err = c.Redirect(http.StatusTemporaryRedirect, "/")

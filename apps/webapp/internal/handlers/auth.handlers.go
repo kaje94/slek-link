@@ -33,7 +33,7 @@ func HandleLogin(c echo.Context) error {
 }
 
 func HandlerLogout(c echo.Context) error {
-	session, ok := c.Get(utils.SESSION_CONTEXT_KEY).(*sessions.Session)
+	session, ok := c.Get(string(utils.SESSION_CONTEXT_KEY)).(*sessions.Session)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Session not found")
 	}
@@ -52,7 +52,7 @@ func HandleAuthCallback(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to handle user information")
 		}
 
-		session, ok := c.Get(utils.SESSION_CONTEXT_KEY).(*sessions.Session)
+		session, ok := c.Get(string(utils.SESSION_CONTEXT_KEY)).(*sessions.Session)
 		if !ok {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Session not found")
 		}
@@ -85,7 +85,7 @@ func HandleAuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to parse user info")
 	}
 
-	session, ok := c.Get(utils.SESSION_CONTEXT_KEY).(*sessions.Session)
+	session, ok := c.Get(string(utils.SESSION_CONTEXT_KEY)).(*sessions.Session)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Session not found")
 	}
@@ -112,6 +112,6 @@ func saveUser(c echo.Context, userInfo models.User) error {
 		return err
 	}
 
-	res := db.FirstOrCreate(userInfo, userInfo)
+	res := db.Where(models.User{ID: userInfo.ID}).Attrs(userInfo).FirstOrCreate(&userInfo)
 	return res.Error
 }

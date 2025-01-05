@@ -16,6 +16,7 @@ module.exports = {
   },
   daisyui: {
     themes: ["forest"],
+    logs: false,
   },
   // todo: check other plugins: forms, typography, animations, fluid-css
   plugins: [require("daisyui")],

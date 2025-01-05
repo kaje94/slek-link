@@ -1,0 +1,17 @@
+package components
+
+templ Input(key, label string, attrs templ.Attributes) {
+	<label class="form-control">
+		if label != "" {
+			<div class="label">
+				<span class="label-text">{ label }</span>
+			</div>
+		}
+		<input
+			type="text"
+			data-bind={ key }
+			class="input input-bordered w-full"
+			{ attrs... }
+		/>
+	</label>
+}

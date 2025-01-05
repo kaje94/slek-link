@@ -38,3 +38,4 @@ __debug_*
 
 # Local SqliteDB
 local.db
+local.db-journal

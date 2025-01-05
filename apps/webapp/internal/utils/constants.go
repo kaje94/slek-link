@@ -1,4 +1,8 @@
 package utils
 
-const DB_CONTEXT_KEY string = "DB-CONTEXT"
-const SESSION_CONTEXT_KEY string = "SESSION-CONTEXT"
+type sessionKeys string
+
+const (
+	DB_CONTEXT_KEY      sessionKeys = "DB-CONTEXT"
+	SESSION_CONTEXT_KEY sessionKeys = "SESSION-CONTEXT"
+)

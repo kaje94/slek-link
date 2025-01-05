@@ -17,6 +17,7 @@ add open graph tags with banner image
 add Prometheus(with GORM to collect db stats)
 GORM(Add indexes, migration, Logger)
 logging (use slog.Error, slog.Info)
+use https://github.com/oklog/ulid for ids
 
 ## Getting Started (Documentation)
 

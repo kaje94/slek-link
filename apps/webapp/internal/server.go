@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -69,8 +70,8 @@ func RunServer() error {
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%d", config.Config.WebAppConfig.Port),
 		Handler:      router, // handle all Echo routes
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  20 * time.Second,
+		WriteTimeout: 30 * time.Second,
 	}
 
 	slog.Info("Starting server...", "port", config.Config.WebAppConfig.Port)
@@ -82,12 +83,12 @@ func sessionMiddleware(store sessions.Store) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Retrieve the session
-			session, err := store.Get(c.Request(), utils.SESSION_CONTEXT_KEY)
+			session, err := store.Get(c.Request(), string(utils.SESSION_CONTEXT_KEY))
 			if err != nil {
 				slog.Error("Failed to retrieve session", "error", err)
 			}
 			// Attach the session to the context
-			c.Set(utils.SESSION_CONTEXT_KEY, session)
+			c.Set(string(utils.SESSION_CONTEXT_KEY), session)
 			return next(c)
 		}
 	}
@@ -95,7 +96,9 @@ func sessionMiddleware(store sessions.Store) echo.MiddlewareFunc {
 
 func initDb() error {
 	var err error
-	db, err = gorm.Open(sqlite.Open("local.db"), &gorm.Config{})
+	db, err = gorm.Open(sqlite.Open("local.db"), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -117,8 +120,8 @@ func initDb() error {
 
 func setDBMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		timeoutContext, _ := context.WithTimeout(context.Background(), time.Second)
-		ctx := context.WithValue(c.Request().Context(), utils.DB_CONTEXT_KEY, db.WithContext(timeoutContext)) //
+		timeoutContext, _ := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx := context.WithValue(c.Request().Context(), utils.DB_CONTEXT_KEY, db.WithContext(timeoutContext))
 		req := c.Request().WithContext(ctx)
 		c.SetRequest(req)
 		return next(c)

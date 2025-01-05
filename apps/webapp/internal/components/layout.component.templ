@@ -21,7 +21,7 @@ templ RootLayout(title string, description string, bodyContent templ.Component) 
 		</head>
 		<body>
 			@bodyContent
-			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js"></script>
+			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-beta.1/bundles/datastar.js"></script>
 			<script src="/dist/scripts.js"></script>
 		</body>
 	</html>
@@ -29,6 +29,18 @@ templ RootLayout(title string, description string, bodyContent templ.Component) 
 
 templ InnerLayout(userInfo models.User) {
 	<main class="min-h-screen">
+		<div class="container mx-auto py-5 flex flex-col">
+			@NavbarWithoutShadow(userInfo)
+			<div class="min-h-[calc(100vh-120px)] my-2 p-4 flex flex-col gap-4 flex-1">
+				{ children... }
+			</div>
+		</div>
+	</main>
+	@Footer()
+}
+
+templ InnerLayoutWithSignals(userInfo models.User, signals string) {
+	<main class="min-h-screen" data-signals={ signals }>
 		<div class="container mx-auto py-5 flex flex-col">
 			@NavbarWithoutShadow(userInfo)
 			<div class="min-h-[calc(100vh-120px)] my-2 p-4 flex flex-col gap-4 flex-1">

@@ -1,0 +1,23 @@
+package components
+
+templ LinkModal() {
+	<dialog class="modal" data-class="{'modal-open': $linkModalOpen}">
+		<div class="modal-box w-11/12 max-w-3xl">
+			<h3 class="font-bold text-lg">New Link Details</h3>
+			<div class="py-4 grid md:grid-cols-2 gap-y-2 md:gap-y-1 gap-x-4">
+				@Input("name", "Name", templ.Attributes{"placeholder": "Name"})
+				@Input("shortCode", "Short Code", templ.Attributes{"placeholder": "/short-endpoint"})
+				<span class="col-span-full">
+					@Input("url", "URL", templ.Attributes{"placeholder": "https://your-long-url.com"})
+				</span>
+			</div>
+			<div class="modal-action">
+				<div class="gap-4 flex flex-wrap justify-end">
+					<button class="btn" data-on-click="$linkModalOpen=false">Cancel</button>
+					<button class="btn btn-primary px-8">Create</button>
+				</div>
+			</div>
+		</div>
+		<div class="modal-backdrop" data-on-click="$linkModalOpen=false"></div>
+	</dialog>
+}

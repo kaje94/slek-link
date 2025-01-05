@@ -35,13 +35,14 @@ type ListItem struct {
 var testData []ListItem
 
 templ dashboardBodyContent(userInfo models.User) {
-	@components.InnerLayout(userInfo) {
+	@components.InnerLayoutWithSignals(userInfo, "{ linkModalOpen:false }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
 		})
 		@dashboardWithContent()
 		// @dashboardEmpty()
+		@components.LinkModal()
 	}
 }
 
@@ -55,7 +56,7 @@ templ dashboardEmpty() {
 				You have not yet created any short links. Get started by shortening
 				your first long URL.
 			</h3>
-			<button class="btn btn-primary w-3/5">Shorten new Link</button>
+			<button class="btn btn-primary w-3/5" data-on-click="$linkModalOpen=true">Shorten new Link</button>
 		</div>
 	</div>
 }
@@ -71,9 +72,7 @@ templ listItemCol(label string, value string, index int) {
 
 templ dashboardWithContent() {
 	<div class="flex justify-between flex-col sm:flex-row-reverse gap-4">
-		<button
-			class="btn btn-primary"
-		>
+		<button class="btn btn-primary" data-on-click="$linkModalOpen=true">
 			Shorten new Link
 		</button>
 		<label class="input input-bordered flex items-center gap-2">
