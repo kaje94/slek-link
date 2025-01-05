@@ -2,5 +2,4 @@ go 1.23.3
 
 use (
 	./apps/webapp
-	./libs/common
 )

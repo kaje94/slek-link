@@ -1,13 +1,13 @@
-package config
+package models
 
-type rootConfig struct {
+type RootConfig struct {
 	EnvName         string
 	IsProd          bool
 	MaxLinksPerUser int
-	WebAppConfig    webAppConfig
+	WebAppConfig    WebAppConfig
 }
 
-type webAppConfig struct {
+type WebAppConfig struct {
 	Url                string
 	Port               int
 	GoogleClientId     string

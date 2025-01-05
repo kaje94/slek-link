@@ -35,3 +35,6 @@ lerna-debug.log*
 
 # VS code temp tiles
 __debug_*
+
+# Local SqliteDB
+local.db

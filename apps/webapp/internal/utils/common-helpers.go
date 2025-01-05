@@ -5,14 +5,23 @@ import (
 	"net/http"
 
 	"github.com/gorilla/sessions"
-	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/models"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
-func GetUserFromCtx(c echo.Context) (userInfo common_types.UserInfo) {
-	session, ok := c.Get("session").(*sessions.Session)
+func GetDbFromCtx(c echo.Context) (*gorm.DB, error) {
+	db, ok := c.Request().Context().Value(DB_CONTEXT_KEY).(*gorm.DB)
 	if !ok {
-		return common_types.UserInfo{}
+		return nil, c.String(http.StatusInternalServerError, "Database not found in context")
+	}
+	return db, nil
+}
+
+func GetUserFromCtx(c echo.Context) (userInfo models.User) {
+	session, ok := c.Get(SESSION_CONTEXT_KEY).(*sessions.Session)
+	if !ok {
+		return models.User{}
 	}
 
 	if userInfoJSON, ok := session.Values["userInfo"].(string); ok {
@@ -21,8 +30,8 @@ func GetUserFromCtx(c echo.Context) (userInfo common_types.UserInfo) {
 	return
 }
 
-func GetUserFromCtxWithRedirect(c echo.Context) (userInfo common_types.UserInfo, err error) {
-	session, ok := c.Get("session").(*sessions.Session)
+func GetUserFromCtxWithRedirect(c echo.Context) (userInfo models.User, err error) {
+	session, ok := c.Get(SESSION_CONTEXT_KEY).(*sessions.Session)
 	if !ok {
 		// TODO: better to redirect towards a more meaningful page
 		err = c.Redirect(http.StatusTemporaryRedirect, "/")

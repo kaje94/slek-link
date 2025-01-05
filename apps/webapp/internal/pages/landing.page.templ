@@ -2,8 +2,8 @@ package pages
 
 import (
 	"github.com/angelofallars/htmx-go"
-	common_types "github.com/kaje94/slek-link/common/pkg/types"
 	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -19,7 +19,7 @@ func HandleLandingPage(c echo.Context) error {
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ landingBodyContent(userInfo common_types.UserInfo) {
+templ landingBodyContent(userInfo models.User) {
 	<main class="min-h-screen relative bg-gradient-to-t lg:bg-gradient-to-tr to-base-100 from-base-neutral-dark">
 		<img
 			src="/images/landing-bg-pattern.svg"

@@ -2,8 +2,8 @@ package pages
 
 import (
 	"github.com/angelofallars/htmx-go"
-	common_types "github.com/kaje94/slek-link/common/pkg/types"
 	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -22,7 +22,7 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ linkDetailsBodyContent(userInfo common_types.UserInfo) {
+templ linkDetailsBodyContent(userInfo models.User) {
 	@components.InnerLayout(userInfo) {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},

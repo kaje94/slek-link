@@ -2,8 +2,8 @@ package pages
 
 import (
 	"github.com/angelofallars/htmx-go"
-	common_types "github.com/kaje94/slek-link/common/pkg/types"
 	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +18,7 @@ func HandleAboutUsPage(c echo.Context) error {
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ aboutUsBodyContent(userInfo common_types.UserInfo) {
+templ aboutUsBodyContent(userInfo models.User) {
 	@components.InnerLayout(userInfo) {
 		<header>
 			<h1 class="text-5xl">About Us</h1>

@@ -2,9 +2,9 @@ package pages
 
 import (
 	"github.com/angelofallars/htmx-go"
-	"github.com/kaje94/slek-link/common/pkg/config"
-	common_types "github.com/kaje94/slek-link/common/pkg/types"
 	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/config"
+	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 	"strconv"
@@ -20,7 +20,7 @@ func HandleFaqsPage(c echo.Context) error {
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ faqsBodyContent(userInfo common_types.UserInfo) {
+templ faqsBodyContent(userInfo models.User) {
 	@components.InnerLayout(userInfo) {
 		<header>
 			<h1 class="text-5xl">Frequently Asked Questions</h1>

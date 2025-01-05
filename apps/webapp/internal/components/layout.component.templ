@@ -1,6 +1,6 @@
 package components
 
-import common_types "github.com/kaje94/slek-link/common/pkg/types"
+import "github.com/kaje94/slek-link/internal/models"
 
 templ RootLayout(title string, description string, bodyContent templ.Component) {
 	<!DOCTYPE html>
@@ -27,7 +27,7 @@ templ RootLayout(title string, description string, bodyContent templ.Component) 
 	</html>
 }
 
-templ InnerLayout(userInfo common_types.UserInfo) {
+templ InnerLayout(userInfo models.User) {
 	<main class="min-h-screen">
 		<div class="container mx-auto py-5 flex flex-col">
 			@NavbarWithoutShadow(userInfo)

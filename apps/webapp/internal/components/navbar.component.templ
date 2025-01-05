@@ -1,21 +1,21 @@
 package components
 
 import (
-	"github.com/kaje94/slek-link/common/pkg/config"
-	common_types "github.com/kaje94/slek-link/common/pkg/types"
+	"github.com/kaje94/slek-link/internal/config"
+	"github.com/kaje94/slek-link/internal/models"
 	"strings"
 	"unicode"
 )
 
-templ Navbar(userInfo common_types.UserInfo) {
+templ Navbar(userInfo models.User) {
 	@navbar(userInfo, true)
 }
 
-templ NavbarWithoutShadow(userInfo common_types.UserInfo) {
+templ NavbarWithoutShadow(userInfo models.User) {
 	@navbar(userInfo, false)
 }
 
-templ navbar(userInfo common_types.UserInfo, showShadow bool) {
+templ navbar(userInfo models.User, showShadow bool) {
 	<div class={ "navbar rounded-full", templ.KV("shadow-md", showShadow) }>
 		<div class="flex-1">
 			<a class="btn btn-ghost text-xl" href="/">

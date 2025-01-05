@@ -3,8 +3,8 @@ package pages
 import (
 	"fmt"
 	"github.com/angelofallars/htmx-go"
-	common_types "github.com/kaje94/slek-link/common/pkg/types"
 	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -34,7 +34,7 @@ type ListItem struct {
 
 var testData []ListItem
 
-templ dashboardBodyContent(userInfo common_types.UserInfo) {
+templ dashboardBodyContent(userInfo models.User) {
 	@components.InnerLayout(userInfo) {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},

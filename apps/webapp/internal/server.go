@@ -1,32 +1,43 @@
 package internal
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	"github.com/gorilla/sessions"
+	"github.com/kaje94/slek-link/internal/config"
+	"github.com/kaje94/slek-link/internal/handlers"
+	"github.com/kaje94/slek-link/internal/models"
+	"github.com/kaje94/slek-link/internal/pages"
+	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/kaje94/slek-link/common/pkg/config"
-	"github.com/kaje94/slek-link/internal/handlers"
-	"github.com/kaje94/slek-link/internal/pages"
+	"gorm.io/gorm"
 )
 
-// runServer runs a new HTTP server with the loaded environment variables.
+var db *gorm.DB
+
 func RunServer() error {
-	// Create a new Echo server.
 	router := echo.New()
 
-	// Add Echo middlewares.
+	// Add Logger middlewares.
 	router.Use(middleware.Logger())
 
 	// create store and attach to context
 	store := sessions.NewCookieStore([]byte(config.Config.WebAppConfig.CookieSecret))
 	store.Options = &sessions.Options{HttpOnly: true, Secure: config.Config.IsProd, SameSite: http.SameSiteLaxMode}
-	router.Use(SessionMiddleware(store))
+	router.Use(sessionMiddleware(store))
+
+	// init db and attach db middleware
+	if err := initDb(); err != nil {
+		return err
+	}
+	router.Use(setDBMiddleware)
 
 	// Handle static files.
 	router.Static("/", "./static/public")
@@ -62,26 +73,54 @@ func RunServer() error {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	// Send log message.
 	slog.Info("Starting server...", "port", config.Config.WebAppConfig.Port)
 
 	return server.ListenAndServe()
 }
 
-func SessionMiddleware(store sessions.Store) echo.MiddlewareFunc {
+func sessionMiddleware(store sessions.Store) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Retrieve the session
-			session, err := store.Get(c.Request(), "session")
+			session, err := store.Get(c.Request(), utils.SESSION_CONTEXT_KEY)
 			if err != nil {
 				slog.Error("Failed to retrieve session", "error", err)
 			}
-
 			// Attach the session to the context
-			c.Set("session", session)
-
-			// Proceed to the next handler
+			c.Set(utils.SESSION_CONTEXT_KEY, session)
 			return next(c)
 		}
+	}
+}
+
+func initDb() error {
+	var err error
+	db, err = gorm.Open(sqlite.Open("local.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	if !config.Config.IsProd {
+		// Perform auto migrate only if it's not production env
+		err = db.AutoMigrate(&models.User{}, &models.URL{})
+		if err != nil {
+			log.Fatalf("Failed to migrate database: %v", err)
+		}
+		slog.Info("Database migrated successfully.")
+
+		//
+		result := db.Find(&models.User{})
+		fmt.Println(result) //
+	}
+	return nil
+}
+
+func setDBMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		timeoutContext, _ := context.WithTimeout(context.Background(), time.Second)
+		ctx := context.WithValue(c.Request().Context(), utils.DB_CONTEXT_KEY, db.WithContext(timeoutContext)) //
+		req := c.Request().WithContext(ctx)
+		c.SetRequest(req)
+		return next(c)
 	}
 }
