@@ -37,27 +37,31 @@ templ dashboardBodyContent(userInfo models.User, links []models.Link) {
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
 		})
-		if len(links)== 0 {
-			@dashboardEmpty()
-		} else {
-			@dashboardWithContent(links)
-		}
+		<div id="dashboard-content-wrap" class="flex-1 flex flex-col">
+			if len(links)== 0 {
+				@DashboardEmpty()
+			} else {
+				@DashboardWithContent(links)
+			}
+		</div>
 		@components.LinkModal()
 		@components.DeleteLinkConfirmModal()
 	}
 }
 
-templ dashboardEmpty() {
-	<div class="flex flex-1 flex-col h-full items-center justify-center">
-		<div class="max-w-lg h-full flex flex-col gap-4 justify-center items-center">
-			<div class="opacity-50">
-				@components.EmptyIllustration()
+templ DashboardEmpty() {
+	<div class="flex-1 flex flex-col">
+		<div class="flex flex-col flex-1 items-center justify-center">
+			<div class="max-w-lg h-full flex flex-col gap-4 justify-center items-center">
+				<div class="opacity-50">
+					@components.EmptyIllustration()
+				</div>
+				<h3 class="text-center w-4/5 mt-10 opacity-80">
+					You have not yet created any short links. Get started by shortening
+					your first long URL.
+				</h3>
+				<button class="btn btn-primary w-3/5" data-on-click="$linkModalOpen=true">Shorten new Link</button>
 			</div>
-			<h3 class="text-center w-4/5 mt-10 opacity-80">
-				You have not yet created any short links. Get started by shortening
-				your first long URL.
-			</h3>
-			<button class="btn btn-primary w-3/5" data-on-click="$linkModalOpen=true">Shorten new Link</button>
 		</div>
 	</div>
 }
@@ -71,7 +75,7 @@ templ listItemCol(label string, value string, index int) {
 	</div>
 }
 
-templ dashboardWithContent(links []models.Link) {
+templ DashboardWithContent(links []models.Link) {
 	<div class="flex justify-between flex-col sm:flex-row-reverse gap-4">
 		<button class="btn btn-primary" data-on-click="$linkModalOpen=true">
 			Shorten new Link

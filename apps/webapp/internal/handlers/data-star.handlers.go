@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kaje94/slek-link/internal/models"
+	"github.com/kaje94/slek-link/internal/pages"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/oklog/ulid/v2"
@@ -74,6 +75,11 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 		LinkId string `json:"deleteLinkId"`
 	}
 
+	links, err := utils.GetLinksOfUser(c, userInfo.ID)
+	if err != nil {
+		return err
+	}
+
 	if err := c.Bind(&reqBody); err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
@@ -81,7 +87,16 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 	sse := datastar.NewSSE(c.Response().Writer, c.Request())
 
 	if err := utils.DeleteLinkOfUser(c, reqBody.LinkId, userInfo.ID); err == nil {
-		sse.RemoveFragments(fmt.Sprintf("#link-item-%s", reqBody.LinkId))
+		if len(links) > 1 {
+			sse.RemoveFragments(fmt.Sprintf("#link-item-%s", reqBody.LinkId))
+		} else {
+			// Show empty screen if there are no links left
+			sse.MergeFragmentTempl(
+				pages.DashboardEmpty(),
+				datastar.WithSelectorID("dashboard-content-wrap"),
+				datastar.WithMergeMode(datastar.FragmentMergeModeInner),
+			)
+		}
 		sse.MarshalAndMergeSignals(map[string]any{"deleteLinkId": ""})
 	}
 
