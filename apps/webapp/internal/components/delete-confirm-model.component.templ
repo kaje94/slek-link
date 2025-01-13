@@ -1,0 +1,24 @@
+package components
+
+templ DeleteLinkConfirmModal() {
+	<dialog class="modal" data-class="{'modal-open': $deleteLinkId}">
+		<div class="modal-box">
+			<h3 class="font-bold text-lg">Delete Link</h3>
+			<div>
+				Are you sure you want to delete this link? This action is not reversible.
+			</div>
+			<div class="modal-action">
+				<div class="gap-4 flex flex-wrap justify-end">
+					<button class="btn" data-on-click="$deleteLinkId=''">Cancel</button>
+					<button
+						class="btn btn-error px-8"
+						data-on-click="@delete('/api/delete-link')"
+						data-indicator-deleting
+						data-attr-disabled="$deleting"
+					><span class="loading loading-spinner" data-show="$deleting"></span>Delete</button>
+				</div>
+			</div>
+		</div>
+		<div class="modal-backdrop" data-on-click="$deleteLinkId=''"></div>
+	</dialog>
+}

@@ -17,11 +17,14 @@ import (
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/valkey-io/valkey-go"
+	"github.com/valkey-io/valkey-go/valkeycompat"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
+var valkeyClient valkey.Client
 
 func RunServer() error {
 	router := echo.New()
@@ -39,6 +42,14 @@ func RunServer() error {
 		return err
 	}
 	router.Use(setDBMiddleware)
+
+	// init cache and attach db middleware if valkey address is provided
+	if config.Config.Valkey.Url != "" {
+		if err := initCache(); err != nil {
+			return err
+		}
+		router.Use(setCacheMiddleware)
+	}
 
 	// Handle static files.
 	router.Static("/", "./static/public")
@@ -60,6 +71,10 @@ func RunServer() error {
 
 	// Handle API endpoints.
 	router.GET("/api/hello-world", handlers.ShowContentAPIHandler)
+
+	// Data-star api handlers
+	router.POST("/api/create-link", handlers.CreateLinkAPIHandler)
+	router.DELETE("/api/delete-link", handlers.DeleteLinkAPIHandler)
 
 	// TODO: Remove once data-star testing is over
 	sessionStore := sessions.NewSession(store, "temp")                      // TODO: Remove once data-star testing is over
@@ -105,16 +120,24 @@ func initDb() error {
 
 	if !config.Config.IsProd {
 		// Perform auto migrate only if it's not production env
-		err = db.AutoMigrate(&models.User{}, &models.URL{})
+		err = db.AutoMigrate(&models.User{}, &models.Link{})
 		if err != nil {
 			log.Fatalf("Failed to migrate database: %v", err)
 		}
 		slog.Info("Database migrated successfully.")
-
-		//
-		result := db.Find(&models.User{})
-		fmt.Println(result) //
 	}
+	return nil
+}
+
+func initCache() error {
+	var err error
+	valkeyClient, err = valkey.NewClient(valkey.ClientOption{
+		InitAddress: []string{config.Config.Valkey.Url},
+	})
+	if err != nil {
+		log.Fatalf("Could not initialize valkey cache: %v", err)
+	}
+
 	return nil
 }
 
@@ -124,6 +147,14 @@ func setDBMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		ctx := context.WithValue(c.Request().Context(), utils.DB_CONTEXT_KEY, db.WithContext(timeoutContext))
 		req := c.Request().WithContext(ctx)
 		c.SetRequest(req)
+		return next(c)
+	}
+}
+
+func setCacheMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		compat := valkeycompat.NewAdapter(valkeyClient)
+		c.Set(string(utils.VALKEY_CONTEXT_KEY), compat)
 		return next(c)
 	}
 }

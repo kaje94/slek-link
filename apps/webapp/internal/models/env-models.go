@@ -5,6 +5,7 @@ type RootConfig struct {
 	IsProd          bool
 	MaxLinksPerUser int
 	WebAppConfig    WebAppConfig
+	Valkey          ValkeyConfig
 }
 
 type WebAppConfig struct {
@@ -13,4 +14,8 @@ type WebAppConfig struct {
 	GoogleClientId     string
 	GoogleClientSecret string
 	CookieSecret       string
+}
+
+type ValkeyConfig struct {
+	Url string
 }

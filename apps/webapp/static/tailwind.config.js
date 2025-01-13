@@ -1,3 +1,5 @@
+const plugin = require("tailwindcss/plugin");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: {
@@ -7,6 +9,9 @@ module.exports = {
       "../internal/**/*.*.{html,templ,txt}",
     ],
   },
+  safelist: [
+    "datastar-swapping", // Force this class to always be included
+  ],
   theme: {
     extend: {
       colors: {
@@ -19,6 +24,16 @@ module.exports = {
     logs: false,
   },
   // todo: check other plugins: forms, typography, animations, fluid-css
-  plugins: [require("daisyui")],
+  plugins: [
+    require("daisyui"),
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".datastar-swapping": {
+          opacity: "0",
+          transition: "opacity 1s ease-out",
+        },
+      });
+    }),
+  ],
 };
 // TODO: try to replace parcel with farm or rspack

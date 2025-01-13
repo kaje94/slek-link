@@ -7,6 +7,8 @@ import (
 	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
+	"github.com/xeonx/timeago"
+	"net/http"
 )
 
 func HandleDashboardsPage(c echo.Context) error {
@@ -14,35 +16,34 @@ func HandleDashboardsPage(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	links, err := utils.GetLinksOfUser(c, userInfo.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find links")
+	}
+
 	indexTemplate := components.RootLayout(
 		"Dashboard | slek.link - Manage and Track Your Links",
 		"Access your slek.link dashboard to view, manage, and track the performance of your shortened links. Simplify your workflow with powerful link analytics and easy link management tools.",
-		dashboardBodyContent(userInfo),
+		dashboardBodyContent(userInfo, links),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-type ListItem struct {
-	Id      string
-	Created string
-	FullUrl string
-	Name    string
-	Slug    string
-	State   string
-}
-
-var testData []ListItem
-
-templ dashboardBodyContent(userInfo models.User) {
-	@components.InnerLayoutWithSignals(userInfo, "{ linkModalOpen:false }") {
+templ dashboardBodyContent(userInfo models.User, links []models.Link) {
+	@components.InnerLayoutWithSignals(userInfo, "{ linkModalOpen:false, linkModalError:'', deleteLinkId: '' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
 		})
-		@dashboardWithContent()
-		// @dashboardEmpty()
+		if len(links)== 0 {
+			@dashboardEmpty()
+		} else {
+			@dashboardWithContent(links)
+		}
 		@components.LinkModal()
+		@components.DeleteLinkConfirmModal()
 	}
 }
 
@@ -70,7 +71,7 @@ templ listItemCol(label string, value string, index int) {
 	</div>
 }
 
-templ dashboardWithContent() {
+templ dashboardWithContent(links []models.Link) {
 	<div class="flex justify-between flex-col sm:flex-row-reverse gap-4">
 		<button class="btn btn-primary" data-on-click="$linkModalOpen=true">
 			Shorten new Link
@@ -87,34 +88,26 @@ templ dashboardWithContent() {
 			<div>State</div>
 			<div>Slug</div>
 		</div>
-		for _, item := range testData {
-			<a
+		for _, item := range links {
+			<div
+				id={ fmt.Sprintf("link-item-%s", item.ID) }
 				class="grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 hover:bg-base-200 duration-200 cursor-pointer bg-base-100 line-clamp-1 items-center overflow-visible"
-				href={ templ.SafeURL(fmt.Sprintf("/dashboard/%s", item.Id)) }
 			>
 				@listItemCol("Name", item.Name, 0)
-				@listItemCol("Created", item.Created, 1)
-				@listItemCol("State", item.State, 2)
-				@listItemCol("Slug", item.Slug, 3)
+				@listItemCol("Created", timeago.English.Format(item.CreatedAt), 1)
+				@listItemCol("State", "Active", 2)
+				@listItemCol("Slug", item.ShortCode, 3)
 				<div class="flex justify-end items-center gap-0.5 col-span-full md:col-span-1 order-first md:order-none">
 					<button title="Edit Link" class="btn hover:btn-accent btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100">
 						<span class="hidden md:block">Edit</span>
 						@components.EditIcon()
 					</button>
-					<button title="Delete Link" class="btn hover:btn-error btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100">
+					<button title="Delete Link" class="btn hover:btn-error btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100" data-on-click={ fmt.Sprintf("$deleteLinkId='%s'", item.ID) }>
 						<span class="hidden md:block">Delete</span>
 						@components.TrashIcon()
 					</button>
 				</div>
-			</a>
+			</div>
 		}
 	</div>
-}
-
-func init() {
-	testData = []ListItem{
-		ListItem{Id: "1", Created: "Today", FullUrl: "http://localhost:8080/dashboard", Name: "Test1", Slug: "/test-1", State: "Active"},
-		ListItem{Id: "2", Created: "2 Days Ago", FullUrl: "http://localhost:8080/dashboaasdasrd", Name: "Test2", Slug: "/test-2", State: "Disabled"},
-		ListItem{Id: "3", Created: "1 Month Ago", FullUrl: "http://localhost:8080/dashbodasfaard", Name: "Test3", Slug: "/test-3", State: "Expired"},
-	}
 }
