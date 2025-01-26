@@ -3,8 +3,6 @@ package pages
 import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
-	"github.com/kaje94/slek-link/internal/models"
-	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,14 +10,14 @@ func HandleAboutUsPage(c echo.Context) error {
 	indexTemplate := components.RootLayout(
 		"About Us | slek.link - Simplify Your Digital Sharing",
 		"Discover how slek.link simplifies URL sharing with powerful link management and analytics tools. Learn about our mission to make the web more accessible.",
-		aboutUsBodyContent(utils.GetUserFromCtx(c)),
+		aboutUsBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ aboutUsBodyContent(userInfo models.User) {
-	@components.InnerLayout(userInfo) {
+templ aboutUsBodyContent(c echo.Context) {
+	@components.Layout(c) {
 		<header>
 			<h1 class="text-5xl">About Us</h1>
 		</header>

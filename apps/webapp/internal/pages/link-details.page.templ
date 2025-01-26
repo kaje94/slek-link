@@ -1,11 +1,14 @@
 package pages
 
 import (
+	"fmt"
 	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/config"
 	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 func HandleLinkDetailsPage(c echo.Context) error {
@@ -13,26 +16,35 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	id := c.Param("id")
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id is required")
+	}
+
+	link, err := utils.GetLinkOfUser(c, userInfo.ID, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find link")
+	}
+
 	indexTemplate := components.RootLayout(
 		"Link Details | slek.link - Track and Analyze Your Link's Performance",
 		"Dive into detailed analytics for your shortened link on slek.link. Monitor clicks, track user behavior, and gain insights to optimize your link's performance.",
-		linkDetailsBodyContent(userInfo),
+		linkDetailsBodyContent(c, link),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ linkDetailsBodyContent(userInfo models.User) {
-	@components.InnerLayout(userInfo) {
+templ linkDetailsBodyContent(c echo.Context, link models.Link) {
+	@components.Layout(c) {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: "/dashboard"},
 			components.BreadcrumbItem{Label: "Link Details", Link: ""},
 		})
 		<div class="flex justify-between gap-4 flex-wrap p-1 items-center mb-4">
-			<h3 class="text-4xl display-font">
-				Link Namdas jkd alsjd lsa dlsadj lasjde
-			</h3>
+			<h3 class="text-4xl display-font">{ link.Name }</h3>
 			<div class="flex justify-end gap-2">
 				<button class="btn btn-outline">
 					<span class="mb-0.5">
@@ -50,8 +62,8 @@ templ linkDetailsBodyContent(userInfo models.User) {
 		</div>
 		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content bg-opacity-10">
 			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
-				@statLinkSection("Original URL", "https://www.google.com/search?q=react+charrts&oq=react+charrts&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIJCAEQABgNGIAEMgkIAhAAGA0YgAQyCQgDEAAYDRiABDIJCAQQABgNGIAEMgkIBRAAGA0YgAQyCQgGEAAYDRiABDIJCAcQABgNGIAEMgkICBAAGA0YgAQyCQgJEAAYDRiABNIBCDI5NDBqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8", "")
-				@statLinkSection("Short URL", "http://localhost:8080/details", "")
+				@statLinkSection("Original URL", link.LongURL, "")
+				@statLinkSection("Short URL", fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode), "")
 			</div>
 			@statSection("Total Clicks", "21k", "Past 12 months")
 			@statSection("Unique Clicks", "16k", "Past 12 months")
@@ -80,7 +92,7 @@ templ statLinkSection(title, value, desc string) {
 			<div class="text-lg line-clamp-1 break-all link-hover cursor-pointer hover:underline">
 				{ value }
 			</div>
-			<button class="btn btn-xs mb-1">
+			<button class="btn btn-xs mb-1" data-on-click={ fmt.Sprintf("@clipboard('%s')", value) }>
 				@components.CopyIcon()
 			</button>
 		</div>

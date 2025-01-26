@@ -1,0 +1,42 @@
+package pages
+
+import (
+	"github.com/angelofallars/htmx-go"
+	"github.com/kaje94/slek-link/internal/components"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
+)
+
+func Handle404Page(c echo.Context) error {
+	indexTemplate := components.RootLayout(
+		"Page Not Found - Slek.link",
+		"Oops! The page you’re looking for doesn’t exist. It might have been moved or deleted. Return to the homepage or explore other features on Slek.link.",
+		pageNotFoundBodyContent(c),
+	)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+}
+
+templ pageNotFoundBodyContent(c echo.Context) {
+	{{ userInfo := utils.GetUserFromCtx(c) }}
+	@components.Layout(c) {
+		<div class="flex flex-col flex-1 items-center justify-center">
+			<div class="max-w-lg h-full flex flex-col gap-4 justify-center items-center">
+				<div class="opacity-80">
+					@components.PageNotFoundIllustration()
+				</div>
+				<div class="text-center w-4/5 mt-10 opacity-80">
+					<h3 class="">Looks like you’re lost.</h3>
+					<h3 class="">Let’s get you back on track!</h3>
+				</div>
+				<div class="flex gap-2 flex-col sm:flex-row mt-2">
+					if userInfo.Email != "" {
+						<a class="btn btn-primary btn-wide" href="/dashboard">Back to Dashboard</a>
+						<div class="divider text-xs divider-vertical opacity-50">OR</div>
+					}
+					<a class="btn btn-secondary btn-wide" href="/">Go back Home</a>
+				</div>
+			</div>
+		</div>
+	}
+}

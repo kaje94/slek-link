@@ -1,6 +1,6 @@
 package components
 
-import "github.com/kaje94/slek-link/internal/models"
+import "github.com/labstack/echo/v4"
 
 templ RootLayout(title string, description string, bodyContent templ.Component) {
 	<!DOCTYPE html>
@@ -16,37 +16,51 @@ templ RootLayout(title string, description string, bodyContent templ.Component) 
 			<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 			<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
 			<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
-			<link rel="icon" href="/favicon.png" sizes="any"/>
-			<link href="/dist/styles.css" rel="stylesheet"/>
+			<link rel="icon" href="/favicon.webp" type="image/webp"/>
+			<link rel="preload" href="/dist/styles.css" as="style"/>
+			<link rel="stylesheet" href="/dist/styles.css"/>
 		</head>
 		<body>
 			@bodyContent
-			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-beta.1/bundles/datastar.js"></script>
-			<script src="/dist/scripts.js"></script>
+			<script src="/dist/scripts.js" defer></script>
 		</body>
 	</html>
 }
 
-templ InnerLayout(userInfo models.User) {
-	<main class="min-h-screen">
-		<div class="container mx-auto py-5 flex flex-col">
-			@NavbarWithoutShadow(userInfo)
-			<div class="min-h-[calc(100vh-120px)] my-2 p-4 flex flex-col gap-4 flex-1">
+templ mainLayout(c echo.Context, signals string) {
+	if signals == "" {
+		<main class="min-h-screen">
+			@mainInnerLayout(c) {
 				{ children... }
-			</div>
-		</div>
-	</main>
+			}
+		</main>
+	} else {
+		<main class="min-h-screen" data-signals={ signals }>
+			@mainInnerLayout(c) {
+				{ children... }
+			}
+		</main>
+	}
 	@Footer()
 }
 
-templ InnerLayoutWithSignals(userInfo models.User, signals string) {
-	<main class="min-h-screen" data-signals={ signals }>
-		<div class="container mx-auto py-5 flex flex-col">
-			@NavbarWithoutShadow(userInfo)
-			<div class="min-h-[calc(100vh-120px)] my-2 p-4 flex flex-col gap-4 flex-1">
-				{ children... }
-			</div>
+templ mainInnerLayout(c echo.Context) {
+	<div class="container mx-auto py-5 flex flex-col">
+		@Navbar(c)
+		<div class="min-h-[calc(100vh-120px)] my-2 p-4 flex flex-col gap-4 flex-1">
+			{ children... }
 		</div>
-	</main>
-	@Footer()
+	</div>
+}
+
+templ Layout(c echo.Context) {
+	@mainLayout(c, "") {
+		{ children... }
+	}
+}
+
+templ LayoutWithSignals(c echo.Context, signals string) {
+	@mainLayout(c, signals) {
+		{ children... }
+	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/xeonx/timeago"
 	"net/http"
+	"slices"
 )
 
 func HandleDashboardsPage(c echo.Context) error {
@@ -22,17 +23,19 @@ func HandleDashboardsPage(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find links")
 	}
 
+	slices.Reverse(links)
+
 	indexTemplate := components.RootLayout(
 		"Dashboard | slek.link - Manage and Track Your Links",
 		"Access your slek.link dashboard to view, manage, and track the performance of your shortened links. Simplify your workflow with powerful link analytics and easy link management tools.",
-		dashboardBodyContent(userInfo, links),
+		dashboardBodyContent(c, links),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ dashboardBodyContent(userInfo models.User, links []models.Link) {
-	@components.InnerLayoutWithSignals(userInfo, "{ linkModalOpen:false, linkModalError:'', deleteLinkId: '' }") {
+templ dashboardBodyContent(c echo.Context, links []models.Link) {
+	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', deleteLinkId: '' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
@@ -44,8 +47,8 @@ templ dashboardBodyContent(userInfo models.User, links []models.Link) {
 				@DashboardWithContent(links)
 			}
 		</div>
-		@components.LinkModal()
-		@components.DeleteLinkConfirmModal()
+		@components.LinkModal(c)
+		@components.DeleteLinkConfirmModal(c)
 	}
 }
 
@@ -93,7 +96,8 @@ templ DashboardWithContent(links []models.Link) {
 			<div>Slug</div>
 		</div>
 		for _, item := range links {
-			<div
+			<a
+				href={ templ.SafeURL(fmt.Sprintf("/dashboard/%s", item.ID)) }
 				id={ fmt.Sprintf("link-item-%s", item.ID) }
 				class="grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 hover:bg-base-200 duration-200 cursor-pointer bg-base-100 line-clamp-1 items-center overflow-visible"
 			>
@@ -106,12 +110,12 @@ templ DashboardWithContent(links []models.Link) {
 						<span class="hidden md:block">Edit</span>
 						@components.EditIcon()
 					</button>
-					<button title="Delete Link" class="btn hover:btn-error btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100" data-on-click={ fmt.Sprintf("$deleteLinkId='%s'", item.ID) }>
+					<button title="Delete Link" class="btn hover:btn-error btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100" data-on-click__stop__prevent={ fmt.Sprintf("$deleteLinkId='%s'", item.ID) }>
 						<span class="hidden md:block">Delete</span>
 						@components.TrashIcon()
 					</button>
 				</div>
-			</div>
+			</a>
 		}
 	</div>
 }

@@ -2,20 +2,16 @@ package components
 
 import (
 	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/models"
+	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/labstack/echo/v4"
 	"strings"
 	"unicode"
 )
 
-templ Navbar(userInfo models.User) {
-	@navbar(userInfo, true)
-}
-
-templ NavbarWithoutShadow(userInfo models.User) {
-	@navbar(userInfo, false)
-}
-
-templ navbar(userInfo models.User, showShadow bool) {
+templ Navbar(c echo.Context) {
+	{{ userInfo := utils.GetUserFromCtx(c) }}
+	{{ showShadow := utils.GetPathFromCtx(c) != "/" }}
+	{{ showDashboardBtn := !strings.HasPrefix(utils.GetPathFromCtx(c), "/dashboard") }}
 	<div class={ "navbar rounded-full", templ.KV("shadow-md", showShadow) }>
 		<div class="flex-1">
 			<a class="btn btn-ghost text-xl" href="/">
@@ -28,7 +24,7 @@ templ navbar(userInfo models.User, showShadow bool) {
 				</span>
 			</a>
 		</div>
-		<div class="flex-none">
+		<div class="flex-none flex gap-2 items-center">
 			if userInfo.Email == "" {
 				<a href="/login" class="btn btn-outline flex items-center gap-3 px-5 bg-base-300 border-base-content border-opacity-75">
 					if (config.Config.WebAppConfig.GoogleClientId != "" && config.Config.WebAppConfig.GoogleClientSecret != "") {
@@ -39,28 +35,30 @@ templ navbar(userInfo models.User, showShadow bool) {
 					<span class="pt-0.5 font-medium">Sign In</span>
 				</a>
 			} else {
+				if showDashboardBtn {
+					<a class="btn btn-md h-8 btn-secondary" href="/dashboard">Dashboard</a>
+				}
 				<div class="dropdown dropdown-end">
-					<div
-						tabindex="0"
-						role="button"
-						class="btn btn-ghost btn-circle avatar"
-					>
-						if userInfo.Picture == "" {
-							<span class="w-10 h-10 rounded-full border-[1px] content-center text-base display-font border-base-content">{ generateInitialsFromName(userInfo.Name) }</span>
-						} else {
-							<div class="w-10 rounded-full border-[1px] border-accent">
-								<img alt={ userInfo.Name } src={ userInfo.Picture } loading="lazy" height="40" width="40"/>
-							</div>
-						}
+					<div class="h-full flex items-center">
+						<div
+							tabindex="0"
+							role="button"
+							class="btn btn-ghost btn-circle avatar content-center my-0"
+						>
+							if userInfo.Picture == "" {
+								<span class="w-12 h-12 rounded-full border-[1px] content-center text-base display-font border-base-content">{ generateInitialsFromName(userInfo.Name) }</span>
+							} else {
+								<div class="w-12 rounded-full border-[1px] border-accent">
+									<img alt={ userInfo.Name } data-src={ userInfo.Picture } data-fallback-src="images/default-user.svg" class="w-12 h-12" loading="lazy" height="48" width="48"/>
+								</div>
+							}
+						</div>
 					</div>
 					<ul
 						tabindex="0"
-						class="menu dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-2xl"
+						class="menu dropdown-content bg-base-300 rounded-box z-[1] mt-1  w-52 p-2 shadow-2xl rounded-tr-none"
 					>
 						<li class="disabled"><a>{ userInfo.Name }</a></li>
-						<li>
-							<a href="/dashboard">Dashboard</a>
-						</li>
 						<li>
 							<a href="/logout">Sign Out</a>
 						</li>

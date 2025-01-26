@@ -41,6 +41,14 @@ func GetUserFromCtx(c echo.Context) (userInfo models.User) {
 	return
 }
 
+func GetCSRFTokenFromCtx(c echo.Context) string {
+	return c.Get("csrf").(string)
+}
+
+func GetPathFromCtx(c echo.Context) string {
+	return c.Request().URL.Path
+}
+
 func GetUserFromCtxWithRedirect(c echo.Context) (userInfo models.User, err error) {
 	session, ok := c.Get(string(SESSION_CONTEXT_KEY)).(*sessions.Session)
 	if !ok {

@@ -3,8 +3,6 @@ package pages
 import (
 	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
-	"github.com/kaje94/slek-link/internal/models"
-	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,14 +10,14 @@ func HandleContactUsPage(c echo.Context) error {
 	indexTemplate := components.RootLayout(
 		"Contact Us | slek.link - Get Support or Ask Questions",
 		"Need help? Contact the slek.link support team for inquiries, assistance, or feedback. We're here to make your URL shortening experience seamless.",
-		contactUsBodyContent(utils.GetUserFromCtx(c)),
+		contactUsBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ contactUsBodyContent(userInfo models.User) {
-	@components.InnerLayout(userInfo) {
+templ contactUsBodyContent(c echo.Context) {
+	@components.Layout(c) {
 		<header>
 			<h1 class="text-5xl">Contact Us</h1>
 		</header>

@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/glebarez/sqlite"
@@ -29,69 +30,105 @@ var valkeyClient valkey.Client
 func RunServer() error {
 	router := echo.New()
 
-	// Add Logger middlewares.
+	// Middleware
+	router.Pre(middleware.RemoveTrailingSlash())
+	if config.Config.IsProd {
+		router.Use(middleware.Secure())
+	}
+	router.Use(middleware.CSRF())
 	router.Use(middleware.Logger())
+	router.Use(middleware.Gzip())
+	router.Use(middleware.Recover())
 
-	// create store and attach to context
+	// Session middleware
 	store := sessions.NewCookieStore([]byte(config.Config.WebAppConfig.CookieSecret))
 	store.Options = &sessions.Options{HttpOnly: true, Secure: config.Config.IsProd, SameSite: http.SameSiteLaxMode}
 	router.Use(sessionMiddleware(store))
 
-	// init db and attach db middleware
+	// Database middleware
 	if err := initDb(); err != nil {
-		return err
+		return fmt.Errorf("failed to initialize database: %w", err)
 	}
 	router.Use(setDBMiddleware)
 
-	// init cache and attach db middleware if valkey address is provided
+	// Cache middleware
 	if config.Config.Valkey.Url != "" {
 		if err := initCache(); err != nil {
-			return err
+			slog.Error("failed to initialize cache", "error", err)
+		} else {
+			router.Use(setCacheMiddleware)
 		}
-		router.Use(setCacheMiddleware)
 	}
 
-	// Handle static files.
+	// Static file serving with Cache-Control headers
+	if config.Config.IsProd {
+		router.Use(cacheControlMiddleware) // Add custom caching middleware
+	}
 	router.Static("/", "./static/public")
 
-	// handle pages
-	router.GET("/", pages.HandleLandingPage)
-	router.GET("/about-us", pages.HandleAboutUsPage)
-	router.GET("/contact-us", pages.HandleContactUsPage)
-	router.GET("/faqs", pages.HandleFaqsPage)
-	router.GET("/privacy-policy", pages.HandlePrivacyPolicyPage)
-	router.GET("/terms-and-conditions", pages.HandleTermsConditionsPage)
-	router.GET("/dashboard", pages.HandleDashboardsPage)
-	router.GET("/dashboard/:id", pages.HandleLinkDetailsPage)
+	// Routes
+	public := router.Group("")
+	public.GET("/", pages.HandleLandingPage)
+	public.GET("/about-us", pages.HandleAboutUsPage)
+	public.GET("/contact-us", pages.HandleContactUsPage)
+	public.GET("/faqs", pages.HandleFaqsPage)
+	public.GET("/privacy-policy", pages.HandlePrivacyPolicyPage)
+	public.GET("/terms-and-conditions", pages.HandleTermsConditionsPage)
+	public.GET("/404", pages.Handle404Page)
 
-	// Auth handlers
-	router.GET("/login", handlers.HandleLogin)
-	router.GET("/callback", handlers.HandleAuthCallback)
-	router.GET("/logout", handlers.HandlerLogout)
+	dashboard := router.Group("/dashboard")
+	dashboard.GET("", pages.HandleDashboardsPage)
+	dashboard.GET("/:id", pages.HandleLinkDetailsPage)
 
-	// Handle API endpoints.
-	router.GET("/api/hello-world", handlers.ShowContentAPIHandler)
+	auth := router.Group("")
+	auth.GET("/login", handlers.HandleLogin)
+	auth.GET("/callback", handlers.HandleAuthCallback)
+	auth.GET("/logout", handlers.HandlerLogout)
 
-	// Data-star api handlers
-	router.POST("/api/create-link", handlers.CreateLinkAPIHandler)
-	router.DELETE("/api/delete-link", handlers.DeleteLinkAPIHandler)
+	api := router.Group("/api")
+	api.GET("/hello-world", handlers.ShowContentAPIHandler)
+	api.POST("/create-link", handlers.CreateLinkAPIHandler)
+	api.DELETE("/delete-link", handlers.DeleteLinkAPIHandler)
 
-	// TODO: Remove once data-star testing is over
-	sessionStore := sessions.NewSession(store, "temp")                      // TODO: Remove once data-star testing is over
-	pages.SetupExamplesTemplCounter(*router.Router(), sessionStore.Store()) // TODO: Remove once data-star testing is over
-
-	// Create a new server instance with options from environment variables.
-	// For more information, see https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/
+	// Server configuration
 	server := http.Server{
 		Addr:         fmt.Sprintf(":%d", config.Config.WebAppConfig.Port),
-		Handler:      router, // handle all Echo routes
+		Handler:      router,
 		ReadTimeout:  20 * time.Second,
 		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	slog.Info("Starting server...", "port", config.Config.WebAppConfig.Port)
+	if err := server.ListenAndServe(); err != nil {
+		slog.Error("failed to start server", "error", err)
+		return err
+	}
+	return nil
+}
 
-	return server.ListenAndServe()
+func cacheControlMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Call the next middleware/handler
+		if err := next(c); err != nil {
+			return err
+		}
+
+		// Set Cache-Control header for specific file types
+		path := c.Request().URL.Path
+		if strings.HasSuffix(path, ".webmanifest") ||
+			strings.HasSuffix(path, ".woff2") ||
+			strings.HasSuffix(path, ".css") ||
+			strings.HasSuffix(path, ".js") ||
+			strings.HasSuffix(path, ".png") ||
+			strings.HasSuffix(path, ".webp") ||
+			strings.HasSuffix(path, ".ico") ||
+			strings.HasSuffix(path, ".svg") {
+			c.Response().Header().Set("Cache-Control", "public, max-age=86400") // 1 day
+		}
+
+		return nil
+	}
 }
 
 func sessionMiddleware(store sessions.Store) echo.MiddlewareFunc {
