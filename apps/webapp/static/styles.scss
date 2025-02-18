@@ -17,12 +17,6 @@
   src: url("public/fonts//ubuntu-v20-latin-700.woff2") format("woff2");
   font-display: swap;
 }
-
-/* Alpine.js styles */
-[x-cloak] {
-  display: none !important;
-}
-
 body {
   font-family: "Josefin Sans", sans-serif;
   font-optical-sizing: auto;
