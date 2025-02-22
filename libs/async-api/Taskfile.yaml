@@ -5,10 +5,8 @@ tasks:
     desc: Start rabbitmq server with management studio
     cmd: devbox services up rabbitmq rabbitmq-logs enable_rabbitmq_management create_queues --process-compose-file ./libs/async-api/process-compose.yaml
   initial-build:
-    desc: Generate go client code for asyncapi.yaml (if main.go isn't found)
-    preconditions:
-      - sh: '[ ! -f "main.go" ]'
-    cmd: asyncapi generate fromTemplate ./asyncapi.yaml  @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o .
+    desc: Generate go client code for asyncapi.yaml (if main.go doesn't exist)
+    cmd: if [ ! -f "main.go" ]; then asyncapi generate fromTemplate ./asyncapi.yaml @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o .; fi
   build:
     desc: Generate go client code for asyncapi.yaml
     cmd: asyncapi generate fromTemplate ./asyncapi.yaml  @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o .
