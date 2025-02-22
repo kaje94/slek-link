@@ -28,6 +28,7 @@ lerna-debug.log*
 
 # Devbox
 .devbox
+devbox.d
 
 # Templ generated files
 *_templ.go
@@ -39,3 +40,8 @@ __debug_*
 # Local SqliteDB
 local.db
 local.db-journal
+
+# AsyncApi
+libs/async-api/**/*.go
+libs/async-api/go.*
+!libs/async-api/asyncapi.yaml

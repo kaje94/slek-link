@@ -23,6 +23,7 @@ var Config = models.RootConfig{
 		GoogleClientSecret: getEnvValWithFallback("GOOGLE_AUTH_CLIENT_SECRET", ""),
 		CookieSecret:       getEnvValWithFallback("COOKIE_SECRET", "super-secret-key"),
 	},
+	AmqpUrl: getEnvValWithFallback("AMQP_URL", "amqp://guest:guest@localhost:5672/"),
 }
 
 func init() {

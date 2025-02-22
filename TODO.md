@@ -20,6 +20,7 @@ logging (use slog.Error, slog.Info)
 add toast after creating, deleting and copying content
 update scroll wheel theme
 add title/tooltips, whereever needed
+Error Handling: Implement robust error handling in all services (e.g., handling database connection issues, RabbitMQ connection issues, message processing failures). Consider dead-letter queues (DLQs) in RabbitMQ for messages that fail to be processed.
 
 ## Getting Started (Documentation)
 

@@ -4,3 +4,6 @@ includes:
   webapp:
     taskfile: ./apps/webapp/Taskfile.yaml
     dir: ./apps/webapp
+  asyncapi:
+    taskfile: ./libs/async-api/Taskfile.yaml
+    dir: ./libs/async-api

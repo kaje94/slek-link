@@ -1,0 +1,74 @@
+asyncapi: 2.6.0
+
+info:
+  title: Slek-Link AsyncAPI spec
+  version: "1.0.0"
+  description: API specification for slek-link asyncAPI.
+  license:
+    name: Apache 2.0
+    url: "https://www.apache.org/licenses/LICENSE-2.0"
+
+defaultContentType: application/json
+
+servers:
+  production:
+    url: localhost:5672
+    protocol: amqp
+
+channels:
+  url/visited:
+    bindings:
+      amqp:
+        is: routingKey
+        queue:
+          name: url/visited
+          durable: false
+          exclusive: true
+          autoDelete: false
+          vhost: /
+        bindingVersion: 0.2.0
+    publish:
+      summary: Handle incoming user visited event.
+      operationId: onUrlVisited
+      message:
+        $ref: "#/components/messages/urlVisitedPayload"
+    subscribe:
+      summary: Publish event notifying user visit.
+      operationId: publishUrlVisited
+      message:
+        $ref: "#/components/messages/urlVisitedPayload"
+
+components:
+  messages:
+    urlVisitedPayload:
+      name: urlVisitedPayload
+      payload:
+        $ref: "#/components/schemas/urlVisitedPayload"
+
+  schemas:
+    urlVisitedPayload:
+      type: object
+      properties:
+        shortUrl:
+          type: string
+          description: The shortened URL that was visited.
+        originalUrl:
+          type: string
+          description: The original, long URL that the shortened URL redirects to.
+        visitorIp:
+          type: string
+          description: IP address of the visitor (consider privacy implications).
+        timestamp:
+          type: string
+          format: date-time
+          description: Date and time of the visit.
+        userAgent:
+          type: string
+          description: User agent of the visitor's browser.
+        referrer:
+          type: string
+          description: Referrer URL, if available.
+      required:
+        - shortUrl
+        - originalUrl
+        - timestamp

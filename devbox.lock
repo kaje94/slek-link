@@ -241,6 +241,90 @@
         }
       }
     },
+    "rabbitmq-server@latest": {
+      "last_modified": "2025-02-13T04:03:32Z",
+      "resolved": "github:NixOS/nixpkgs/2d55b4c1531187926c2a423f6940b3b1301399b5#rabbitmq-server",
+      "source": "devbox-search",
+      "version": "4.0.6",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wmb56qvjw4g399zgsarlncwm8jgwvr1d-rabbitmq-server-4.0.6",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/jyf1xc2hx9prkk70kgz7qp2f8phlc2nw-rabbitmq-server-4.0.6-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/yvji3xwa68qgnp6mx24w4f6w890xs7ip-rabbitmq-server-4.0.6-doc"
+            }
+          ],
+          "store_path": "/nix/store/wmb56qvjw4g399zgsarlncwm8jgwvr1d-rabbitmq-server-4.0.6"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/cyc9ql2i6081506szbkv29sgr744c8h9-rabbitmq-server-4.0.6",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/hi5hcrnqqaym035pqij0h8xln4ascg6b-rabbitmq-server-4.0.6-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/aj35i3ymf8xgm5q1rcvy6v89x99p5vci-rabbitmq-server-4.0.6-doc"
+            }
+          ],
+          "store_path": "/nix/store/cyc9ql2i6081506szbkv29sgr744c8h9-rabbitmq-server-4.0.6"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ryk1n9w70a907rmy6ph2myvzpj3v8lgd-rabbitmq-server-4.0.6",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/gs7rj59f4f8626qy8qf404lsxk49wcdc-rabbitmq-server-4.0.6-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/1vx9rd0j6idqkxxch7hxm9hfr1s8md9l-rabbitmq-server-4.0.6-doc"
+            }
+          ],
+          "store_path": "/nix/store/ryk1n9w70a907rmy6ph2myvzpj3v8lgd-rabbitmq-server-4.0.6"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/g9zg44mraif6spz5kw471xj4zhrxbnr4-rabbitmq-server-4.0.6",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/m4lcn1sbdgn91xnhln9r7c16bsbsifsw-rabbitmq-server-4.0.6-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/cndb95pq13czry8lqp1gin6wpipjhcss-rabbitmq-server-4.0.6-doc"
+            }
+          ],
+          "store_path": "/nix/store/g9zg44mraif6spz5kw471xj4zhrxbnr4-rabbitmq-server-4.0.6"
+        }
+      }
+    },
     "templ@0.2.793": {
       "last_modified": "2024-11-28T07:51:56Z",
       "resolved": "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef#templ",

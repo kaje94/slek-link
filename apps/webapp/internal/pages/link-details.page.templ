@@ -89,9 +89,9 @@ templ statLinkSection(title, value, desc string) {
 	@statSectionWrap() {
 		<div>{ title }</div>
 		<div class="gap-2 flex items-center">
-			<div class="text-lg line-clamp-1 break-all link-hover cursor-pointer hover:underline">
+			<a class="text-lg line-clamp-1 break-all link-hover cursor-pointer hover:underline" href={ templ.SafeURL(value) } target="_blank">
 				{ value }
-			</div>
+			</a>
 			<button class="btn btn-xs mb-1" data-on-click={ fmt.Sprintf("@clipboard('%s')", value) }>
 				@components.CopyIcon()
 			</button>

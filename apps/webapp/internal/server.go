@@ -6,9 +6,14 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"slek-link/asyncapi/asyncapi"
 	"strings"
+	"syscall"
 	"time"
 
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/glebarez/sqlite"
 	"github.com/gorilla/sessions"
 	"github.com/kaje94/slek-link/internal/config"
@@ -28,6 +33,10 @@ var db *gorm.DB
 var valkeyClient valkey.Client
 
 func RunServer() error {
+	// Setup AMQP asyncAPI server
+	go setupAmqp()
+
+	// Create new echo router
 	router := echo.New()
 
 	// Middleware
@@ -75,6 +84,7 @@ func RunServer() error {
 	public.GET("/privacy-policy", pages.HandlePrivacyPolicyPage)
 	public.GET("/terms-and-conditions", pages.HandleTermsConditionsPage)
 	public.GET("/404", pages.Handle404Page)
+	public.GET("/s/:slug", handlers.HandleRedirect)
 
 	dashboard := router.Group("/dashboard")
 	dashboard.GET("", pages.HandleDashboardsPage)
@@ -193,5 +203,29 @@ func setCacheMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		compat := valkeycompat.NewAdapter(valkeyClient)
 		c.Set(string(utils.VALKEY_CONTEXT_KEY), compat)
 		return next(c)
+	}
+}
+
+func setupAmqp() {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
+
+	router, err := asyncapi.GetRouter()
+	if err != nil {
+		log.Fatalf("error getting router: %s", err)
+	}
+
+	amqpSubscriber, err := asyncapi.GetAMQPSubscriber(config.Config.AmqpUrl)
+	if err != nil {
+		log.Fatalf("error starting amqp subscribers: %s", err)
+	}
+
+	router.AddNoPublisherHandler("url_visited_handler", "url/visited", amqpSubscriber, func(msg *message.Message) error {
+		fmt.Println(msg)
+		return nil
+	})
+
+	if err = router.Run(ctx); err != nil {
+		log.Fatalf("error running watermill router: %s", err)
 	}
 }

@@ -6,6 +6,7 @@ type RootConfig struct {
 	MaxLinksPerUser int
 	WebAppConfig    WebAppConfig
 	Valkey          ValkeyConfig
+	AmqpUrl         string
 }
 
 type WebAppConfig struct {
