@@ -33,9 +33,6 @@ var db *gorm.DB
 var valkeyClient valkey.Client
 
 func RunServer() error {
-	// Setup AMQP asyncAPI server
-	go setupAmqp()
-
 	// Create new echo router
 	router := echo.New()
 
@@ -68,6 +65,9 @@ func RunServer() error {
 			router.Use(setCacheMiddleware)
 		}
 	}
+
+	// Setup AMQP asyncAPI server
+	go setupAmqp()
 
 	// Static file serving with Cache-Control headers
 	if config.Config.IsProd {
@@ -167,7 +167,7 @@ func initDb() error {
 
 	if !config.Config.IsProd {
 		// Perform auto migrate only if it's not production env
-		err = db.AutoMigrate(&models.User{}, &models.Link{})
+		err = db.AutoMigrate(&models.User{}, &models.Link{}, &models.LinkMonthlyClicks{})
 		if err != nil {
 			log.Fatalf("Failed to migrate database: %v", err)
 		}
@@ -208,6 +208,7 @@ func setCacheMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func setupAmqp() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	compat := valkeycompat.NewAdapter(valkeyClient)
 	defer stop()
 
 	router, err := asyncapi.GetRouter()
@@ -220,9 +221,9 @@ func setupAmqp() {
 		log.Fatalf("error starting amqp subscribers: %s", err)
 	}
 
+	// Add asyncAPI handlers
 	router.AddNoPublisherHandler("url_visited_handler", "url/visited", amqpSubscriber, func(msg *message.Message) error {
-		fmt.Println(msg)
-		return nil
+		return handlers.HandleUserUrlVisit(compat, db, msg)
 	})
 
 	if err = router.Run(ctx); err != nil {

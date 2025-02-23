@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/sessions"
+	"github.com/kaje94/slek-link/internal/config"
 	"github.com/kaje94/slek-link/internal/models"
 	"github.com/labstack/echo/v4"
 	"github.com/valkey-io/valkey-go/valkeycompat"
@@ -21,12 +22,14 @@ func GetDbFromCtx(c echo.Context) (*gorm.DB, error) {
 }
 
 func GetValkeyFromCtx(c echo.Context) (valkeycompat.Cmdable, error) {
+	if config.Config.Valkey.Url == "" {
+		return nil, nil
+	}
 	valkeycompatCmd, ok := c.Get(string(VALKEY_CONTEXT_KEY)).(valkeycompat.Cmdable)
 	if !ok || valkeycompatCmd == nil {
 		return nil, fmt.Errorf("failed to find valkey in context")
 	}
 	return valkeycompatCmd, nil
-
 }
 
 func GetUserFromCtx(c echo.Context) (userInfo models.User) {

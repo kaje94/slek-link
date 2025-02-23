@@ -49,15 +49,9 @@ components:
     urlVisitedPayload:
       type: object
       properties:
-        shortUrl:
+        linkId:
           type: string
-          description: The shortened URL that was visited.
-        originalUrl:
-          type: string
-          description: The original, long URL that the shortened URL redirects to.
-        visitorIp:
-          type: string
-          description: IP address of the visitor (consider privacy implications).
+          description: ID of the link that is visited.
         timestamp:
           type: string
           format: date-time
@@ -69,6 +63,5 @@ components:
           type: string
           description: Referrer URL, if available.
       required:
-        - shortUrl
-        - originalUrl
+        - linkId
         - timestamp

@@ -22,6 +22,14 @@ update scroll wheel theme
 add title/tooltips, whereever needed
 Error Handling: Implement robust error handling in all services (e.g., handling database connection issues, RabbitMQ connection issues, message processing failures). Consider dead-letter queues (DLQs) in RabbitMQ for messages that fail to be processed.
 move gorm into libs
+watermill should not requeue if its error more than 3 times
+check locally with valkey again
+
+## Gorm migration
+
+```
+go generate gorm:migration
+```
 
 ## Getting Started (Documentation)
 

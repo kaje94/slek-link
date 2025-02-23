@@ -3,11 +3,11 @@ package pages
 import (
 	"fmt"
 	"github.com/angelofallars/htmx-go"
+	"github.com/dustin/go-humanize"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
-	"github.com/xeonx/timeago"
 	"net/http"
 	"slices"
 )
@@ -18,7 +18,17 @@ func HandleDashboardsPage(c echo.Context) error {
 		return err
 	}
 
-	links, err := utils.GetLinksOfUser(c, userInfo.ID)
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	links, err := utils.GetLinksOfUser(compat, db, userInfo.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find links")
 	}
@@ -102,8 +112,8 @@ templ DashboardWithContent(links []models.Link) {
 				class="grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 hover:bg-base-200 duration-200 cursor-pointer bg-base-100 line-clamp-1 items-center overflow-visible"
 			>
 				@listItemCol("Name", item.Name, 0)
-				@listItemCol("Created", timeago.English.Format(item.CreatedAt), 1)
-				@listItemCol("State", "Active", 2)
+				@listItemCol("Created", humanize.Time(item.CreatedAt), 1)
+				@listItemCol("State", string(item.Status), 2)
 				@listItemCol("Slug", item.ShortCode, 3)
 				<div class="flex justify-end items-center gap-0.5 col-span-full md:col-span-1 order-first md:order-none">
 					<button title="Edit Link" class="btn hover:btn-accent btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100">

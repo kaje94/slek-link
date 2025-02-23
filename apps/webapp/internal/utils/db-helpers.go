@@ -2,27 +2,33 @@ package utils
 
 import (
 	"github.com/kaje94/slek-link/internal/models"
-	"github.com/labstack/echo/v4"
+	"github.com/valkey-io/valkey-go/valkeycompat"
+	"gorm.io/gorm"
 )
 
-func CreateLink(c echo.Context, newLink models.Link) error {
-	db, err := GetDbFromCtx(c)
-	if err != nil {
-		return err
-	}
+func CreateLink(db *gorm.DB, newLink models.Link) error {
 	result := db.Create(&newLink)
 	return result.Error
 }
 
-func GetLinksOfUser(c echo.Context, userId string) ([]models.Link, error) {
+func CreateLinkMonthlyClicks(db *gorm.DB, newMonthlyClicks models.LinkMonthlyClicks) error {
+	result := db.Create(&newMonthlyClicks)
+
+	return result.Error
+}
+
+func UpdateLinkMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, newMonthlyClicks models.LinkMonthlyClicks) error {
+	result := db.Save(&newMonthlyClicks)
+	if result.Error == nil {
+		DeleteMonthlyClicksCache(compat, newMonthlyClicks.LinkID)
+	}
+	return result.Error
+}
+
+func GetLinksOfUser(compat valkeycompat.Cmdable, db *gorm.DB, userId string) ([]models.Link, error) {
 	var links []models.Link
 
-	db, err := GetDbFromCtx(c)
-	if err != nil {
-		return nil, err
-	}
-
-	err = GetUserLinksCache(c, userId, &links)
+	err := GetUserLinksCache(compat, userId, &links)
 	if err == nil {
 		return links, nil
 	}
@@ -31,20 +37,32 @@ func GetLinksOfUser(c echo.Context, userId string) ([]models.Link, error) {
 		return nil, results.Error
 	}
 
-	CreateUserLinksCache(c, userId, links)
+	CreateUserLinksCache(compat, userId, links)
 
 	return links, nil
 }
 
-func GetLinkOfUser(c echo.Context, userId, linkId string) (models.Link, error) {
-	var link models.Link
+func GetLinksMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId string) ([]models.LinkMonthlyClicks, error) {
+	var monthlyClicks []models.LinkMonthlyClicks
 
-	db, err := GetDbFromCtx(c)
-	if err != nil {
-		return link, err
+	err := GetMonthlyClicksCache(compat, linkId, &monthlyClicks)
+	if err == nil {
+		return monthlyClicks, nil
 	}
 
-	err = GetUserLinkCache(c, userId, linkId, &link)
+	if results := db.Where(&models.LinkMonthlyClicks{LinkID: linkId}).Limit(12).Order("id desc").Find(&monthlyClicks); results.Error != nil {
+		return nil, results.Error
+	}
+
+	CreateMonthlyClicksCache(compat, linkId, monthlyClicks)
+
+	return monthlyClicks, nil
+}
+
+func GetLinkOfUser(compat valkeycompat.Cmdable, db *gorm.DB, userId, linkId string) (models.Link, error) {
+	var link models.Link
+
+	err := GetUserLinkCache(compat, userId, linkId, &link)
 	if err == nil {
 		return link, nil
 	}
@@ -53,19 +71,14 @@ func GetLinkOfUser(c echo.Context, userId, linkId string) (models.Link, error) {
 		return link, results.Error
 	}
 
-	CreateUserLinkCache(c, userId, linkId, link)
-	CreateSlugCache(c, link.ShortCode, link)
+	CreateUserLinkCache(compat, userId, linkId, link)
+	CreateSlugCache(compat, link.ShortCode, link)
 
 	return link, nil
 }
 
-func DeleteLinkOfUser(c echo.Context, linkId, userId string) error {
-	db, err := GetDbFromCtx(c)
-	if err != nil {
-		return err
-	}
-
-	link, err := GetLinkOfUser(c, userId, linkId)
+func DeleteLinkOfUser(compat valkeycompat.Cmdable, db *gorm.DB, linkId, userId string) error {
+	link, err := GetLinkOfUser(compat, db, userId, linkId)
 	if err != nil {
 		return err
 	}
@@ -74,22 +87,17 @@ func DeleteLinkOfUser(c echo.Context, linkId, userId string) error {
 		return result.Error
 	}
 
-	DeleteUserLinksCache(c, userId)
-	DeleteUserLinkCache(c, userId, linkId)
-	DeleteSlugCache(c, link.ShortCode)
+	DeleteUserLinksCache(compat, userId)
+	DeleteUserLinkCache(compat, userId, linkId)
+	DeleteSlugCache(compat, link.ShortCode)
 
 	return nil
 }
 
-func GetLinkOfSlug(c echo.Context, slug string) (models.Link, error) {
+func GetLinkOfSlug(compat valkeycompat.Cmdable, db *gorm.DB, slug string) (models.Link, error) {
 	var link models.Link
 
-	db, err := GetDbFromCtx(c)
-	if err != nil {
-		return link, err
-	}
-
-	err = GetSlugCache(c, slug, &link)
+	err := GetSlugCache(compat, slug, &link)
 	if err == nil {
 		return link, nil
 	}
@@ -98,7 +106,7 @@ func GetLinkOfSlug(c echo.Context, slug string) (models.Link, error) {
 		return link, results.Error
 	}
 
-	CreateSlugCache(c, slug, link)
+	CreateSlugCache(compat, slug, link)
 
 	return link, nil
 }

@@ -6,21 +6,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kaje94/slek-link/internal/config"
 	"github.com/kaje94/slek-link/internal/models"
-	"github.com/labstack/echo/v4"
+	"github.com/valkey-io/valkey-go/valkeycompat"
 )
 
-func saveCache(c echo.Context, cacheKey string, cacheVal any) error {
-	valkeyCompat, err := GetValkeyFromCtx(c)
-	if err != nil {
-		return err
-	}
+func saveCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, cacheVal any) error {
 	jsonBytes, err := json.Marshal(cacheVal)
 	if err != nil {
 		return err
 	}
 
-	if valkeyCompat != nil {
+	if config.Config.Valkey.Url != "" && valkeyCompat != nil {
 		_, err = valkeyCompat.SetNX(context.Background(), cacheKey, jsonBytes, time.Hour).Result()
 		if err != nil {
 			return err
@@ -29,12 +26,10 @@ func saveCache(c echo.Context, cacheKey string, cacheVal any) error {
 	return nil
 }
 
-func getCache(c echo.Context, cacheKey string, data any) error {
-	valkeyCompat, err := GetValkeyFromCtx(c)
-	if err != nil {
-		return err
+func getCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, data any) error {
+	if config.Config.Valkey.Url == "" {
+		return fmt.Errorf("valkey not configured")
 	}
-
 	if valkeyCompat != nil {
 		res, err := valkeyCompat.Cache(time.Second).Get(context.Background(), cacheKey).Result()
 		if err != nil {
@@ -53,13 +48,8 @@ func getCache(c echo.Context, cacheKey string, data any) error {
 	return nil
 }
 
-func deleteCache(c echo.Context, cacheKey string) error {
-	valkeyCompat, err := GetValkeyFromCtx(c)
-	if err != nil {
-		return err
-	}
-
-	if valkeyCompat != nil {
+func deleteCache(valkeyCompat valkeycompat.Cmdable, cacheKey string) error {
+	if config.Config.Valkey.Url != "" && valkeyCompat != nil {
 		_, err := valkeyCompat.Del(context.Background(), cacheKey).Result()
 		if err != nil {
 			return err
@@ -80,38 +70,54 @@ func getCacheKeyForSlug(slug string) string {
 	return fmt.Sprintf("slug-%s", slug)
 }
 
-func CreateUserLinksCache(c echo.Context, userId string, links []models.Link) error {
-	return saveCache(c, getCacheKeyForUserLinks(userId), links)
+func getCacheKeyForMonthlyClicks(linkId string) string {
+	return fmt.Sprintf("monthly-clicks-%s", linkId)
 }
 
-func GetUserLinksCache(c echo.Context, userId string, links *[]models.Link) error {
-	return getCache(c, getCacheKeyForUserLinks(userId), &links)
+func CreateUserLinksCache(compat valkeycompat.Cmdable, userId string, links []models.Link) error {
+	return saveCache(compat, getCacheKeyForUserLinks(userId), links)
 }
 
-func DeleteUserLinksCache(c echo.Context, userId string) error {
-	return deleteCache(c, getCacheKeyForUserLinks(userId))
+func GetUserLinksCache(compat valkeycompat.Cmdable, userId string, links *[]models.Link) error {
+	return getCache(compat, getCacheKeyForUserLinks(userId), &links)
 }
 
-func CreateUserLinkCache(c echo.Context, userId string, linkId string, link models.Link) error {
-	return saveCache(c, getCacheKeyForUserLink(userId, linkId), link)
+func CreateMonthlyClicksCache(compat valkeycompat.Cmdable, linkId string, links []models.LinkMonthlyClicks) error {
+	return saveCache(compat, getCacheKeyForMonthlyClicks(linkId), links)
 }
 
-func GetUserLinkCache(c echo.Context, userId string, linkId string, links *models.Link) error {
-	return getCache(c, getCacheKeyForUserLink(userId, linkId), &links)
+func GetMonthlyClicksCache(compat valkeycompat.Cmdable, linkId string, monthlyClicks *[]models.LinkMonthlyClicks) error {
+	return getCache(compat, getCacheKeyForMonthlyClicks(linkId), &monthlyClicks)
 }
 
-func DeleteUserLinkCache(c echo.Context, userId string, linkId string) error {
-	return deleteCache(c, getCacheKeyForUserLink(userId, linkId))
+func DeleteMonthlyClicksCache(compat valkeycompat.Cmdable, linkId string) error {
+	return deleteCache(compat, getCacheKeyForMonthlyClicks(linkId))
 }
 
-func CreateSlugCache(c echo.Context, slug string, link models.Link) error {
-	return saveCache(c, getCacheKeyForSlug(slug), link)
+func DeleteUserLinksCache(compat valkeycompat.Cmdable, userId string) error {
+	return deleteCache(compat, getCacheKeyForUserLinks(userId))
 }
 
-func GetSlugCache(c echo.Context, slug string, link *models.Link) error {
-	return getCache(c, getCacheKeyForSlug(slug), &link)
+func CreateUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId string, link models.Link) error {
+	return saveCache(compat, getCacheKeyForUserLink(userId, linkId), link)
 }
 
-func DeleteSlugCache(c echo.Context, slug string) error {
-	return deleteCache(c, getCacheKeyForSlug(slug))
+func GetUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId string, links *models.Link) error {
+	return getCache(compat, getCacheKeyForUserLink(userId, linkId), &links)
+}
+
+func DeleteUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId string) error {
+	return deleteCache(compat, getCacheKeyForUserLink(userId, linkId))
+}
+
+func CreateSlugCache(compat valkeycompat.Cmdable, slug string, link models.Link) error {
+	return saveCache(compat, getCacheKeyForSlug(slug), link)
+}
+
+func GetSlugCache(compat valkeycompat.Cmdable, slug string, link *models.Link) error {
+	return getCache(compat, getCacheKeyForSlug(slug), &link)
+}
+
+func DeleteSlugCache(compat valkeycompat.Cmdable, slug string) error {
+	return deleteCache(compat, getCacheKeyForSlug(slug))
 }

@@ -17,15 +17,25 @@ func HandleRedirect(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/404")
 	}
 
-	link, err := utils.GetLinkOfSlug(c, slug)
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	link, err := utils.GetLinkOfSlug(compat, db, slug)
 	if err != nil || link.ID == "" {
 		return c.Redirect(http.StatusTemporaryRedirect, "/404")
 	}
 
 	urlVisitedPayload := asyncapi.UrlVisitedPayload{
-		ShortUrl:    slug,
-		OriginalUrl: link.LongURL,
-		Timestamp:   time.Now().String(),
+		LinkId:    link.ID,
+		Timestamp: time.Now().Format(time.RFC3339),
+		// todo: handle other properties
 	}
 
 	amqpPub, err := asyncapi.GetAMQPPublisher(config.Config.AmqpUrl)

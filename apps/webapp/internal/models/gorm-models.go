@@ -1,6 +1,15 @@
 package models
 
-import "time"
+import (
+	"time"
+)
+
+type linkStatusType string
+
+const (
+	ACTIVE   linkStatusType = "Active"
+	DISABLED linkStatusType = "Disabled"
+)
 
 type User struct {
 	ID      string `gorm:"primaryKey"`
@@ -17,6 +26,15 @@ type Link struct {
 	UserID      *string `gorm:"index" validate:"required"`
 	User        *User   `gorm:"constraint:OnDelete:SET NULL;"`
 	CreatedAt   time.Time
-	Description string `gorm:"type:text"`
-	// todo: add State
+	Description string         `gorm:"type:text"`
+	Status      linkStatusType `gorm:"type:text"`
+}
+
+type LinkMonthlyClicks struct {
+	ID        int    `gorm:"primaryKey"`
+	LinkID    string `gorm:"foreignKey:Link.ID;index"`
+	Year      int    `gorm:"index"`
+	Month     int    `gorm:"index"`
+	Count     int    `gorm:"default:0"`
+	CreatedAt time.Time
 }

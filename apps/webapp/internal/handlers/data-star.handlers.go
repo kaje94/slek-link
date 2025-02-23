@@ -45,6 +45,7 @@ func CreateLinkAPIHandler(c echo.Context) error {
 		LongURL:     reqBody.URL,
 		UserID:      &userInfo.ID,
 		Description: reqBody.Description,
+		Status:      models.ACTIVE,
 	}
 
 	if err = validate.Struct(newLink); err != nil {
@@ -52,7 +53,12 @@ func CreateLinkAPIHandler(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
 
-	if err = utils.CreateLink(c, newLink); err == nil {
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	if err = utils.CreateLink(db, newLink); err == nil {
 		sse.Redirect(fmt.Sprintf("/dashboard/%s", newLink.ID))
 	} else if strings.Contains(err.Error(), "UNIQUE constraint failed: links.short_code") {
 		sse.MarshalAndMergeSignals(map[string]any{"linkModalError": "Short Code already exists. Try a different one."})
@@ -71,11 +77,21 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 		return err
 	}
 
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
 	var reqBody struct {
 		LinkId string `json:"deleteLinkId"`
 	}
 
-	links, err := utils.GetLinksOfUser(c, userInfo.ID)
+	links, err := utils.GetLinksOfUser(compat, db, userInfo.ID)
 	if err != nil {
 		return err
 	}
@@ -86,7 +102,7 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 
 	sse := datastar.NewSSE(c.Response().Writer, c.Request())
 
-	if err := utils.DeleteLinkOfUser(c, reqBody.LinkId, userInfo.ID); err == nil {
+	if err := utils.DeleteLinkOfUser(compat, db, reqBody.LinkId, userInfo.ID); err == nil {
 		if len(links) > 1 {
 			sse.RemoveFragments(fmt.Sprintf("#link-item-%s", reqBody.LinkId))
 		} else {
