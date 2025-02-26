@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
+	watermillMiddleware "github.com/ThreeDotsLabs/watermill/message/router/middleware"
 	"github.com/glebarez/sqlite"
 	"github.com/gorilla/sessions"
 	"github.com/kaje94/slek-link/internal/config"
@@ -35,6 +36,7 @@ var valkeyClient valkey.Client
 func RunServer() error {
 	// Create new echo router
 	router := echo.New()
+	router.IPExtractor = echo.ExtractIPFromXFFHeader()
 
 	// Middleware
 	router.Pre(middleware.RemoveTrailingSlash())
@@ -109,6 +111,12 @@ func RunServer() error {
 		IdleTimeout:  60 * time.Second,
 	}
 
+	// load ip to country mapping
+	err := utils.Load("db-ip-to-country.csv.gz")
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	slog.Info("Starting server...", "port", config.Config.WebAppConfig.Port)
 	if err := server.ListenAndServe(); err != nil {
 		slog.Error("failed to start server", "error", err)
@@ -167,7 +175,7 @@ func initDb() error {
 
 	if !config.Config.IsProd {
 		// Perform auto migrate only if it's not production env
-		err = db.AutoMigrate(&models.User{}, &models.Link{}, &models.LinkMonthlyClicks{})
+		err = db.AutoMigrate(&models.User{}, &models.Link{}, &models.LinkMonthlyClicks{}, &models.LinkCountryClicks{})
 		if err != nil {
 			log.Fatalf("Failed to migrate database: %v", err)
 		}
@@ -215,6 +223,22 @@ func setupAmqp() {
 	if err != nil {
 		log.Fatalf("error getting router: %s", err)
 	}
+
+	amqpPub, err := asyncapi.GetAMQPPublisher(config.Config.AmqpUrl)
+	if err != nil {
+		log.Fatalf("error getting amqp publisher: %s", err)
+	}
+
+	poisonQueue, err := watermillMiddleware.PoisonQueue(amqpPub, "url/visited/error")
+	if err != nil {
+		log.Fatalf("error getting error queue: %s", err)
+	}
+
+	router.AddMiddleware(
+		poisonQueue,
+		watermillMiddleware.Recoverer,
+		watermillMiddleware.Timeout(time.Second*30),
+	)
 
 	amqpSubscriber, err := asyncapi.GetAMQPSubscriber(config.Config.AmqpUrl)
 	if err != nil {

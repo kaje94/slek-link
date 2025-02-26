@@ -24,6 +24,9 @@ Error Handling: Implement robust error handling in all services (e.g., handling 
 move gorm into libs
 watermill should not requeue if its error more than 3 times
 check locally with valkey again
+`asyncapi:start-rabbitmq`, etc seems to be redundent in devbox json
+add valkey to process-compose and rename it to devbox-services
+add `asyncapi:build` to webapp watch and dev
 
 ## Gorm migration
 

@@ -62,6 +62,10 @@ func getCacheKeyForUserLinks(userId string) string {
 	return fmt.Sprintf("links-%s", userId)
 }
 
+func getCacheKeyForCountryClicks(linkId string) string {
+	return fmt.Sprintf("country-clicks-%s", linkId)
+}
+
 func getCacheKeyForUserLink(userId, linkId string) string {
 	return fmt.Sprintf("link-%s-%s", userId, linkId)
 }
@@ -72,6 +76,14 @@ func getCacheKeyForSlug(slug string) string {
 
 func getCacheKeyForMonthlyClicks(linkId string) string {
 	return fmt.Sprintf("monthly-clicks-%s", linkId)
+}
+
+func CreateCountryClicksCache(compat valkeycompat.Cmdable, linkId string, item []models.LinkCountryClicks) error {
+	return saveCache(compat, getCacheKeyForCountryClicks(linkId), item)
+}
+
+func GetCountryClicksCache(compat valkeycompat.Cmdable, linkId string, item *[]models.LinkCountryClicks) error {
+	return getCache(compat, getCacheKeyForCountryClicks(linkId), &item)
 }
 
 func CreateUserLinksCache(compat valkeycompat.Cmdable, userId string, links []models.Link) error {
@@ -120,4 +132,8 @@ func GetSlugCache(compat valkeycompat.Cmdable, slug string, link *models.Link) e
 
 func DeleteSlugCache(compat valkeycompat.Cmdable, slug string) error {
 	return deleteCache(compat, getCacheKeyForSlug(slug))
+}
+
+func DeleteCountryClicksCache(compat valkeycompat.Cmdable, linkId string) error {
+	return deleteCache(compat, getCacheKeyForCountryClicks(linkId))
 }

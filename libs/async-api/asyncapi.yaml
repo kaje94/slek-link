@@ -37,6 +37,22 @@ channels:
       operationId: publishUrlVisited
       message:
         $ref: "#/components/messages/urlVisitedPayload"
+  error_queue:
+    bindings:
+      amqp:
+        is: routingKey
+        queue:
+          name: url/visited/error
+          durable: true
+          exclusive: false
+          autoDelete: false
+          vhost: /
+        bindingVersion: 0.2.0
+    publish:
+      summary: Publish error messages related to URL visits.
+      operationId: publishUrlVisitedError
+      message:
+        $ref: "#/components/messages/urlVisitedPayload"
 
 components:
   messages:
@@ -56,12 +72,9 @@ components:
           type: string
           format: date-time
           description: Date and time of the visit.
-        userAgent:
+        ipAddress:
           type: string
-          description: User agent of the visitor's browser.
-        referrer:
-          type: string
-          description: Referrer URL, if available.
+          description: IP address of the user.
       required:
         - linkId
         - timestamp

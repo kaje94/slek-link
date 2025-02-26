@@ -27,3 +27,4 @@ processes:
     command: |
       sleep 5;
       curl --user "guest:guest" -X PUT "http://localhost:15672/api/queues/%2f/url%2Fvisited" -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"auto_delete\":false,\"durable\":true}";
+      curl --user "guest:guest" -X PUT "http://localhost:15672/api/queues/%2f/url%2Fvisited%2Ferror" -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"auto_delete\":false,\"durable\":false}";

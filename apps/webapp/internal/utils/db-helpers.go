@@ -1,6 +1,10 @@
 package utils
 
 import (
+	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/kaje94/slek-link/internal/models"
 	"github.com/valkey-io/valkey-go/valkeycompat"
 	"gorm.io/gorm"
@@ -17,10 +21,24 @@ func CreateLinkMonthlyClicks(db *gorm.DB, newMonthlyClicks models.LinkMonthlyCli
 	return result.Error
 }
 
-func UpdateLinkMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, newMonthlyClicks models.LinkMonthlyClicks) error {
-	result := db.Save(&newMonthlyClicks)
+func UpdateLinkMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, monthlyClicks models.LinkMonthlyClicks) error {
+	result := db.Save(&monthlyClicks)
 	if result.Error == nil {
-		DeleteMonthlyClicksCache(compat, newMonthlyClicks.LinkID)
+		DeleteMonthlyClicksCache(compat, monthlyClicks.LinkID)
+	}
+	return result.Error
+}
+
+func CreateLinkCountryClicks(db *gorm.DB, newCountryClicks models.LinkCountryClicks) error {
+	result := db.Create(&newCountryClicks)
+
+	return result.Error
+}
+
+func UpdateLinkCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, countryClicks models.LinkCountryClicks) error {
+	result := db.Save(&countryClicks)
+	if result.Error == nil {
+		DeleteCountryClicksCache(compat, countryClicks.LinkID)
 	}
 	return result.Error
 }
@@ -54,9 +72,42 @@ func GetLinksMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId stri
 		return nil, results.Error
 	}
 
-	CreateMonthlyClicksCache(compat, linkId, monthlyClicks)
+	monthlyClicksUpdated := []models.LinkMonthlyClicks{}
+	for i := 0; i < 12; i++ {
+		pastMonthTime := time.Now().AddDate(0, -i, 0)
+		pastMonth := int(pastMonthTime.Month())
+		pastMonthYear := pastMonthTime.Year()
+		found := false
+		for _, item := range monthlyClicks {
+			if item.Month == pastMonth && item.Year == pastMonthYear {
+				found = true
+				monthlyClicksUpdated = append(monthlyClicksUpdated, item)
+				break
+			}
+		}
 
-	return monthlyClicks, nil
+		if !found {
+			id, _ := strconv.Atoi(fmt.Sprintf("%d%d", pastMonthYear, pastMonth))
+			monthlyClicksUpdated = append(monthlyClicksUpdated, models.LinkMonthlyClicks{
+				ID:     id,
+				LinkID: linkId,
+				Year:   pastMonthYear,
+				Month:  int(pastMonth),
+				Count:  0,
+			})
+		}
+	}
+
+	monthlyClicksTrimmed := []models.LinkMonthlyClicks{}
+	for _, item := range monthlyClicksUpdated {
+		if len(monthlyClicksTrimmed) > 0 || item.Count > 0 {
+			monthlyClicksTrimmed = append(monthlyClicksTrimmed, item)
+		}
+	}
+
+	CreateMonthlyClicksCache(compat, linkId, monthlyClicksTrimmed)
+
+	return monthlyClicksTrimmed, nil
 }
 
 func GetLinkOfUser(compat valkeycompat.Cmdable, db *gorm.DB, userId, linkId string) (models.Link, error) {
@@ -109,4 +160,21 @@ func GetLinkOfSlug(compat valkeycompat.Cmdable, db *gorm.DB, slug string) (model
 	CreateSlugCache(compat, slug, link)
 
 	return link, nil
+}
+
+func GetCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId string) ([]models.LinkCountryClicks, error) {
+	var countryClicks []models.LinkCountryClicks
+
+	err := GetCountryClicksCache(compat, linkId, &countryClicks)
+	if err == nil {
+		return countryClicks, nil
+	}
+
+	if results := db.Where(&models.LinkCountryClicks{LinkID: linkId}).Limit(10).Order("count desc").Find(&countryClicks); results.Error != nil {
+		return nil, results.Error
+	}
+
+	CreateCountryClicksCache(compat, linkId, countryClicks)
+
+	return countryClicks, nil
 }

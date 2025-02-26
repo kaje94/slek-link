@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"slek-link/asyncapi/asyncapi"
 	"time"
@@ -16,6 +17,12 @@ func HandleRedirect(c echo.Context) error {
 	if slug == "" {
 		return c.Redirect(http.StatusTemporaryRedirect, "/404")
 	}
+
+	fmt.Println("IP of the user clicking the link", c.RealIP())
+
+	clientIP := "176.31.84.249"
+	//"112.134.213.249" // todo: remove hardcoded ip address
+	// clientIP := c.RealIP()
 
 	db, err := utils.GetDbFromCtx(c)
 	if err != nil {
@@ -35,7 +42,7 @@ func HandleRedirect(c echo.Context) error {
 	urlVisitedPayload := asyncapi.UrlVisitedPayload{
 		LinkId:    link.ID,
 		Timestamp: time.Now().Format(time.RFC3339),
-		// todo: handle other properties
+		IpAddress: clientIP,
 	}
 
 	amqpPub, err := asyncapi.GetAMQPPublisher(config.Config.AmqpUrl)
