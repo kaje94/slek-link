@@ -1,6 +1,6 @@
 processes:
   valkey:
-    command: valkey-server $VALKEY_CONF --port $VALKEY_PORT
+    command: valkey-server ./libs/devbox-services/valkey.conf --port $VALKEY_PORT
 
   rabbitmq:
     command: "rabbitmq-server"
