@@ -375,6 +375,55 @@
           "store_path": "/nix/store/p78h7a4amkpyhppx4xv0rmddcl4kqih1-templ-0.2.793"
         }
       }
+    },
+    "valkey@latest": {
+      "last_modified": "2025-02-07T11:26:36Z",
+      "plugin_version": "0.0.1",
+      "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#valkey",
+      "source": "devbox-search",
+      "version": "8.0.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/y4jvh5nz4mfxgbxkyzz734g52s1vssrb-valkey-8.0.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/y4jvh5nz4mfxgbxkyzz734g52s1vssrb-valkey-8.0.2"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/r3ml6233a5gz75kl7fkqlrdx1kb41a0r-valkey-8.0.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/r3ml6233a5gz75kl7fkqlrdx1kb41a0r-valkey-8.0.2"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4gsyc6spbk2c5rgq74lkf9ghil5a0rqf-valkey-8.0.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4gsyc6spbk2c5rgq74lkf9ghil5a0rqf-valkey-8.0.2"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1i73ygjixgfq2cn4jsd76jwii9v5ydgi-valkey-8.0.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/1i73ygjixgfq2cn4jsd76jwii9v5ydgi-valkey-8.0.2"
+        }
+      }
     }
   }
 }

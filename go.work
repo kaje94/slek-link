@@ -2,5 +2,5 @@ go 1.23.3
 
 use (
 	./apps/webapp
-	./libs/async-api
+	./libs/devbox-services/generated-asyncapi
 )

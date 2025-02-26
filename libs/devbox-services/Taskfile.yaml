@@ -1,0 +1,15 @@
+version: "3"
+output: "prefixed"
+tasks:
+  start:
+    desc: Start all services(valkey,rabbitmq with management studio)
+    cmd: devbox services up valkey rabbitmq rabbitmq-logs enable_rabbitmq_management create_queues --process-compose-file ./libs/devbox-services/process-compose.yaml
+  initial-build:
+    desc: Generate go client code for asyncapi.yaml (if generated-asyncapi directory doesn't exist)
+    cmd: if [ ! -d "generated-asyncapi" ]; then asyncapi generate fromTemplate ./asyncapi.yaml @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o generated-asyncapi; fi
+  build:
+    desc: Generate go client code for asyncapi.yaml
+    cmd: asyncapi generate fromTemplate ./asyncapi.yaml  @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o generated-asyncapi
+  watch:
+    desc: Generate go client & watch for changes in asyncapi.yaml
+    cmd: asyncapi generate fromTemplate ./asyncapi.yaml  @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o generated-asyncapi -w

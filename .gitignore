@@ -41,7 +41,5 @@ __debug_*
 local.db
 local.db-journal
 
-# AsyncApi
-libs/async-api/**/*.go
-libs/async-api/go.*
-!libs/async-api/asyncapi.yaml
+# AsyncApi generated code
+libs/devbox-services/generated-asyncapi
