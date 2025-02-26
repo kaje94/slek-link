@@ -28,7 +28,7 @@ lerna-debug.log*
 
 # Devbox
 .devbox
-devbox.d
+devbox.d/jetify-com.devbox-plugins.rabbitmq
 
 # Templ generated files
 *_templ.go
