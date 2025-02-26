@@ -1,6 +1,7 @@
 processes:
   valkey:
     command: valkey-server $VALKEY_CONF --port $VALKEY_PORT
+
   rabbitmq:
     command: "rabbitmq-server"
     availability:

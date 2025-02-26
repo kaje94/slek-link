@@ -14,6 +14,7 @@
   "env": {
     "NIX_HARDENING_ENABLE": ""
   },
+  "env_from": ".env",
   "shell": {
     "init_hook": ["devbox run init"],
     "scripts": {
@@ -21,7 +22,8 @@
         "bun install --cwd ./apps/webapp/static",
         "bun add --global @asyncapi/generator@latest",
         "templ generate -lazy",
-        "task asyncapi:initial-build"
+        "task devbox-services:initial-build",
+        "task --list-all"
       ]
     }
   }

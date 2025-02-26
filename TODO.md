@@ -24,9 +24,6 @@ Error Handling: Implement robust error handling in all services (e.g., handling 
 move gorm into libs
 watermill should not requeue if its error more than 3 times
 check locally with valkey again
-`asyncapi:start-rabbitmq`, etc seems to be redundent in devbox json
-add valkey to process-compose and rename it to devbox-services
-add `asyncapi:build` to webapp watch and dev
 
 ## Gorm migration
 
@@ -41,6 +38,7 @@ You can run the application locally either using Kubernetes or by running comman
 ### Prerequisites
 
 1. **Create .env File**: Refer the [.env.example](.env.example) file in the root of the repository.
+   // do we actually need this?
 2. **Load Environment Variables**: Install [direnv](https://direnv.net/) and run `direnv allow` to load the `.envrc` or `.env` file.
 3. **Install Devbox**: Install [Devbox](https://www.jetpack.io/devbox/) and run `devbox shell` to install the required packages and tools. (Optionally, install the [Devbox VSCode extension](https://marketplace.visualstudio.com/items?itemName=jetpack-io.devbox) if you use VSCode).
    NEED TO INSTALL BOTH DEVBOX AND DIRENV VSCODE EXTENSIONS to properly work with vscode

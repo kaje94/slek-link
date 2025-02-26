@@ -119,14 +119,20 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	humanizedMonthlyCount := humanize.Comma(int64(currentMonth.Count))
 	humanizedTotalCount := humanize.Comma(int64(totalClicks))
 
-	clicksTrendChart := createClicksTrendChart(monthlyClicks)
+	var clicksTrendChart *charts.Line
+	if len(monthlyClicks) > 0 {
+		clicksTrendChart = createClicksTrendChart(monthlyClicks)
+	}
 
 	countryClicks, err := utils.GetCountryClicks(compat, db, link.ID)
 	if err != nil {
 		return err
 	}
 
-	countryClicksChart := createBarChart(countryClicks)
+	var countryClicksChart *charts.Bar
+	if len(countryClicks) > 0 {
+		countryClicksChart = createBarChart(countryClicks)
+	}
 
 	indexTemplate := components.RootLayout(
 		"Link Details | slek.link - Track and Analyze Your Link's Performance",
@@ -170,10 +176,16 @@ templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount stri
 			@statSection("Clicks This Month", monthlyCount, "")
 			@statSection("Created", humanize.Time(link.CreatedAt), fmt.Sprintf("Created on %s", link.CreatedAt.Format(utils.LayoutHuman)))
 			@statSection("Status", string(link.Status), "")
-			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
-				@statChartSection("Clicks Trend", "Clicks over the past 12 months", ConvertChartToTemplComponent(clicksTrendChart))
-				@statChartSection("Clicks by Country", "Top countries where the users who clicked on the link are from", ConvertChartToTemplComponent(countryClicksChart))
-			</div>
+			if clicksTrendChart!=nil || countryClicksChart!=nil {
+				<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
+					if clicksTrendChart!=nil {
+						@statChartSection("Clicks Trend", "Clicks over the past 12 months", ConvertChartToTemplComponent(clicksTrendChart))
+					}
+					if countryClicksChart!=nil {
+						@statChartSection("Clicks by Country", "Top countries where the users who clicked on the link are from", ConvertChartToTemplComponent(countryClicksChart))
+					}
+				</div>
+			}
 		</div>
 	}
 }
@@ -205,7 +217,7 @@ templ statChartSection(title string, desc string, chartComp templ.Component) {
 	@statSectionWrap() {
 		<div>{ title }</div>
 		@statDesc(desc)
-		<div class="my-1 flex items-center justify-center min-h-[500px]">
+		<div class="my-1 flex items-center justify-center min-h-[400px] h-full">
 			@chartComp
 		</div>
 	}
