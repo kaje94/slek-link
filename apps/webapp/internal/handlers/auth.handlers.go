@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gorilla/sessions"
 	"github.com/kaje94/slek-link/internal/config"
@@ -28,7 +30,11 @@ func HandleLogin(c echo.Context) error {
 		// if GoogleClientId or GoogleClientSecret is not available, redirect to /callback and login as a test user
 		return c.Redirect(http.StatusTemporaryRedirect, "/callback")
 	}
-	url := googleOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+
+	originalURL := c.QueryParam("originalURL")
+	state := url.QueryEscape(originalURL)
+
+	url := googleOauthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
@@ -39,10 +45,14 @@ func HandlerLogout(c echo.Context) error {
 	}
 	session.Values["userInfo"] = nil
 	session.Save(c.Request(), c.Response())
-	return c.Redirect(http.StatusTemporaryRedirect, "/")
+	if strings.HasPrefix(c.QueryParam("originalURL"), "/dashboard") {
+		return c.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+	return c.Redirect(http.StatusTemporaryRedirect, c.QueryParam("originalURL"))
 }
 
 func HandleAuthCallback(c echo.Context) error {
+	redirectUrl := "/dashboard"
 	if googleOauthConfig.ClientID == "" || googleOauthConfig.ClientSecret == "" {
 		// if GoogleClientId or GoogleClientSecret is not available, redirect to /callback and login as a test user
 		userInfo := models.User{ID: "test-user", Name: "Test User", Email: "test-user@email.com"}
@@ -59,12 +69,16 @@ func HandleAuthCallback(c echo.Context) error {
 		userInfoJSON, _ := json.Marshal(userInfo)
 		session.Values["userInfo"] = string(userInfoJSON)
 		session.Save(c.Request(), c.Response())
-		return c.Redirect(http.StatusTemporaryRedirect, "/")
+		return c.Redirect(http.StatusTemporaryRedirect, "/dashboard")
 	}
 
 	state := c.QueryParam("state")
-	if state != "state-token" {
+	originalURL, err := url.QueryUnescape(state)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid state")
+	}
+	if originalURL != "" {
+		redirectUrl = originalURL
 	}
 
 	code := c.QueryParam("code")
@@ -102,7 +116,7 @@ func HandleAuthCallback(c echo.Context) error {
 
 	session.Values["userInfo"] = string(userInfoJSON)
 	session.Save(c.Request(), c.Response())
-	return c.Redirect(http.StatusTemporaryRedirect, "/")
+	return c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
 }
 
 // Save user details to database

@@ -99,6 +99,10 @@ func HandleLinkDetailsPage(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find link")
 	}
 
+	if link.ID == "" {
+		return c.Redirect(http.StatusTemporaryRedirect, "/404")
+	}
+
 	monthlyClicks, err := utils.GetLinksMonthlyClicks(compat, db, link.ID)
 	if err != nil {
 		return err

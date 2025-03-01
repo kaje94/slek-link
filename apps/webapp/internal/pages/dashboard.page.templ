@@ -44,7 +44,9 @@ func HandleDashboardsPage(c echo.Context) error {
 }
 
 templ dashboardBodyContent(c echo.Context, links []models.Link) {
-	@components.LayoutWithSignals(c, "{ searchInput:'', linkModalOpen:false, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
+	{{ linkModalOpen := c.QueryParam("linkModalOpen") }}
+	{{ initialUrl := c.QueryParam("initialUrl") }}
+	@components.LayoutWithSignals(c, fmt.Sprintf("{ searchInput:'', linkModalOpen:%t, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'%s', description:'' }", linkModalOpen == "true", initialUrl)) {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},

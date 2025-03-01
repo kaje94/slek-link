@@ -31,11 +31,12 @@ type Link struct {
 }
 
 type LinkMonthlyClicks struct {
-	ID     int    `gorm:"primaryKey"`
-	LinkID string `gorm:"foreignKey:Link.ID;index"`
-	Year   int    `gorm:"year"`
-	Month  int    `gorm:"month"`
-	Count  int    `gorm:"default:0"`
+	ID        string `gorm:"primaryKey"`
+	LinkID    string `gorm:"foreignKey:Link.ID;index"`
+	Year      int    `gorm:"year"`
+	Month     int    `gorm:"month"`
+	Count     int    `gorm:"default:0"`
+	CreatedAt time.Time
 }
 
 type LinkCountryClicks struct {

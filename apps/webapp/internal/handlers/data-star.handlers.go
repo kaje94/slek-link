@@ -167,6 +167,30 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 
 	sse := datastar.NewSSE(c.Response().Writer, c.Request())
 
+	// Delete related monthly clicks entries
+	monthlyClickIds := []models.LinkMonthlyClicks{}
+	monthlyClicks, _ := utils.GetLinksMonthlyClicks(compat, db, reqBody.LinkId)
+	for _, item := range monthlyClicks {
+		if item.ID != "" {
+			monthlyClickIds = append(monthlyClickIds, models.LinkMonthlyClicks{ID: item.ID})
+		}
+	}
+	if len(monthlyClickIds) > 0 {
+		db.Delete(&monthlyClickIds)
+	}
+
+	// Delete related country clicks entries
+	countryClickIds := []models.LinkCountryClicks{}
+	countryClicks, _ := utils.GetCountryClicks(compat, db, reqBody.LinkId)
+	for _, item := range countryClicks {
+		if item.ID != "" {
+			countryClickIds = append(countryClickIds, models.LinkCountryClicks{ID: item.ID})
+		}
+	}
+	if len(countryClicks) > 0 {
+		db.Delete(&countryClicks)
+	}
+
 	if err := utils.DeleteLinkOfUser(compat, db, reqBody.LinkId, userInfo.ID); err == nil {
 		redirectToDashboard := c.QueryParam("redirectToDashboard")
 		if redirectToDashboard != "" {

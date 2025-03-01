@@ -37,8 +37,12 @@ templ landingBodyContent(c echo.Context) {
 						<input
 							class="input input-bordered join-item input-md md:input-lg input-primary w-full placeholder:text-center sm:placeholder:text-start"
 							placeholder="Paste your long URL"
+							data-bind="initialUrl"
 						/>
-						<button class="btn join-item rounded-r-full btn-md md:btn-lg btn-primary">
+						<button
+							class="btn join-item rounded-r-full btn-md md:btn-lg btn-primary"
+							data-on-click="window.location.href='/dashboard?linkModalOpen=true&initialUrl='+$initialUrl"
+						>
 							Shorten URL
 						</button>
 					</div>

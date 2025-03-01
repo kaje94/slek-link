@@ -4,6 +4,7 @@ import (
 	"github.com/kaje94/slek-link/internal/config"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
+	"net/url"
 	"strings"
 	"unicode"
 )
@@ -12,6 +13,7 @@ templ Navbar(c echo.Context) {
 	{{ userInfo := utils.GetUserFromCtx(c) }}
 	{{ showShadow := utils.GetPathFromCtx(c) != "/" }}
 	{{ showDashboardBtn := !strings.HasPrefix(utils.GetPathFromCtx(c), "/dashboard") }}
+	{{ logoutWithOriginalUrl := "/logout?originalURL=" + url.QueryEscape(c.Request().URL.String()) }}
 	<div class={ "navbar rounded-full", templ.KV("shadow-md", showShadow) }>
 		<div class="flex-1">
 			<a class="btn btn-ghost text-xl" href="/">
@@ -26,7 +28,7 @@ templ Navbar(c echo.Context) {
 		</div>
 		<div class="flex-none flex gap-2 items-center">
 			if userInfo.Email == "" {
-				<a href="/login" class="btn btn-outline flex items-center gap-3 px-5 bg-base-300 border-base-content border-opacity-75">
+				<a href="/dashboard" class="btn btn-outline flex items-center gap-3 px-5 bg-base-300 border-base-content border-opacity-75">
 					if (config.Config.WebAppConfig.GoogleClientId != "" && config.Config.WebAppConfig.GoogleClientSecret != "") {
 						<span class="w-5 h-5 ">
 							@GoogleIcon()
@@ -60,7 +62,7 @@ templ Navbar(c echo.Context) {
 					>
 						<li class="disabled"><a>{ userInfo.Name }</a></li>
 						<li>
-							<a href="/logout">Sign Out</a>
+							<a href={ templ.SafeURL(logoutWithOriginalUrl) }>Sign Out</a>
 						</li>
 					</ul>
 				</div>

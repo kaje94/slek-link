@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -16,13 +14,20 @@ func CreateLink(db *gorm.DB, compat valkeycompat.Cmdable, newLink models.Link) e
 	if result.Error != nil {
 		return result.Error
 	}
+	CreateSlugCache(compat, newLink.ShortCode, newLink)
+	CreateUserLinkCache(compat, *newLink.UserID, newLink.ID, newLink)
+	CreateMonthlyClicksCache(compat, newLink.ID, []models.LinkMonthlyClicks{})
+	CreateCountryClicksCache(compat, newLink.ID, []models.LinkCountryClicks{})
 	DeleteUserLinksCache(compat, *newLink.UserID)
 	DeleteDashboardSearchCache(compat, *newLink.UserID)
 	return nil
 }
 
-func CreateLinkMonthlyClicks(db *gorm.DB, newMonthlyClicks models.LinkMonthlyClicks) error {
+func CreateLinkMonthlyClicks(db *gorm.DB, compat valkeycompat.Cmdable, newMonthlyClicks models.LinkMonthlyClicks) error {
 	result := db.Create(&newMonthlyClicks)
+	if result.Error == nil {
+		DeleteMonthlyClicksCache(compat, newMonthlyClicks.LinkID)
+	}
 	return result.Error
 }
 
@@ -35,14 +40,17 @@ func UpdateLinkMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, monthlyCl
 	return nil
 }
 
-func CreateLinkCountryClicks(db *gorm.DB, newCountryClicks models.LinkCountryClicks) error {
+func CreateLinkCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, newCountryClicks models.LinkCountryClicks) error {
 	result := db.Create(&newCountryClicks)
+	if result.Error == nil {
+		DeleteCountryClicksCache(compat, newCountryClicks.LinkID)
+	}
 	return result.Error
 }
 
 func UpdateLinkCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, countryClicks models.LinkCountryClicks) error {
 	result := db.Save(&countryClicks)
-	if result.Error == nil {
+	if result.Error != nil {
 		return result.Error
 	}
 	DeleteCountryClicksCache(compat, countryClicks.LinkID)
@@ -74,7 +82,7 @@ func GetLinksMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId stri
 		return monthlyClicks, nil
 	}
 
-	if results := db.Where(&models.LinkMonthlyClicks{LinkID: linkId}).Limit(12).Order("id desc").Find(&monthlyClicks); results.Error != nil {
+	if results := db.Where(&models.LinkMonthlyClicks{LinkID: linkId}).Limit(12).Order("created_at desc").Find(&monthlyClicks); results.Error != nil {
 		return nil, results.Error
 	}
 
@@ -93,9 +101,7 @@ func GetLinksMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId stri
 		}
 
 		if !found {
-			id, _ := strconv.Atoi(fmt.Sprintf("%d%d", pastMonthYear, pastMonth))
 			monthlyClicksUpdated = append(monthlyClicksUpdated, models.LinkMonthlyClicks{
-				ID:     id,
 				LinkID: linkId,
 				Year:   pastMonthYear,
 				Month:  int(pastMonth),
@@ -149,6 +155,8 @@ func DeleteLinkOfUser(compat valkeycompat.Cmdable, db *gorm.DB, linkId, userId s
 	DeleteUserLinkCache(compat, userId, linkId)
 	DeleteSlugCache(compat, link.ShortCode)
 	DeleteDashboardSearchCache(compat, *link.UserID)
+	DeleteCountryClicksCache(compat, link.ID)
+	DeleteMonthlyClicksCache(compat, link.ID)
 	return nil
 }
 

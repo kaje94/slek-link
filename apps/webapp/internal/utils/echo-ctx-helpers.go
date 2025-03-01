@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/sessions"
 	"github.com/kaje94/slek-link/internal/config"
@@ -54,21 +55,23 @@ func GetPathFromCtx(c echo.Context) string {
 
 func GetUserFromCtxWithRedirect(c echo.Context) (userInfo models.User, err error) {
 	session, ok := c.Get(string(SESSION_CONTEXT_KEY)).(*sessions.Session)
+	originalURL := c.Request().URL.String()
+	loginWithOriginalUrl := "/login?originalURL=" + url.QueryEscape(originalURL)
 	if !ok {
 		// TODO: better to redirect towards a more meaningful page
-		err = c.Redirect(http.StatusTemporaryRedirect, "/")
+		err = c.Redirect(http.StatusTemporaryRedirect, loginWithOriginalUrl)
 		return
 	}
 
 	if userInfoJSON, ok := session.Values["userInfo"].(string); ok {
 		parseErr := json.Unmarshal([]byte(userInfoJSON), &userInfo)
 		if parseErr != nil {
-			err = c.Redirect(http.StatusTemporaryRedirect, "/")
+			err = c.Redirect(http.StatusTemporaryRedirect, loginWithOriginalUrl)
 			return
 		}
 	}
 	if !ok || userInfo.ID == "" {
-		err = c.Redirect(http.StatusTemporaryRedirect, "/")
+		err = c.Redirect(http.StatusTemporaryRedirect, loginWithOriginalUrl)
 	}
 	return
 }

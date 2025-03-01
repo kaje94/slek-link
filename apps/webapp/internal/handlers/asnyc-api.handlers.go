@@ -43,24 +43,20 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 		}
 	}
 
-	if currentMonth.ID == 0 {
+	if currentMonth.ID == "" {
 		// create current month
 		monthStr := strconv.Itoa(int(month))
 		if month < 10 {
 			monthStr = fmt.Sprintf("0%d", month)
 		}
-		id, err := strconv.Atoi(fmt.Sprintf("%d%s", year, monthStr))
-		if err != nil {
-			return err
-		}
 		currentMonth = models.LinkMonthlyClicks{
 			LinkID: lm.LinkId,
 			Year:   year,
 			Month:  int(month),
-			ID:     id,
+			ID:     fmt.Sprintf("%s-%d%s", lm.LinkId, year, monthStr),
 			Count:  1,
 		}
-		err = utils.CreateLinkMonthlyClicks(db, currentMonth)
+		err = utils.CreateLinkMonthlyClicks(db, compat, currentMonth)
 		if err != nil {
 			return err
 		}
@@ -99,7 +95,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 				CountryName: countryName,
 				Count:       1,
 			}
-			err = utils.CreateLinkCountryClicks(db, countryClicks)
+			err = utils.CreateLinkCountryClicks(compat, db, countryClicks)
 			if err != nil {
 				return err
 			}
