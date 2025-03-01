@@ -7,10 +7,7 @@ illustrations: https://illustrationkit.com/illustrations/halo
 # TODO:
 
 add github related files (contribute.md, etc)
-add golangci
 add sitemap
-remove direnv and have taskfile use the .env
-make sure that air reloads when libs changes
 add title property or daisyui tooltip to all links and buttons
 remove htmx and alpinejs
 add open graph tags with banner image
@@ -19,11 +16,8 @@ GORM(Add indexes, migration, Logger)
 logging (use slog.Error, slog.Info)
 add toast after creating, deleting and copying content
 update scroll wheel theme
-add title/tooltips, whereever needed
-Error Handling: Implement robust error handling in all services (e.g., handling database connection issues, RabbitMQ connection issues, message processing failures). Consider dead-letter queues (DLQs) in RabbitMQ for messages that fail to be processed.
+Error Handling: Implement robust error handling in all services (e.g., handling database connection issues, RabbitMQ connection issues, message processing failures).
 move gorm into libs
-watermill should not requeue if its error more than 3 times
-check locally with valkey again
 
 ## Gorm migration
 

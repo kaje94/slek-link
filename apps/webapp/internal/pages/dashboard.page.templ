@@ -45,7 +45,7 @@ func HandleDashboardsPage(c echo.Context) error {
 }
 
 templ dashboardBodyContent(c echo.Context, links []models.Link) {
-	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
+	@components.LayoutWithSignals(c, "{ searchInput:'', linkModalOpen:false, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
@@ -54,7 +54,7 @@ templ dashboardBodyContent(c echo.Context, links []models.Link) {
 			if len(links)== 0 {
 				@DashboardEmpty()
 			} else {
-				@DashboardWithContent(links)
+				@DashboardWithContent(c, links)
 			}
 		</div>
 		@components.LinkModal(c, false)
@@ -79,6 +79,21 @@ templ DashboardEmpty() {
 	</div>
 }
 
+templ DashboardNoMatchingItems() {
+	<div class="flex-1 flex flex-col" id="dashboard-items">
+		<div class="flex flex-col flex-1 items-center justify-center">
+			<div class="max-w-lg h-full flex flex-col gap-4 justify-center items-center">
+				<div class="opacity-80">
+					@components.MatchNotFoundIllustration()
+				</div>
+				<h3 class="text-center w-4/5 mt-10 opacity-80">
+					No search results found
+				</h3>
+			</div>
+		</div>
+	</div>
+}
+
 templ listItemCol(label string, value string, index int) {
 	<div class={ "flex gap-1 line-clamp-1 h-6 break-all", templ.KV("justify-end text-right md:justify-start md:text-left", index % 2 == 1) }>
 		<span class={ "md:hidden block font-extralight", templ.KV("text-right md:text-left", index % 2 == 1) }>
@@ -88,17 +103,31 @@ templ listItemCol(label string, value string, index int) {
 	</div>
 }
 
-templ DashboardWithContent(links []models.Link) {
+templ DashboardWithContent(c echo.Context, links []models.Link) {
 	<div class="flex justify-between flex-col sm:flex-row-reverse gap-4">
 		<button class="btn btn-primary" data-on-click="$linkModalOpen=true">
 			Shorten new Link
 		</button>
 		<label class="input input-bordered flex items-center gap-2">
-			<input type="text" class="grow" placeholder="Search"/>
-			@components.SearchIcon()
+			<input
+				type="text"
+				class="grow"
+				placeholder="Search..."
+				data-bind-searchInput
+				data-indicator-searching
+				data-on-input__debounce.1000ms={ fmt.Sprintf("@post('/api/dashboard-search',{headers:{'x-csrf-token': '%s'}})", utils.GetCSRFTokenFromCtx(c)) }
+			/>
+			<span class="loading loading-ring" data-show="$searching"></span>
+			<span data-show="!$searching">
+				@components.SearchIcon()
+			</span>
 		</label>
 	</div>
-	<div class="bg-base-content bg-opacity-10 flex flex-col gap-[1px] my-2">
+	@DashboardItems(links)
+}
+
+templ DashboardItems(links []models.Link) {
+	<div class="bg-base-content bg-opacity-10 flex flex-col gap-[1px] my-2" id="dashboard-items">
 		<div class="md:grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 font-extralight bg-base-100 hidden">
 			<div>Name</div>
 			<div>Created</div>

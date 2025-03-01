@@ -148,7 +148,7 @@ func HandleLinkDetailsPage(c echo.Context) error {
 }
 
 templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount string, totalCount string, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
-	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
+	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: "/dashboard"},

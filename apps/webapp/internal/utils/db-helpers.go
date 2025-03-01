@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kaje94/slek-link/internal/models"
@@ -10,37 +11,42 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateLink(db *gorm.DB, newLink models.Link) error {
+func CreateLink(db *gorm.DB, compat valkeycompat.Cmdable, newLink models.Link) error {
 	result := db.Create(&newLink)
-	return result.Error
+	if result.Error != nil {
+		return result.Error
+	}
+	DeleteUserLinksCache(compat, *newLink.UserID)
+	DeleteDashboardSearchCache(compat, *newLink.UserID)
+	return nil
 }
 
 func CreateLinkMonthlyClicks(db *gorm.DB, newMonthlyClicks models.LinkMonthlyClicks) error {
 	result := db.Create(&newMonthlyClicks)
-
 	return result.Error
 }
 
 func UpdateLinkMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, monthlyClicks models.LinkMonthlyClicks) error {
 	result := db.Save(&monthlyClicks)
-	if result.Error == nil {
-		DeleteMonthlyClicksCache(compat, monthlyClicks.LinkID)
+	if result.Error != nil {
+		return result.Error
 	}
-	return result.Error
+	DeleteMonthlyClicksCache(compat, monthlyClicks.LinkID)
+	return nil
 }
 
 func CreateLinkCountryClicks(db *gorm.DB, newCountryClicks models.LinkCountryClicks) error {
 	result := db.Create(&newCountryClicks)
-
 	return result.Error
 }
 
 func UpdateLinkCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, countryClicks models.LinkCountryClicks) error {
 	result := db.Save(&countryClicks)
 	if result.Error == nil {
-		DeleteCountryClicksCache(compat, countryClicks.LinkID)
+		return result.Error
 	}
-	return result.Error
+	DeleteCountryClicksCache(compat, countryClicks.LinkID)
+	return nil
 }
 
 func GetLinksOfUser(compat valkeycompat.Cmdable, db *gorm.DB, userId string) ([]models.Link, error) {
@@ -134,14 +140,15 @@ func DeleteLinkOfUser(compat valkeycompat.Cmdable, db *gorm.DB, linkId, userId s
 		return err
 	}
 
-	if result := db.Where("user_id = ?", userId).Delete(&models.Link{ID: linkId}); result.Error == nil {
+	result := db.Where("user_id = ?", userId).Delete(&models.Link{ID: linkId})
+	if result.Error != nil {
 		return result.Error
 	}
 
 	DeleteUserLinksCache(compat, userId)
 	DeleteUserLinkCache(compat, userId, linkId)
 	DeleteSlugCache(compat, link.ShortCode)
-
+	DeleteDashboardSearchCache(compat, *link.UserID)
 	return nil
 }
 
@@ -158,6 +165,7 @@ func GetLinkOfSlug(compat valkeycompat.Cmdable, db *gorm.DB, slug string) (model
 	}
 
 	CreateSlugCache(compat, slug, link)
+	CreateUserLinkCache(compat, *link.UserID, link.ID, link)
 
 	return link, nil
 }
@@ -181,10 +189,30 @@ func GetCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId string) (
 
 func UpdateLink(compat valkeycompat.Cmdable, db *gorm.DB, link models.Link) error {
 	result := db.Save(&link)
-	if result.Error == nil {
-		CreateUserLinkCache(compat, *link.UserID, link.ID, link)
-		CreateSlugCache(compat, link.ShortCode, link)
-		DeleteUserLinksCache(compat, *link.UserID)
+	if result.Error != nil {
+		return result.Error
 	}
-	return result.Error
+	CreateUserLinkCache(compat, *link.UserID, link.ID, link)
+	CreateSlugCache(compat, link.ShortCode, link)
+	DeleteUserLinksCache(compat, *link.UserID)
+	DeleteDashboardSearchCache(compat, *link.UserID)
+	return nil
+}
+
+func GetSearchLinks(compat valkeycompat.Cmdable, db *gorm.DB, userId string, keyword string) ([]models.Link, error) {
+	var links []models.Link
+	keywordLower := strings.ToLower(keyword)
+
+	err := GetDashboardSearchCache(compat, userId, keywordLower, &links)
+	if err == nil {
+		return links, nil
+	}
+
+	if results := db.Where(&models.Link{UserID: &userId}).Where("lower(name) LIKE ?", "%"+keywordLower+"%").Find(&links); results.Error != nil {
+		return nil, results.Error
+	}
+
+	CreateDashboardSearchCache(compat, userId, keywordLower, links)
+
+	return links, nil
 }

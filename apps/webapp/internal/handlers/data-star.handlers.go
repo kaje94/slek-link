@@ -111,7 +111,7 @@ func UpsertLinkAPIHandler(c echo.Context) error {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		if err = utils.CreateLink(db, newLink); err == nil {
+		if err = utils.CreateLink(db, compat, newLink); err == nil {
 			sse.Redirect(fmt.Sprintf("/dashboard/%s?isNewLink=true", newLink.ID))
 		} else if strings.Contains(err.Error(), "UNIQUE constraint failed: links.short_code") {
 			sse.MarshalAndMergeSignals(map[string]any{"linkModalError": "Short Code already exists. Try a different one."})
@@ -171,7 +171,7 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 					datastar.WithMergeMode(datastar.FragmentMergeModeInner),
 				)
 			}
-			sse.MarshalAndMergeSignals(map[string]any{"deleteLinkId": ""})
+			sse.MarshalAndMergeSignals(map[string]any{"deleteLinkId": "", "searchInput": ""})
 		}
 	}
 
@@ -214,4 +214,51 @@ func FormatValidationErrors(err error, obj interface{}) string {
 
 	// Combine all messages into a single string
 	return strings.Join(messages, ", ")
+}
+
+func DashboardSearchAPIHandler(c echo.Context) error {
+	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
+	if err != nil {
+		return err
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	var reqBody struct {
+		Search string `json:"searchInput"`
+	}
+
+	if err := c.Bind(&reqBody); err != nil {
+		return c.String(http.StatusBadRequest, "bad request")
+	}
+
+	sse := datastar.NewSSE(c.Response().Writer, c.Request())
+
+	if reqBody.Search == "" {
+		links, err := utils.GetLinksOfUser(compat, db, userInfo.ID)
+		if err != nil {
+			return err
+		}
+		sse.MergeFragmentTempl(pages.DashboardItems(links), datastar.WithSelectorID("dashboard-items"))
+	} else {
+		links, err := utils.GetSearchLinks(compat, db, userInfo.ID, reqBody.Search)
+		if err != nil {
+			return err
+		}
+		if len(links) > 0 {
+			sse.MergeFragmentTempl(pages.DashboardItems(links), datastar.WithSelectorID("dashboard-items"))
+		} else {
+			sse.MergeFragmentTempl(pages.DashboardNoMatchingItems(), datastar.WithSelectorID("dashboard-items"))
+		}
+	}
+
+	return nil
 }

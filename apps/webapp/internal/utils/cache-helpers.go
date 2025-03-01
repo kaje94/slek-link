@@ -11,6 +11,10 @@ import (
 	"github.com/valkey-io/valkey-go/valkeycompat"
 )
 
+var (
+	cacheVersion = "v5"
+)
+
 func saveCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, cacheVal any) error {
 	jsonBytes, err := json.Marshal(cacheVal)
 	if err != nil {
@@ -18,7 +22,7 @@ func saveCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, cacheVal any)
 	}
 
 	if config.Config.Valkey.Url != "" && valkeyCompat != nil {
-		_, err = valkeyCompat.SetNX(context.Background(), cacheKey, jsonBytes, time.Hour).Result()
+		_, err = valkeyCompat.Set(context.Background(), cacheKey, jsonBytes, time.Minute*10).Result()
 		if err != nil {
 			return err
 		}
@@ -59,23 +63,35 @@ func deleteCache(valkeyCompat valkeycompat.Cmdable, cacheKey string) error {
 }
 
 func getCacheKeyForUserLinks(userId string) string {
-	return fmt.Sprintf("links-%s", userId)
-}
-
-func getCacheKeyForCountryClicks(linkId string) string {
-	return fmt.Sprintf("country-clicks-%s", linkId)
+	return fmt.Sprintf("links-%s-%s", cacheVersion, userId)
 }
 
 func getCacheKeyForUserLink(userId, linkId string) string {
-	return fmt.Sprintf("link-%s-%s", userId, linkId)
+	return fmt.Sprintf("link-%s-%s-%s", cacheVersion, userId, linkId)
+}
+
+func getCacheKeyForCountryClicks(linkId string) string {
+	return fmt.Sprintf("country-clicks-%s-%s", cacheVersion, linkId)
 }
 
 func getCacheKeyForSlug(slug string) string {
-	return fmt.Sprintf("slug-%s", slug)
+	return fmt.Sprintf("slug-%s-%s", cacheVersion, slug)
 }
 
 func getCacheKeyForMonthlyClicks(linkId string) string {
-	return fmt.Sprintf("monthly-clicks-%s", linkId)
+	return fmt.Sprintf("monthly-%s-clicks-%s", cacheVersion, linkId)
+}
+
+func getCacheKeyForDashboardSearchPrefix(userId string) string {
+	return fmt.Sprintf("search-%s-%s", cacheVersion, userId)
+}
+
+func getCacheKeyForDashboardSearchKeys(userId string) string {
+	return fmt.Sprintf("search-%s-%s", cacheVersion, userId)
+}
+
+func getCacheKeyForDashboardSearch(userId string, keyword string) string {
+	return fmt.Sprintf("%s-%s", getCacheKeyForDashboardSearchPrefix(userId), keyword)
 }
 
 func CreateCountryClicksCache(compat valkeycompat.Cmdable, linkId string, item []models.LinkCountryClicks) error {
@@ -136,4 +152,40 @@ func DeleteSlugCache(compat valkeycompat.Cmdable, slug string) error {
 
 func DeleteCountryClicksCache(compat valkeycompat.Cmdable, linkId string) error {
 	return deleteCache(compat, getCacheKeyForCountryClicks(linkId))
+}
+
+func CreateDashboardSearchCache(compat valkeycompat.Cmdable, userId string, keyword string, items []models.Link) error {
+	cacheKeys := []string{}
+	getCache(compat, getCacheKeyForDashboardSearchKeys(userId), &cacheKeys)
+	exists := false
+	for _, cacheKey := range cacheKeys {
+		if cacheKey == getCacheKeyForDashboardSearch(userId, keyword) {
+			exists = true
+			break
+		}
+	}
+	if !exists {
+		cacheKeys = append(cacheKeys, getCacheKeyForDashboardSearch(userId, keyword))
+		err := saveCache(compat, getCacheKeyForDashboardSearchKeys(userId), cacheKeys)
+		if err != nil {
+			return err
+		}
+	}
+	return saveCache(compat, getCacheKeyForDashboardSearch(userId, keyword), items)
+}
+
+func GetDashboardSearchCache(compat valkeycompat.Cmdable, userId string, keyword string, links *[]models.Link) error {
+	return getCache(compat, getCacheKeyForDashboardSearch(userId, keyword), &links)
+}
+
+func DeleteDashboardSearchCache(compat valkeycompat.Cmdable, userId string) error {
+	cacheKeys := []string{}
+	getCache(compat, getCacheKeyForDashboardSearchKeys(userId), &cacheKeys)
+	for _, cacheKey := range cacheKeys {
+		err := deleteCache(compat, cacheKey)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
