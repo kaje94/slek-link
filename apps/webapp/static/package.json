@@ -9,7 +9,7 @@
   "dependencies": {
     "tailwindcss": "^3.4.15",
     "daisyui": "^4.12.14",
-    "@starfederation/datastar": "1.0.0-beta.2"
+    "@starfederation/datastar": "1.0.0-beta.8"
   },
   "devDependencies": {
     "parcel": "^2.13.3",
