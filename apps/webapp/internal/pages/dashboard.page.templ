@@ -2,7 +2,6 @@ package pages
 
 import (
 	"fmt"
-	"github.com/angelofallars/htmx-go"
 	"github.com/dustin/go-humanize"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/kaje94/slek-link/internal/models"
@@ -35,13 +34,13 @@ func HandleDashboardsPage(c echo.Context) error {
 
 	slices.Reverse(links)
 
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"Dashboard | slek.link - Manage and Track Your Links",
 		"Access your slek.link dashboard to view, manage, and track the performance of your shortened links. Simplify your workflow with powerful link analytics and easy link management tools.",
 		dashboardBodyContent(c, links),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ dashboardBodyContent(c echo.Context, links []models.Link) {

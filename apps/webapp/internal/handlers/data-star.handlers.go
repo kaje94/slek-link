@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/kaje94/slek-link/internal/config"
 	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/pages"
 	"github.com/kaje94/slek-link/internal/utils"
@@ -96,6 +97,16 @@ func UpsertLinkAPIHandler(c echo.Context) error {
 			sse.MergeFragmentTempl(pages.DashboardItem(item), datastar.WithSelectorID(fmt.Sprintf("link-item-%s", reqBody.EditLinkId)))
 		}
 	} else {
+		userLinks, err := utils.GetLinksOfUser(compat, db, userInfo.ID)
+		if err != nil {
+			return err
+		}
+
+		if len(userLinks) >= (config.Config.MaxLinksPerUser) {
+			sse.MarshalAndMergeSignals(map[string]any{"linkModalError": "Maximum number of links reached"})
+			return c.String(http.StatusBadRequest, "maximum number of links reached")
+		}
+
 		newLink := models.Link{
 			ID:          ulid.Make().String(),
 			Name:        reqBody.Name,

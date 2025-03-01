@@ -98,7 +98,6 @@ func RunServer() error {
 	auth.GET("/logout", handlers.HandlerLogout)
 
 	api := router.Group("/api")
-	api.GET("/hello-world", handlers.ShowContentAPIHandler) // todo: delete
 	api.POST("/upsert-link", handlers.UpsertLinkAPIHandler)
 	api.DELETE("/delete-link", handlers.DeleteLinkAPIHandler)
 	api.POST("/dashboard-search", handlers.DashboardSearchAPIHandler)

@@ -1,19 +1,18 @@
 package pages
 
 import (
-	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/labstack/echo/v4"
 )
 
 func HandlePrivacyPolicyPage(c echo.Context) error {
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"Privacy Policy | slek.link - Protecting Your Data",
 		"Understand how slek.link safeguards your privacy. We use cookies only for authentication and are committed to ensuring your data is secure.",
 		privacyPolicyBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ privacyPolicyBodyContent(c echo.Context) {

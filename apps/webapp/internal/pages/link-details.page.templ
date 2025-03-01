@@ -3,7 +3,6 @@ package pages
 import (
 	"context"
 	"fmt"
-	"github.com/angelofallars/htmx-go"
 	"github.com/dustin/go-humanize"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -138,13 +137,13 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	isNewLinkStr := c.QueryParam("isNewLink")
 	isNewLink, _ := strconv.ParseBool(isNewLinkStr)
 
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"Link Details | slek.link - Track and Analyze Your Link's Performance",
 		"Dive into detailed analytics for your shortened link on slek.link. Monitor clicks, track user behavior, and gain insights to optimize your link's performance.",
 		linkDetailsBodyContent(c, link, humanizedMonthlyCount, humanizedTotalCount, isNewLink, clicksTrendChart, countryClicksChart),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount string, totalCount string, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {

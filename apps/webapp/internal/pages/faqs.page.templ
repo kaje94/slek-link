@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/kaje94/slek-link/internal/config"
 	"github.com/labstack/echo/v4"
@@ -9,13 +8,13 @@ import (
 )
 
 func HandleFaqsPage(c echo.Context) error {
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"FAQs | slek.link - Your Questions Answered",
 		"Find answers to common questions about slek.link. Learn how to shorten URLs, track performance, and get the most out of our free URL shortening service.",
 		faqsBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ faqsBodyContent(c echo.Context) {

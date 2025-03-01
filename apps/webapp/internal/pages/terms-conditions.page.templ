@@ -1,19 +1,18 @@
 package pages
 
 import (
-	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/labstack/echo/v4"
 )
 
 func HandleTermsConditionsPage(c echo.Context) error {
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"Terms & Conditions | slek.link - User Agreement",
 		"Review the terms and conditions for using slek.link. Learn about your rights, responsibilities, and our commitment to providing a reliable service.",
 		termsConditionsBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ termsConditionsBodyContent(c echo.Context) {

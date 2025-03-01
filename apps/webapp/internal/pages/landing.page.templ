@@ -1,19 +1,18 @@
 package pages
 
 import (
-	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/labstack/echo/v4"
 )
 
 func HandleLandingPage(c echo.Context) error {
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"slek.link - Simplify Your URLs",
 		"Shorten URLs for free with slek.link. Create custom links, track performance analytics, and simplify your digital interactions with secure URL shortening.",
 		landingBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ landingBodyContent(c echo.Context) {

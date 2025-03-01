@@ -1,19 +1,19 @@
 package pages
 
 import (
-	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/labstack/echo/v4"
 )
 
 func HandleContactUsPage(c echo.Context) error {
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"Contact Us | slek.link - Get Support or Ask Questions",
 		"Need help? Contact the slek.link support team for inquiries, assistance, or feedback. We're here to make your URL shortening experience seamless.",
 		contactUsBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
+
 }
 
 templ contactUsBodyContent(c echo.Context) {

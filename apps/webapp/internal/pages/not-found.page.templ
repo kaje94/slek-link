@@ -1,20 +1,19 @@
 package pages
 
 import (
-	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
 func Handle404Page(c echo.Context) error {
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"Page Not Found - Slek.link",
 		"Oops! The page you’re looking for doesn’t exist. It might have been moved or deleted. Return to the homepage or explore other features on Slek.link.",
 		pageNotFoundBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ pageNotFoundBodyContent(c echo.Context) {

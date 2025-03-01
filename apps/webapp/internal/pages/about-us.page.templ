@@ -1,19 +1,18 @@
 package pages
 
 import (
-	"github.com/angelofallars/htmx-go"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/labstack/echo/v4"
 )
 
 func HandleAboutUsPage(c echo.Context) error {
-	indexTemplate := components.RootLayout(
+	resp := components.RootLayout(
 		"About Us | slek.link - Simplify Your Digital Sharing",
 		"Discover how slek.link simplifies URL sharing with powerful link management and analytics tools. Learn about our mission to make the web more accessible.",
 		aboutUsBodyContent(c),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
+	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
 templ aboutUsBodyContent(c echo.Context) {
