@@ -26,7 +26,7 @@ type Link struct {
 	UserID      *string `gorm:"index" validate:"required"`
 	User        *User   `gorm:"constraint:OnDelete:SET NULL;"`
 	CreatedAt   time.Time
-	Description string         `gorm:"type:text"`
+	Description string         `gorm:"type:text" validate:"max=225" errormgs:"Description cannot have more than 255 characters"`
 	Status      linkStatusType `gorm:"type:text"`
 }
 

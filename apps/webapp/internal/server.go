@@ -99,7 +99,7 @@ func RunServer() error {
 
 	api := router.Group("/api")
 	api.GET("/hello-world", handlers.ShowContentAPIHandler)
-	api.POST("/create-link", handlers.CreateLinkAPIHandler)
+	api.POST("/upsert-link", handlers.UpsertLinkAPIHandler)
 	api.DELETE("/delete-link", handlers.DeleteLinkAPIHandler)
 
 	// Server configuration

@@ -45,7 +45,7 @@ func HandleDashboardsPage(c echo.Context) error {
 }
 
 templ dashboardBodyContent(c echo.Context, links []models.Link) {
-	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', deleteLinkId: '' }") {
+	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
@@ -58,7 +58,7 @@ templ dashboardBodyContent(c echo.Context, links []models.Link) {
 			}
 		</div>
 		@components.LinkModal(c)
-		@components.DeleteLinkConfirmModal(c)
+		@components.DeleteLinkConfirmModal(c, false)
 	}
 }
 
@@ -106,26 +106,34 @@ templ DashboardWithContent(links []models.Link) {
 			<div>Slug</div>
 		</div>
 		for _, item := range links {
-			<a
-				href={ templ.SafeURL(fmt.Sprintf("/dashboard/%s", item.ID)) }
-				id={ fmt.Sprintf("link-item-%s", item.ID) }
-				class="grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 hover:bg-base-200 duration-200 cursor-pointer bg-base-100 line-clamp-1 items-center overflow-visible"
-			>
-				@listItemCol("Name", item.Name, 0)
-				@listItemCol("Created", humanize.Time(item.CreatedAt), 1)
-				@listItemCol("State", string(item.Status), 2)
-				@listItemCol("Slug", item.ShortCode, 3)
-				<div class="flex justify-end items-center gap-0.5 col-span-full md:col-span-1 order-first md:order-none">
-					<button title="Edit Link" class="btn hover:btn-accent btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100">
-						<span class="hidden md:block">Edit</span>
-						@components.EditIcon()
-					</button>
-					<button title="Delete Link" class="btn hover:btn-error btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100" data-on-click__stop__prevent={ fmt.Sprintf("$deleteLinkId='%s'", item.ID) }>
-						<span class="hidden md:block">Delete</span>
-						@components.TrashIcon()
-					</button>
-				</div>
-			</a>
+			@DashboardItem(item)
 		}
 	</div>
+}
+
+templ DashboardItem(item models.Link) {
+	<a
+		href={ templ.SafeURL(fmt.Sprintf("/dashboard/%s", item.ID)) }
+		id={ fmt.Sprintf("link-item-%s", item.ID) }
+		class="grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 hover:bg-base-200 duration-200 cursor-pointer bg-base-100 line-clamp-1 items-center overflow-visible"
+	>
+		@listItemCol("Name", item.Name, 0)
+		@listItemCol("Created", humanize.Time(item.CreatedAt), 1)
+		@listItemCol("State", string(item.Status), 2)
+		@listItemCol("Slug", item.ShortCode, 3)
+		<div class="flex justify-end items-center gap-0.5 col-span-full md:col-span-1 order-first md:order-none">
+			<button
+				title="Edit Link"
+				class="btn hover:btn-accent btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100"
+				data-on-click__stop__prevent={ fmt.Sprintf("$linkModalOpen=true;$editLinkId='%s';$name='%s';$shortCode='%s';$url='%s';$description='%s'", item.ID, item.Name, item.ShortCode, item.LongURL, item.Description) }
+			>
+				<span class="hidden md:block">Edit</span>
+				@components.EditIcon()
+			</button>
+			<button title="Delete Link" class="btn hover:btn-error btn-sm  px-1 md:px-3 opacity-50 hover:opacity-100" data-on-click__stop__prevent={ fmt.Sprintf("$deleteLinkId='%s'", item.ID) }>
+				<span class="hidden md:block">Delete</span>
+				@components.TrashIcon()
+			</button>
+		</div>
+	</a>
 }

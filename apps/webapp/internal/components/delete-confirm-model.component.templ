@@ -6,7 +6,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-templ DeleteLinkConfirmModal(c echo.Context) {
+templ DeleteLinkConfirmModal(c echo.Context, redirectToDashboard bool) {
+	{{ deleteUrl := "/api/delete-link" }}
+	{{
+		if redirectToDashboard {
+			deleteUrl = "/api/delete-link?redirectToDashboard=true"
+		}
+	}}
 	<dialog class="modal" data-class="{'modal-open': $deleteLinkId}">
 		<div class="modal-box">
 			<h3 class="font-bold text-lg">Delete Link</h3>
@@ -18,7 +24,7 @@ templ DeleteLinkConfirmModal(c echo.Context) {
 					<button class="btn" data-on-click="$deleteLinkId=''">Cancel</button>
 					<button
 						class="btn btn-error px-8"
-						data-on-click={ fmt.Sprintf("@delete('/api/delete-link',{headers:{'x-csrf-token': '%s'}})", utils.GetCSRFTokenFromCtx(c)) }
+						data-on-click={ fmt.Sprintf("@delete('%s',{headers:{'x-csrf-token': '%s'}})", deleteUrl, utils.GetCSRFTokenFromCtx(c)) }
 						data-indicator-deleting
 						data-attr-disabled="$deleting"
 					><span class="loading loading-spinner" data-show="$deleting"></span>Delete</button>

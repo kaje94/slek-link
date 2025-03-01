@@ -20,7 +20,7 @@
     "scripts": {
       "init": [
         "bun install --cwd ./apps/webapp/static",
-        "bun add --global @asyncapi/generator@latest",
+        "bun add --global @asyncapi/generator@2.6.0",
         "templ generate -lazy",
         "task devbox-services:initial-build",
         "task --list-all"

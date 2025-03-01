@@ -9,39 +9,42 @@ import (
 templ LinkModal(c echo.Context) {
 	<dialog class="modal" data-class="{'modal-open': $linkModalOpen}">
 		<div class="modal-box w-11/12 max-w-3xl">
-			<h3 class="font-bold text-lg">New Link Details</h3>
+			<h3 class="font-bold text-lg" data-text="$editLinkId ? 'Edit Link Details' : 'New Link Details'"></h3>
 			<div class="py-4 grid md:grid-cols-2 gap-y-2 md:gap-y-1 gap-x-4">
-				@Input("name", "Name", true, templ.Attributes{"placeholder": "Name", "data-attr-disabled": "$creating"})
-				@Input("shortCode", "Short Code / Endpoint", true, templ.Attributes{"placeholder": "short-endpoint", "data-attr-disabled": "$creating"})
+				@Input("name", "Name", true, templ.Attributes{"placeholder": "Name", "data-attr-disabled": "$mutating"})
+				@Input("shortCode", "Short Code / Endpoint", true, templ.Attributes{"placeholder": "short-endpoint", "data-attr-disabled": "$mutating"})
 				<span class="col-span-full">
-					@Input("url", "URL", true, templ.Attributes{"placeholder": "https://your-long-url.com", "type": "url", "data-attr-disabled": "$creating"})
+					@Input("url", "URL", true, templ.Attributes{"placeholder": "https://your-long-url.com", "type": "url", "data-attr-disabled": "$mutating"})
 				</span>
 				<span class="col-span-full">
-					@TextArea("description", "Description", false, templ.Attributes{"placeholder": "An optional description for your URL...", "data-attr-disabled": "$creating"})
+					@TextArea("description", "Description", false, templ.Attributes{"placeholder": "An optional description for your URL...", "data-attr-disabled": "$mutating"})
 				</span>
 			</div>
-			<div role="alert" class="alert alert-error my-2" data-show="$linkModalError && !$creating">
-				@AlertCircle()
+			<div role="alert" class="alert alert-error my-2" data-show="$linkModalError && !$mutating">
+				@AlertCircleIcon()
 				<span data-text="$linkModalError"></span>
 			</div>
 			<div class="modal-action">
 				<div class="gap-4 flex flex-wrap justify-end">
 					<button
 						class="btn"
-						data-on-click="$name='';$shortCode='';$url='';$description='';$linkModalError='';$linkModalOpen=false"
+						data-on-click="$editLinkId='';$name='';$shortCode='';$url='';$description='';$linkModalError='';$linkModalOpen=false"
 					>Cancel</button>
 					<button
 						class="btn btn-primary px-8"
-						data-on-click={ fmt.Sprintf("@post('/api/create-link',{headers:{'x-csrf-token': '%s'}})", utils.GetCSRFTokenFromCtx(c)) }
-						data-indicator-creating
-						data-attr-disabled="$creating"
-					><span class="loading loading-spinner" data-show="$creating"></span>Create</button>
+						data-on-click={ fmt.Sprintf("@post('/api/upsert-link',{headers:{'x-csrf-token': '%s'}})", utils.GetCSRFTokenFromCtx(c)) }
+						data-indicator-mutating
+						data-attr-disabled="$mutating"
+					>
+						<span class="loading loading-spinner" data-show="$mutating"></span>
+						<span data-text="$editLinkId ? 'Edit' : 'Create'"></span>
+					</button>
 				</div>
 			</div>
 		</div>
 		<div
 			class="modal-backdrop"
-			data-on-click="$name='';$shortCode='';$url='';$description='';$linkModalError='';$linkModalOpen=false"
+			data-on-click="$editLinkId='';$name='';$shortCode='';$url='';$description='';$linkModalError='';$linkModalOpen=false"
 		></div>
 	</dialog>
 }

@@ -16,6 +16,7 @@ import (
 	"io"
 	"net/http"
 	"slices"
+	"strconv"
 	"time"
 )
 
@@ -134,32 +135,49 @@ func HandleLinkDetailsPage(c echo.Context) error {
 		countryClicksChart = createBarChart(countryClicks)
 	}
 
+	isNewLinkStr := c.QueryParam("isNewLink")
+	isNewLink, _ := strconv.ParseBool(isNewLinkStr)
+
 	indexTemplate := components.RootLayout(
 		"Link Details | slek.link - Track and Analyze Your Link's Performance",
 		"Dive into detailed analytics for your shortened link on slek.link. Monitor clicks, track user behavior, and gain insights to optimize your link's performance.",
-		linkDetailsBodyContent(c, link, humanizedMonthlyCount, humanizedTotalCount, clicksTrendChart, countryClicksChart),
+		linkDetailsBodyContent(c, link, humanizedMonthlyCount, humanizedTotalCount, isNewLink, clicksTrendChart, countryClicksChart),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return htmx.NewResponse().RenderTempl(c.Request().Context(), c.Response().Writer, indexTemplate)
 }
 
-templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount string, totalCount string, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
-	@components.Layout(c) {
+templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount string, totalCount string, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
+	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: "/dashboard"},
 			components.BreadcrumbItem{Label: "Link Details", Link: ""},
 		})
+		if showNewLinkBanner {
+			<div role="alert" class="alert alert-success">
+				@components.InfoIcon()
+				<p>
+					Here is your shortened URL::
+					<a class="link-hover link" href={ templ.SafeURL(fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode)) } target="_blank">
+						{ fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode) }
+					</a>
+				</p>
+			</div>
+		}
 		<div class="flex justify-between gap-4 flex-wrap p-1 items-center mb-4">
-			<h3 class="text-4xl display-font">{ link.Name }</h3>
+			@LinkDetailsBodyNameDesc(link)
 			<div class="flex justify-end gap-2">
-				<button class="btn btn-outline">
+				<button
+					class="btn btn-outline"
+					data-on-click={ fmt.Sprintf("$linkModalOpen=true;$editLinkId='%s';$name='%s';$shortCode='%s';$url='%s';$description='%s'", link.ID, link.Name, link.ShortCode, link.LongURL, link.Description) }
+				>
 					<span class="mb-0.5">
 						@components.EditIcon()
 					</span>
 					Edit
 				</button>
-				<button class="btn btn-error btn-outline">
+				<button class="btn btn-error btn-outline" data-on-click={ fmt.Sprintf("$deleteLinkId='%s'", link.ID) }>
 					<span class="mb-0.5">
 						@components.TrashIcon()
 					</span>
@@ -168,10 +186,7 @@ templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount stri
 			</div>
 		</div>
 		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content bg-opacity-10">
-			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
-				@statLinkSection("Original URL", link.LongURL, "")
-				@statLinkSection("Short URL", fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode), "")
-			</div>
+			@LinkDetailsBodyLinks(link)
 			@statSection("Total Clicks", totalCount, "Past 12 months")
 			@statSection("Clicks This Month", monthlyCount, "")
 			@statSection("Created", humanize.Time(link.CreatedAt), fmt.Sprintf("Created on %s", link.CreatedAt.Format(utils.LayoutHuman)))
@@ -187,7 +202,23 @@ templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount stri
 				</div>
 			}
 		</div>
+		@components.LinkModal(c)
+		@components.DeleteLinkConfirmModal(c, true)
 	}
+}
+
+templ LinkDetailsBodyNameDesc(link models.Link) {
+	<div class="flex flex-col gap-0.5 flex-1" id={ fmt.Sprintf("link-details-body-title-%s", link.ID) }>
+		<h3 class="text-4xl display-font">{ link.Name }</h3>
+		<h5 class="text-lg opacity-70">{ link.Description }</h5>
+	</div>
+}
+
+templ LinkDetailsBodyLinks(link models.Link) {
+	<div class="grid lg:grid-cols-2 gap-[1px] col-span-full" id={ fmt.Sprintf("link-details-body-links-%s", link.ID) }>
+		@statLinkSection("Original URL", link.LongURL, "")
+		@statLinkSection("Short URL", fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode), "")
+	</div>
 }
 
 templ statSection(title, value, desc string) {

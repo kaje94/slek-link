@@ -18,8 +18,18 @@ import (
 
 var validate *validator.Validate
 
-func CreateLinkAPIHandler(c echo.Context) error {
+func UpsertLinkAPIHandler(c echo.Context) error {
 	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
+	if err != nil {
+		return err
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	db, err := utils.GetDbFromCtx(c)
 	if err != nil {
 		return err
 	}
@@ -29,6 +39,7 @@ func CreateLinkAPIHandler(c echo.Context) error {
 		ShortCode   string `json:"shortCode"`
 		URL         string `json:"url"`
 		Description string `json:"description"`
+		EditLinkId  string `json:"editLinkId"`
 	}
 
 	if err := c.Bind(&reqBody); err != nil {
@@ -38,34 +49,72 @@ func CreateLinkAPIHandler(c echo.Context) error {
 	sse := datastar.NewSSE(c.Response().Writer, c.Request())
 	sse.MarshalAndMergeSignals(map[string]any{"linkModalError": ""})
 
-	newLink := models.Link{
-		ID:          ulid.Make().String(),
-		Name:        reqBody.Name,
-		ShortCode:   reqBody.ShortCode,
-		LongURL:     reqBody.URL,
-		UserID:      &userInfo.ID,
-		Description: reqBody.Description,
-		Status:      models.ACTIVE,
-	}
+	if reqBody.EditLinkId != "" {
+		item, err := utils.GetLinkOfUser(compat, db, userInfo.ID, reqBody.EditLinkId)
+		if err != nil {
+			return err
+		}
 
-	if err = validate.Struct(newLink); err != nil {
-		sse.MarshalAndMergeSignals(map[string]any{"linkModalError": FormatValidationErrors(err, newLink)})
-		return c.String(http.StatusBadRequest, "bad request")
-	}
+		if item.ID == "" {
+			return c.String(http.StatusBadRequest, "bad request")
+		}
+		item.Name = reqBody.Name
+		item.ShortCode = reqBody.ShortCode
+		item.LongURL = reqBody.URL
+		item.Description = reqBody.Description
 
-	db, err := utils.GetDbFromCtx(c)
-	if err != nil {
-		return err
-	}
+		if err = validate.Struct(item); err != nil {
+			sse.MarshalAndMergeSignals(map[string]any{"linkModalError": FormatValidationErrors(err, item)})
+			return c.String(http.StatusBadRequest, "bad request")
+		}
 
-	if err = utils.CreateLink(db, newLink); err == nil {
-		sse.Redirect(fmt.Sprintf("/dashboard/%s", newLink.ID))
-	} else if strings.Contains(err.Error(), "UNIQUE constraint failed: links.short_code") {
-		sse.MarshalAndMergeSignals(map[string]any{"linkModalError": "Short Code already exists. Try a different one."})
-		return c.String(http.StatusBadRequest, "Short code already exists")
+		err = utils.UpdateLink(compat, db, item)
+		if err != nil {
+			if strings.Contains(err.Error(), "UNIQUE constraint failed: links.short_code") {
+				sse.MarshalAndMergeSignals(map[string]any{"linkModalError": "Short Code already exists. Try a different one."})
+				return c.String(http.StatusBadRequest, "Short code already exists")
+			} else {
+				sse.MarshalAndMergeSignals(map[string]any{"linkModalError": err.Error()})
+				return c.String(http.StatusInternalServerError, "Failed to Create Link")
+			}
+		}
+
+		sse.MarshalAndMergeSignals(map[string]any{
+			"linkModalOpen": false,
+			"name":          "",
+			"shortCode":     "",
+			"url":           "",
+			"description":   "",
+			"editLinkId":    "",
+		})
+		sse.MergeFragmentTempl(pages.DashboardItem(item), datastar.WithSelectorID(fmt.Sprintf("link-item-%s", reqBody.EditLinkId)))
+		sse.MergeFragmentTempl(pages.LinkDetailsBodyNameDesc(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-title-%s", item.ID)))
+		sse.MergeFragmentTempl(pages.LinkDetailsBodyLinks(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-links-%s", item.ID)))
 	} else {
-		sse.MarshalAndMergeSignals(map[string]any{"linkModalError": err.Error()})
-		return c.String(http.StatusInternalServerError, "Failed to Create Link")
+		newLink := models.Link{
+			ID:          ulid.Make().String(),
+			Name:        reqBody.Name,
+			ShortCode:   reqBody.ShortCode,
+			LongURL:     reqBody.URL,
+			UserID:      &userInfo.ID,
+			Description: reqBody.Description,
+			Status:      models.ACTIVE,
+		}
+
+		if err = validate.Struct(newLink); err != nil {
+			sse.MarshalAndMergeSignals(map[string]any{"linkModalError": FormatValidationErrors(err, newLink)})
+			return c.String(http.StatusBadRequest, "bad request")
+		}
+
+		if err = utils.CreateLink(db, newLink); err == nil {
+			sse.Redirect(fmt.Sprintf("/dashboard/%s?isNewLink=true", newLink.ID))
+		} else if strings.Contains(err.Error(), "UNIQUE constraint failed: links.short_code") {
+			sse.MarshalAndMergeSignals(map[string]any{"linkModalError": "Short Code already exists. Try a different one."})
+			return c.String(http.StatusBadRequest, "Short code already exists")
+		} else {
+			sse.MarshalAndMergeSignals(map[string]any{"linkModalError": err.Error()})
+			return c.String(http.StatusInternalServerError, "Failed to Create Link")
+		}
 	}
 
 	return nil
@@ -114,6 +163,11 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 			)
 		}
 		sse.MarshalAndMergeSignals(map[string]any{"deleteLinkId": ""})
+
+		redirectToDashboard := c.QueryParam("redirectToDashboard")
+		if redirectToDashboard != "" {
+			sse.Redirect("/dashboard")
+		}
 	}
 
 	return nil

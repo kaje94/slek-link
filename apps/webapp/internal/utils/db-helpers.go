@@ -178,3 +178,13 @@ func GetCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId string) (
 
 	return countryClicks, nil
 }
+
+func UpdateLink(compat valkeycompat.Cmdable, db *gorm.DB, link models.Link) error {
+	result := db.Save(&link)
+	if result.Error == nil {
+		CreateUserLinkCache(compat, *link.UserID, link.ID, link)
+		CreateSlugCache(compat, link.ShortCode, link)
+		DeleteUserLinksCache(compat, *link.UserID)
+	}
+	return result.Error
+}
