@@ -1,4 +1,4 @@
-import { Datastar } from "@starfederation/datastar/dist/";
+import { load, apply } from "@starfederation/datastar/dist/";
 // Refer following links for officeial plugins
 // https://data-star.dev/bundler
 // https://github.com/starfederation/datastar/blob/main/library/src/bundles/datastar.ts
@@ -23,7 +23,7 @@ import { On } from "@starfederation/datastar/dist/plugins/official/dom/attribute
 import { Ref } from "@starfederation/datastar/dist/plugins/official/dom/attributes/ref";
 import { Text } from "@starfederation/datastar/dist/plugins/official/dom/attributes/text";
 
-Datastar.load(
+load(
   GET,
   DELETE,
   PATCH,
@@ -46,7 +46,7 @@ Datastar.load(
   Text
 );
 
-Datastar.apply(document.body);
+apply(document.body);
 
 // store image cache in browser local storage
 function fetchAndCacheImage(img, src, fallbackSrc) {
