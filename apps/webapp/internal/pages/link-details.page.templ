@@ -158,7 +158,7 @@ templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount stri
 			<div role="alert" class="alert alert-success">
 				@components.InfoIcon()
 				<p>
-					Here is your shortened URL::
+					Your link has been shortened. To share, use:
 					<a class="link-hover link" href={ templ.SafeURL(fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode)) } target="_blank">
 						{ fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode) }
 					</a>
@@ -202,7 +202,7 @@ templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount stri
 				</div>
 			}
 		</div>
-		@components.LinkModal(c)
+		@components.LinkModal(c, true)
 		@components.DeleteLinkConfirmModal(c, true)
 	}
 }

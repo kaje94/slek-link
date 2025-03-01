@@ -87,9 +87,14 @@ func UpsertLinkAPIHandler(c echo.Context) error {
 			"description":   "",
 			"editLinkId":    "",
 		})
-		sse.MergeFragmentTempl(pages.DashboardItem(item), datastar.WithSelectorID(fmt.Sprintf("link-item-%s", reqBody.EditLinkId)))
-		sse.MergeFragmentTempl(pages.LinkDetailsBodyNameDesc(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-title-%s", item.ID)))
-		sse.MergeFragmentTempl(pages.LinkDetailsBodyLinks(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-links-%s", item.ID)))
+
+		isInDetailsPage := c.QueryParam("isInDetailsPage")
+		if isInDetailsPage != "" {
+			sse.MergeFragmentTempl(pages.LinkDetailsBodyNameDesc(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-title-%s", item.ID)))
+			sse.MergeFragmentTempl(pages.LinkDetailsBodyLinks(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-links-%s", item.ID)))
+		} else {
+			sse.MergeFragmentTempl(pages.DashboardItem(item), datastar.WithSelectorID(fmt.Sprintf("link-item-%s", reqBody.EditLinkId)))
+		}
 	} else {
 		newLink := models.Link{
 			ID:          ulid.Make().String(),
@@ -152,21 +157,21 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 	sse := datastar.NewSSE(c.Response().Writer, c.Request())
 
 	if err := utils.DeleteLinkOfUser(compat, db, reqBody.LinkId, userInfo.ID); err == nil {
-		if len(links) > 1 {
-			sse.RemoveFragments(fmt.Sprintf("#link-item-%s", reqBody.LinkId))
-		} else {
-			// Show empty screen if there are no links left
-			sse.MergeFragmentTempl(
-				pages.DashboardEmpty(),
-				datastar.WithSelectorID("dashboard-content-wrap"),
-				datastar.WithMergeMode(datastar.FragmentMergeModeInner),
-			)
-		}
-		sse.MarshalAndMergeSignals(map[string]any{"deleteLinkId": ""})
-
 		redirectToDashboard := c.QueryParam("redirectToDashboard")
 		if redirectToDashboard != "" {
 			sse.Redirect("/dashboard")
+		} else {
+			if len(links) > 1 {
+				sse.RemoveFragments(fmt.Sprintf("#link-item-%s", reqBody.LinkId))
+			} else {
+				// Show empty screen if there are no links left
+				sse.MergeFragmentTempl(
+					pages.DashboardEmpty(),
+					datastar.WithSelectorID("dashboard-content-wrap"),
+					datastar.WithMergeMode(datastar.FragmentMergeModeInner),
+				)
+			}
+			sse.MarshalAndMergeSignals(map[string]any{"deleteLinkId": ""})
 		}
 	}
 

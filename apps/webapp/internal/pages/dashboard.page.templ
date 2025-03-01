@@ -57,7 +57,7 @@ templ dashboardBodyContent(c echo.Context, links []models.Link) {
 				@DashboardWithContent(links)
 			}
 		</div>
-		@components.LinkModal(c)
+		@components.LinkModal(c, false)
 		@components.DeleteLinkConfirmModal(c, false)
 	}
 }
