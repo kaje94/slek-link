@@ -1,0 +1,4 @@
+Sitemap: https://slek.link/sitemap.xml
+User-agent: *
+Disallow: /images/landing-bg-pattern.svg
+Disallow: /images/default-user.svg

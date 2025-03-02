@@ -7,7 +7,6 @@ illustrations: https://illustrationkit.com/illustrations/halo
 # TODO:
 
 add github related files (contribute.md, etc)
-add sitemap
 add title property or daisyui tooltip to all links and buttons
 add open graph tags with banner image
 add Prometheus(with GORM to collect db stats)

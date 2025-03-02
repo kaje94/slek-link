@@ -12,6 +12,16 @@ templ RootLayout(title string, description string, bodyContent templ.Component) 
 			<title>{ title }</title>
 			<meta name="keywords" content="URL shortener, free link shortener, custom links, link analytics, link tracking"/>
 			<meta name="description" content={ description }/>
+			<meta property="og:type" content="website"/>
+			<meta property="og:title" content={ title }/>
+			<meta property="og:description" content={ description }/>
+			<meta property="og:image" content="/images/banner.jpg"/>
+			<meta property="og:image:width" content="1200"/>
+			<meta property="og:image:height" content="630"/>
+			<meta property="og:image:alt" content="A banner image for slek.link"/>
+			<meta property="og:url" content="https://slek.link"/>
+			<meta property="og:locale" content="en_US"/>
+			<meta property="og:site_name" content="slek.link"/>
 			<link rel="manifest" href="/manifest.webmanifest"/>
 			<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 			<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
