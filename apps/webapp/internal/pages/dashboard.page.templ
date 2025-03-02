@@ -128,7 +128,7 @@ templ DashboardWithContent(c echo.Context, links []models.Link) {
 }
 
 templ DashboardItems(links []models.Link) {
-	<div class="bg-base-content bg-opacity-10 flex flex-col gap-[1px] my-2" id="dashboard-items">
+	<div class="bg-base-content/10 flex flex-col gap-[1px] my-2" id="dashboard-items">
 		<div class="md:grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 font-extralight bg-base-100 hidden">
 			<div>Name</div>
 			<div>Created</div>

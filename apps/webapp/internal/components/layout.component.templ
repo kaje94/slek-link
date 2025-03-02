@@ -29,6 +29,8 @@ templ RootLayout(title string, description string, bodyContent templ.Component) 
 			<link rel="icon" href="/favicon.webp" type="image/webp"/>
 			<link rel="preload" href="/dist/styles.css" as="style"/>
 			<link rel="stylesheet" href="/dist/styles.css"/>
+			<link rel="preload" as="font" type="font/woff2" href="/fonts/josefin-sans-v32-latin.woff2" crossorigin/>
+			<link rel="preload" as="font" type="font/woff2" href="/fonts/ubuntu-v20-latin-700.woff2" crossorigin/>
 		</head>
 		<body>
 			@bodyContent

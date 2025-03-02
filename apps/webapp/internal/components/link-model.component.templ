@@ -16,7 +16,7 @@ templ LinkModal(c echo.Context, isInDetailsPage bool) {
 	<dialog class="modal" data-class="{'modal-open': $linkModalOpen}">
 		<div class="modal-box w-11/12 max-w-3xl">
 			<h3 class="font-bold text-lg" data-text="$editLinkId ? 'Edit Link Details' : 'New Link Details'"></h3>
-			<div class="py-4 grid md:grid-cols-2 gap-y-2 md:gap-y-1 gap-x-4">
+			<div class="py-4 grid md:grid-cols-2 gap-y-2 md:gap-y-3 gap-x-4">
 				@Input("name", "Name", true, templ.Attributes{"placeholder": "Name", "data-attr-disabled": "$mutating"})
 				@Input("shortCode", "Short Code / Endpoint", true, templ.Attributes{"placeholder": "short-endpoint", "data-attr-disabled": "$mutating"})
 				<span class="col-span-full">

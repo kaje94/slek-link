@@ -28,13 +28,13 @@ templ pageNotFoundBodyContent(c echo.Context) {
 					<h3 class="">Looks like you’re lost.</h3>
 					<h3 class="">Let’s get you back on track!</h3>
 				</div>
-				<div class="flex gap-2 flex-col sm:flex-row mt-2">
-					if userInfo.Email != "" {
-						<a class="btn btn-primary btn-wide" href="/dashboard">Back to Dashboard</a>
-						<div class="divider text-xs divider-vertical opacity-50">OR</div>
-					}
-					<a class="btn btn-secondary btn-wide" href="/">Go back Home</a>
-				</div>
+			</div>
+			<div class="flex gap-2 flex-col sm:flex-row mt-6 sm:w-full justify-center">
+				if userInfo.Email != "" {
+					<a class="btn btn-primary btn-wide" href="/dashboard">Back to Dashboard</a>
+					<div class="divider text-xs divider-vertical opacity-50">OR</div>
+				}
+				<a class="btn btn-secondary btn-wide" href="/">Go back Home</a>
 			</div>
 		</div>
 	}

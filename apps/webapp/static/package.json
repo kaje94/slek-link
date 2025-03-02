@@ -2,22 +2,22 @@
   "name": "slek-link-webapp",
   "version": "1.0.0",
   "scripts": {
-    "build": "parcel build ./scripts.js ./styles.scss --dist-dir ./public/dist",
-    "dev": "parcel build ./scripts.js ./styles.scss --dist-dir ./public/dist --no-optimize --no-cache",
-    "watch": "parcel watch ./scripts.js ./styles.scss --dist-dir ./public/dist  --watch-dir ../internal --no-cache"
+    "build-js": "bun build ./scripts.js --outdir ./public/dist --minify",
+    "build-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css --minify",
+    "build": "bun run build-js && bun run build-css",
+    "dev-js": "bun build ./scripts.js --outdir ./public/dist",
+    "dev-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css",
+    "dev": "bun run dev-js && bun run dev-css",
+    "watch-js": "bun build ./scripts.js --outdir ./public/dist --watch",
+    "watch-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css --watch",
+    "watch": "concurrently 'bun run watch-js' 'bun run watch-css'"
   },
   "dependencies": {
-    "tailwindcss": "^3.4.15",
-    "daisyui": "^4.12.14",
+    "tailwindcss": "4.0.8",
+    "daisyui": "5.0.0",
     "@starfederation/datastar": "1.0.0-beta.8"
   },
   "devDependencies": {
-    "parcel": "^2.13.3",
-    "@parcel/transformer-sass": "^2.13.3",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49"
-  },
-  "trustedDependencies": [
-    "@parcel/watcher"
-  ]
+    "concurrently": "^9.1.2"
+  }
 }

@@ -188,7 +188,7 @@ templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount stri
 				</button>
 			</div>
 		</div>
-		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content bg-opacity-10">
+		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content/10">
 			@LinkDetailsBodyLinks(link)
 			@statSection("Total Clicks", totalCount, "Past 12 months")
 			@statSection("Clicks This Month", monthlyCount, "")
