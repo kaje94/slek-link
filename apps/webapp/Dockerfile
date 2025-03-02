@@ -16,14 +16,10 @@ USER root:root
 
 # Copy core files
 COPY . .
-RUN devbox run -- echo "Installed Packages."
-RUN devbox run go mod download
-
 
 # Build go app
 ENV CGO_ENABLED 0
 ENV GOOS linux
-apt-get install lib32stdc++6
 RUN devbox run task webapp:build
 
 ###############
