@@ -1,8 +1,24 @@
 package components
 
-import "github.com/labstack/echo/v4"
+import (
+	"github.com/labstack/echo/v4"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+)
+
+var (
+	jsCache  string
+	cssCache string
+	cacheMu  sync.RWMutex
+)
 
 templ RootLayout(title string, description string, bodyContent templ.Component) {
+	{{ jsFile, cssFile := getDistFiles() }}
+	{{ jsDistPath := "/dist/" + jsFile }}
+	{{ cssDistPath := "/dist/" + cssFile }}
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -27,14 +43,14 @@ templ RootLayout(title string, description string, bodyContent templ.Component) 
 			<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
 			<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 			<link rel="icon" href="/favicon.webp" type="image/webp"/>
-			<link rel="preload" href="/dist/styles.css" as="style"/>
-			<link rel="stylesheet" href="/dist/styles.css"/>
+			<link rel="preload" href={ cssDistPath } as="style"/>
+			<link rel="stylesheet" href={ cssDistPath }/>
 			<link rel="preload" as="font" type="font/woff2" href="/fonts/josefin-sans-v32-latin.woff2" crossorigin/>
 			<link rel="preload" as="font" type="font/woff2" href="/fonts/ubuntu-v20-latin-700.woff2" crossorigin/>
 		</head>
 		<body>
 			@bodyContent
-			<script src="/dist/scripts.js" defer></script>
+			<script src={ jsDistPath } defer></script>
 		</body>
 	</html>
 }
@@ -75,4 +91,50 @@ templ LayoutWithSignals(c echo.Context, signals string) {
 	@mainLayout(c, signals) {
 		{ children... }
 	}
+}
+
+func getDistFiles() (string, string) {
+	cacheMu.RLock()
+	js, css := jsCache, cssCache
+	cacheMu.RUnlock()
+
+	if js != "" && css != "" {
+		return js, css
+	}
+
+	cacheMu.Lock()
+	defer cacheMu.Unlock()
+
+	if jsCache == "" {
+		jsCache = resolveFile("scripts.js", "scripts-", ".js")
+	}
+
+	if cssCache == "" {
+		cssCache = resolveFile("styles.css", "styles-", ".css")
+	}
+
+	return jsCache, cssCache
+}
+
+func resolveFile(defaultName, prefix, suffix string) string {
+	if _, err := os.Stat(filepath.Join("static/public/dist", defaultName)); err == nil {
+		return defaultName
+	}
+	return findFirstMatchingFile("static/public/dist", prefix, suffix)
+}
+
+func findFirstMatchingFile(dir, prefix, suffix string) string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		log.Println("Error reading dist directory:", err)
+		return ""
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasPrefix(entry.Name(), prefix) && strings.HasSuffix(entry.Name(), suffix) {
+			return entry.Name()
+		}
+	}
+
+	return ""
 }

@@ -2,22 +2,27 @@
   "name": "slek-link-webapp",
   "version": "1.0.0",
   "scripts": {
-    "build-js": "bun build ./scripts.js --outdir ./public/dist --minify",
-    "build-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css --minify",
-    "build": "bun run build-js && bun run build-css",
-    "dev-js": "bun build ./scripts.js --outdir ./public/dist",
-    "dev-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css",
+    "generate-staticfile-hash": "bun run tsx generate-staticfile-hash.ts",
+    "build-js": "JS_FILENAME=$(bun run generate-staticfile-hash js) && bun build ./scripts.ts --outfile ./public/dist/$JS_FILENAME --minify",
+    "build-css": "CSS_FILENAME=$(bun run generate-staticfile-hash css) && npx @tailwindcss/cli -i ./app.css -o ./public/dist/$CSS_FILENAME --minify",
+    "build": "rimraf ./public/dist && bun run build-js && bun run build-css",
+    "dev-js": "bun build ./scripts.ts --outdir ./public/dist",
+    "dev-css": "bunx @tailwindcss/cli -i ./app.css -o ./public/dist/styles.css",
     "dev": "bun run dev-js && bun run dev-css",
-    "watch-js": "bun build ./scripts.js --outdir ./public/dist --watch",
-    "watch-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css --watch",
+    "watch-js": "bun build ./scripts.ts --outdir ./public/dist --watch",
+    "watch-css": "bunx @tailwindcss/cli -i ./app.css -o ./public/dist/styles.css --watch",
     "watch": "concurrently 'bun run watch-js' 'bun run watch-css'"
   },
   "dependencies": {
-    "tailwindcss": "4.0.8",
+    "tailwindcss": "4.0.9",
+    "@tailwindcss/cli": "4.0.9",
     "daisyui": "5.0.0",
-    "@starfederation/datastar": "1.0.0-beta.8"
+    "@starfederation/datastar": "1.0.0-beta.9"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.8.2",
+    "rimraf": "^6.0.1"
   }
 }

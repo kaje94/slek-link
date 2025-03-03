@@ -1,4 +1,4 @@
-import { load, apply } from "@starfederation/datastar/dist/";
+import * as datastar from "@starfederation/datastar/dist/";
 // Refer following links for officeial plugins
 // https://data-star.dev/bundler
 // https://github.com/starfederation/datastar/blob/main/library/src/bundles/datastar.ts
@@ -23,7 +23,7 @@ import { On } from "@starfederation/datastar/dist/plugins/official/dom/attribute
 import { Ref } from "@starfederation/datastar/dist/plugins/official/dom/attributes/ref";
 import { Text } from "@starfederation/datastar/dist/plugins/official/dom/attributes/text";
 
-load(
+datastar.load(
   GET,
   DELETE,
   PATCH,
@@ -46,10 +46,14 @@ load(
   Text
 );
 
-apply(document.body);
+datastar.apply();
 
 // store image cache in browser local storage
-function fetchAndCacheImage(img, src, fallbackSrc) {
+function fetchAndCacheImage(
+  img: HTMLImageElement,
+  src: string,
+  fallbackSrc?: string
+): void {
   fetch(src)
     .then((response) => {
       if (!response.ok) {
@@ -60,7 +64,7 @@ function fetchAndCacheImage(img, src, fallbackSrc) {
     .then((blob) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const dataURL = reader.result;
+        const dataURL = reader.result as string;
         localStorage.setItem(src, dataURL); // Cache the image
         img.src = dataURL; // Set the image source
       };
@@ -78,14 +82,17 @@ function fetchAndCacheImage(img, src, fallbackSrc) {
 
 // cache images if there is a data-src property
 document.addEventListener("DOMContentLoaded", () => {
-  const images = document.querySelectorAll("img[data-src]");
+  const images = document.querySelectorAll(
+    "img[data-src]"
+  ) as NodeListOf<HTMLImageElement>;
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const img = entry.target;
-        const src = img.getAttribute("data-src");
-        const fallbackSrc = img.getAttribute("data-fallback-src");
-
+        const img = entry.target as HTMLImageElement;
+        const src = img.getAttribute("data-src") as string;
+        const fallbackSrc = img.getAttribute("data-fallback-src") as
+          | string
+          | undefined;
         // Check if the image is already cached
         const cachedImage = localStorage.getItem(src);
         if (cachedImage) {
@@ -94,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
           // Fetch and cache the image
           fetchAndCacheImage(img, src, fallbackSrc);
         }
-
         observer.unobserve(img); // Stop observing once the image is loaded
       }
     });
