@@ -22,6 +22,7 @@ import { Class } from "@starfederation/datastar/dist/plugins/official/dom/attrib
 import { On } from "@starfederation/datastar/dist/plugins/official/dom/attributes/on";
 import { Ref } from "@starfederation/datastar/dist/plugins/official/dom/attributes/ref";
 import { Text } from "@starfederation/datastar/dist/plugins/official/dom/attributes/text";
+import "instant.page/instantpage";
 
 datastar.load(
   GET,
@@ -46,6 +47,7 @@ datastar.load(
   Text
 );
 
+// Initialize Datastar
 datastar.apply();
 
 // store image cache in browser local storage
