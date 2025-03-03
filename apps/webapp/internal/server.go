@@ -142,7 +142,7 @@ func cacheControlMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			strings.HasSuffix(path, ".webp") ||
 			strings.HasSuffix(path, ".ico") ||
 			strings.HasSuffix(path, ".svg") {
-			c.Response().Header().Set("Cache-Control", "public, max-age=86400") // 1 day
+			c.Response().Header().Set("Cache-Control", "public, max-age=604800") // 1 week
 		}
 
 		return nil
