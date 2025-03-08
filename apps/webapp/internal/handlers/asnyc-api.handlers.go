@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/kaje94/slek-link/internal/models"
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/valkey-io/valkey-go/valkeycompat"
 	"gorm.io/gorm"
@@ -35,7 +35,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 		return err
 	}
 
-	var currentMonth models.LinkMonthlyClicks
+	var currentMonth gormModels.LinkMonthlyClicks
 	for _, item := range monthlyClicks {
 		if item.Month == int(month) && item.Year == year {
 			currentMonth = item
@@ -49,7 +49,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 		if month < 10 {
 			monthStr = fmt.Sprintf("0%d", month)
 		}
-		currentMonth = models.LinkMonthlyClicks{
+		currentMonth = gormModels.LinkMonthlyClicks{
 			LinkID: lm.LinkId,
 			Year:   year,
 			Month:  int(month),
@@ -78,7 +78,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 			return err
 		}
 
-		var matchingCountry models.LinkCountryClicks
+		var matchingCountry gormModels.LinkCountryClicks
 		for _, item := range countryClicks {
 			if item.CountryCode == countryCode {
 				matchingCountry = item
@@ -88,7 +88,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 
 		if matchingCountry.ID == "" {
 			// create new entry
-			countryClicks := models.LinkCountryClicks{
+			countryClicks := gormModels.LinkCountryClicks{
 				ID:          fmt.Sprintf("%s-%s", lm.LinkId, countryCode),
 				LinkID:      lm.LinkId,
 				CountryCode: countryCode,

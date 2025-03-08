@@ -5,18 +5,38 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
-
-	"github.com/kaje94/slek-link/internal/models"
 )
 
-var Config = models.RootConfig{
+type rootConfig struct {
+	EnvName         string
+	IsProd          bool
+	MaxLinksPerUser int
+	WebAppConfig    webAppConfig
+	Valkey          valkeyConfig
+	AmqpUrl         string
+	PostgreSqlDsn   string
+}
+
+type webAppConfig struct {
+	Url                string
+	Port               int
+	GoogleClientId     string
+	GoogleClientSecret string
+	CookieSecret       string
+}
+
+type valkeyConfig struct {
+	Url string
+}
+
+var Config = rootConfig{
 	EnvName:         getEnvValWithFallback("ENV_NAME", "development"),
 	IsProd:          getEnvValWithFallback("ENV_NAME", "development") == "production",
 	MaxLinksPerUser: getIntEnvValWithFallback("MAX_LINKS_PER_USER", 10),
-	Valkey: models.ValkeyConfig{
+	Valkey: valkeyConfig{
 		Url: getEnvValWithFallback("VALKEY_HOST", ""),
 	},
-	WebAppConfig: models.WebAppConfig{
+	WebAppConfig: webAppConfig{
 		Port:               getIntEnvValWithFallback("WEBAPP_PORT", 8080),
 		Url:                getEnvValWithFallback("WEBAPP_URL", "http://localhost:8080"),
 		GoogleClientId:     getEnvValWithFallback("GOOGLE_AUTH_CLIENT_ID", ""),

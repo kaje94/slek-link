@@ -7,9 +7,9 @@ import (
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/go-echarts/go-echarts/v2/types"
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/components"
 	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 	"io"
@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func createBarChart(countryClicks []models.LinkCountryClicks) *charts.Bar {
+func createBarChart(countryClicks []gormModels.LinkCountryClicks) *charts.Bar {
 	bar := charts.NewBar()
 	bar.SetGlobalOptions(
 		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(false)}),
@@ -38,7 +38,7 @@ func createBarChart(countryClicks []models.LinkCountryClicks) *charts.Bar {
 	return bar
 }
 
-func createClicksTrendChart(monthlyClicks []models.LinkMonthlyClicks) *charts.Line {
+func createClicksTrendChart(monthlyClicks []gormModels.LinkMonthlyClicks) *charts.Line {
 	lineChart := charts.NewLine()
 
 	slices.Reverse(monthlyClicks)
@@ -109,7 +109,7 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	}
 
 	totalClicks := 0
-	var currentMonth models.LinkMonthlyClicks
+	var currentMonth gormModels.LinkMonthlyClicks
 	for _, item := range monthlyClicks {
 		if item.Month == int(time.Now().Month()) && item.Year == time.Now().Year() {
 			currentMonth = item
@@ -150,7 +150,7 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount string, totalCount string, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
+templ linkDetailsBodyContent(c echo.Context, link gormModels.Link, monthlyCount string, totalCount string, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
 	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
@@ -210,14 +210,14 @@ templ linkDetailsBodyContent(c echo.Context, link models.Link, monthlyCount stri
 	}
 }
 
-templ LinkDetailsBodyNameDesc(link models.Link) {
+templ LinkDetailsBodyNameDesc(link gormModels.Link) {
 	<div class="flex flex-col gap-0.5 flex-1" id={ fmt.Sprintf("link-details-body-title-%s", link.ID) }>
 		<h3 class="text-4xl display-font">{ link.Name }</h3>
 		<h5 class="text-lg opacity-70">{ link.Description }</h5>
 	</div>
 }
 
-templ LinkDetailsBodyLinks(link models.Link) {
+templ LinkDetailsBodyLinks(link gormModels.Link) {
 	<div class="grid lg:grid-cols-2 gap-[1px] col-span-full" id={ fmt.Sprintf("link-details-body-links-%s", link.ID) }>
 		@statLinkSection("Original URL", link.LongURL, "")
 		@statLinkSection("Short URL", fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode), "")

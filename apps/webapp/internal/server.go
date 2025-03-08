@@ -16,9 +16,9 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	watermillMiddleware "github.com/ThreeDotsLabs/watermill/message/router/middleware"
 	"github.com/gorilla/sessions"
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/config"
 	"github.com/kaje94/slek-link/internal/handlers"
-	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/pages"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -175,7 +175,7 @@ func initDb() error {
 
 	if !config.Config.IsProd {
 		// Perform auto migrate only if it's not production env
-		err = db.AutoMigrate(&models.User{}, &models.Link{}, &models.LinkMonthlyClicks{}, &models.LinkCountryClicks{})
+		err = db.AutoMigrate(&gormModels.User{}, &gormModels.Link{}, &gormModels.LinkMonthlyClicks{}, &gormModels.LinkCountryClicks{})
 		if err != nil {
 			log.Fatalf("Failed to migrate database: %v", err)
 		}

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/models"
 	"github.com/valkey-io/valkey-go/valkeycompat"
 )
 
@@ -94,27 +94,27 @@ func getCacheKeyForDashboardSearch(userId string, keyword string) string {
 	return fmt.Sprintf("%s-%s", getCacheKeyForDashboardSearchPrefix(userId), keyword)
 }
 
-func CreateCountryClicksCache(compat valkeycompat.Cmdable, linkId string, item []models.LinkCountryClicks) error {
+func CreateCountryClicksCache(compat valkeycompat.Cmdable, linkId string, item []gormModels.LinkCountryClicks) error {
 	return saveCache(compat, getCacheKeyForCountryClicks(linkId), item)
 }
 
-func GetCountryClicksCache(compat valkeycompat.Cmdable, linkId string, item *[]models.LinkCountryClicks) error {
+func GetCountryClicksCache(compat valkeycompat.Cmdable, linkId string, item *[]gormModels.LinkCountryClicks) error {
 	return getCache(compat, getCacheKeyForCountryClicks(linkId), &item)
 }
 
-func CreateUserLinksCache(compat valkeycompat.Cmdable, userId string, links []models.Link) error {
+func CreateUserLinksCache(compat valkeycompat.Cmdable, userId string, links []gormModels.Link) error {
 	return saveCache(compat, getCacheKeyForUserLinks(userId), links)
 }
 
-func GetUserLinksCache(compat valkeycompat.Cmdable, userId string, links *[]models.Link) error {
+func GetUserLinksCache(compat valkeycompat.Cmdable, userId string, links *[]gormModels.Link) error {
 	return getCache(compat, getCacheKeyForUserLinks(userId), &links)
 }
 
-func CreateMonthlyClicksCache(compat valkeycompat.Cmdable, linkId string, links []models.LinkMonthlyClicks) error {
+func CreateMonthlyClicksCache(compat valkeycompat.Cmdable, linkId string, links []gormModels.LinkMonthlyClicks) error {
 	return saveCache(compat, getCacheKeyForMonthlyClicks(linkId), links)
 }
 
-func GetMonthlyClicksCache(compat valkeycompat.Cmdable, linkId string, monthlyClicks *[]models.LinkMonthlyClicks) error {
+func GetMonthlyClicksCache(compat valkeycompat.Cmdable, linkId string, monthlyClicks *[]gormModels.LinkMonthlyClicks) error {
 	return getCache(compat, getCacheKeyForMonthlyClicks(linkId), &monthlyClicks)
 }
 
@@ -126,11 +126,11 @@ func DeleteUserLinksCache(compat valkeycompat.Cmdable, userId string) error {
 	return deleteCache(compat, getCacheKeyForUserLinks(userId))
 }
 
-func CreateUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId string, link models.Link) error {
+func CreateUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId string, link gormModels.Link) error {
 	return saveCache(compat, getCacheKeyForUserLink(userId, linkId), link)
 }
 
-func GetUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId string, links *models.Link) error {
+func GetUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId string, links *gormModels.Link) error {
 	return getCache(compat, getCacheKeyForUserLink(userId, linkId), &links)
 }
 
@@ -138,11 +138,11 @@ func DeleteUserLinkCache(compat valkeycompat.Cmdable, userId string, linkId stri
 	return deleteCache(compat, getCacheKeyForUserLink(userId, linkId))
 }
 
-func CreateSlugCache(compat valkeycompat.Cmdable, slug string, link models.Link) error {
+func CreateSlugCache(compat valkeycompat.Cmdable, slug string, link gormModels.Link) error {
 	return saveCache(compat, getCacheKeyForSlug(slug), link)
 }
 
-func GetSlugCache(compat valkeycompat.Cmdable, slug string, link *models.Link) error {
+func GetSlugCache(compat valkeycompat.Cmdable, slug string, link *gormModels.Link) error {
 	return getCache(compat, getCacheKeyForSlug(slug), &link)
 }
 
@@ -154,7 +154,7 @@ func DeleteCountryClicksCache(compat valkeycompat.Cmdable, linkId string) error 
 	return deleteCache(compat, getCacheKeyForCountryClicks(linkId))
 }
 
-func CreateDashboardSearchCache(compat valkeycompat.Cmdable, userId string, keyword string, items []models.Link) error {
+func CreateDashboardSearchCache(compat valkeycompat.Cmdable, userId string, keyword string, items []gormModels.Link) error {
 	cacheKeys := []string{}
 	getCache(compat, getCacheKeyForDashboardSearchKeys(userId), &cacheKeys)
 	exists := false
@@ -174,7 +174,7 @@ func CreateDashboardSearchCache(compat valkeycompat.Cmdable, userId string, keyw
 	return saveCache(compat, getCacheKeyForDashboardSearch(userId, keyword), items)
 }
 
-func GetDashboardSearchCache(compat valkeycompat.Cmdable, userId string, keyword string, links *[]models.Link) error {
+func GetDashboardSearchCache(compat valkeycompat.Cmdable, userId string, keyword string, links *[]gormModels.Link) error {
 	return getCache(compat, getCacheKeyForDashboardSearch(userId, keyword), &links)
 }
 

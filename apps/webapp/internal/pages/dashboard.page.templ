@@ -3,8 +3,8 @@ package pages
 import (
 	"fmt"
 	"github.com/dustin/go-humanize"
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/components"
-	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -43,7 +43,7 @@ func HandleDashboardsPage(c echo.Context) error {
 	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-templ dashboardBodyContent(c echo.Context, links []models.Link) {
+templ dashboardBodyContent(c echo.Context, links []gormModels.Link) {
 	{{ linkModalOpen := c.QueryParam("linkModalOpen") }}
 	{{ initialUrl := c.QueryParam("initialUrl") }}
 	@components.LayoutWithSignals(c, fmt.Sprintf("{ searchInput:'', linkModalOpen:%t, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'%s', description:'' }", linkModalOpen == "true", initialUrl)) {
@@ -104,7 +104,7 @@ templ listItemCol(label string, value string, index int) {
 	</div>
 }
 
-templ DashboardWithContent(c echo.Context, links []models.Link) {
+templ DashboardWithContent(c echo.Context, links []gormModels.Link) {
 	<div class="flex justify-between flex-col sm:flex-row-reverse gap-4">
 		<button class="btn btn-primary" data-on-click="$linkModalOpen=true">
 			Shorten new Link
@@ -127,7 +127,7 @@ templ DashboardWithContent(c echo.Context, links []models.Link) {
 	@DashboardItems(links)
 }
 
-templ DashboardItems(links []models.Link) {
+templ DashboardItems(links []gormModels.Link) {
 	<div class="bg-base-content/10 flex flex-col gap-[1px] my-2" id="dashboard-items">
 		<div class="md:grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 font-extralight bg-base-100 hidden">
 			<div>Name</div>
@@ -141,7 +141,7 @@ templ DashboardItems(links []models.Link) {
 	</div>
 }
 
-templ DashboardItem(item models.Link) {
+templ DashboardItem(item gormModels.Link) {
 	<a
 		href={ templ.SafeURL(fmt.Sprintf("/dashboard/%s", item.ID)) }
 		id={ fmt.Sprintf("link-item-%s", item.ID) }

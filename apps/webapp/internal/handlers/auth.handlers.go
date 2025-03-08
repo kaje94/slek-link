@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/sessions"
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
@@ -55,7 +55,7 @@ func HandleAuthCallback(c echo.Context) error {
 	redirectUrl := "/dashboard"
 	if googleOauthConfig.ClientID == "" || googleOauthConfig.ClientSecret == "" {
 		// if GoogleClientId or GoogleClientSecret is not available, redirect to /callback and login as a test user
-		userInfo := models.User{ID: "test-user", Name: "Test User", Email: "test-user@email.com"}
+		userInfo := gormModels.User{ID: "test-user", Name: "Test User", Email: "test-user@email.com"}
 
 		err := saveUser(c, userInfo)
 		if err != nil {
@@ -94,7 +94,7 @@ func HandleAuthCallback(c echo.Context) error {
 	}
 	defer resp.Body.Close()
 
-	userInfo := models.User{}
+	userInfo := gormModels.User{}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to parse user info")
 	}
@@ -120,12 +120,12 @@ func HandleAuthCallback(c echo.Context) error {
 }
 
 // Save user details to database
-func saveUser(c echo.Context, userInfo models.User) error {
+func saveUser(c echo.Context, userInfo gormModels.User) error {
 	db, err := utils.GetDbFromCtx(c)
 	if err != nil {
 		return err
 	}
 
-	res := db.Where(models.User{ID: userInfo.ID}).Attrs(userInfo).FirstOrCreate(&userInfo)
+	res := db.Where(gormModels.User{ID: userInfo.ID}).Attrs(userInfo).FirstOrCreate(&userInfo)
 	return res.Error
 }

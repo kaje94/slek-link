@@ -10,6 +10,9 @@ includes:
   asyncapi:
     taskfile: ./libs/asyncapi/Taskfile.yaml
     dir: ./libs/asyncapi
+  gorm:
+    taskfile: ./libs/gorm/Taskfile.yaml
+    dir: ./libs/gorm
 
 tasks:
   skaffold:run:

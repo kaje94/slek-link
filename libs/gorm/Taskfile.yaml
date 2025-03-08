@@ -1,0 +1,8 @@
+version: "3"
+output: "prefixed"
+tasks:
+  migrate:
+    desc: Perform DB schema migration
+    cmds:
+      - go run cmd/migrate.go
+  

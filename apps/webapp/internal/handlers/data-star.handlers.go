@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/models"
 	"github.com/kaje94/slek-link/internal/pages"
 	"github.com/kaje94/slek-link/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -107,14 +107,14 @@ func UpsertLinkAPIHandler(c echo.Context) error {
 			return c.String(http.StatusBadRequest, "maximum number of links reached")
 		}
 
-		newLink := models.Link{
+		newLink := gormModels.Link{
 			ID:          ulid.Make().String(),
 			Name:        reqBody.Name,
 			ShortCode:   reqBody.ShortCode,
 			LongURL:     reqBody.URL,
 			UserID:      &userInfo.ID,
 			Description: reqBody.Description,
-			Status:      models.ACTIVE,
+			Status:      gormModels.ACTIVE,
 		}
 
 		if err = validate.Struct(newLink); err != nil {
@@ -168,11 +168,11 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 	sse := datastar.NewSSE(c.Response().Writer, c.Request())
 
 	// Delete related monthly clicks entries
-	monthlyClickIds := []models.LinkMonthlyClicks{}
+	monthlyClickIds := []gormModels.LinkMonthlyClicks{}
 	monthlyClicks, _ := utils.GetLinksMonthlyClicks(compat, db, reqBody.LinkId)
 	for _, item := range monthlyClicks {
 		if item.ID != "" {
-			monthlyClickIds = append(monthlyClickIds, models.LinkMonthlyClicks{ID: item.ID})
+			monthlyClickIds = append(monthlyClickIds, gormModels.LinkMonthlyClicks{ID: item.ID})
 		}
 	}
 	if len(monthlyClickIds) > 0 {
@@ -180,11 +180,11 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 	}
 
 	// Delete related country clicks entries
-	countryClickIds := []models.LinkCountryClicks{}
+	countryClickIds := []gormModels.LinkCountryClicks{}
 	countryClicks, _ := utils.GetCountryClicks(compat, db, reqBody.LinkId)
 	for _, item := range countryClicks {
 		if item.ID != "" {
-			countryClickIds = append(countryClickIds, models.LinkCountryClicks{ID: item.ID})
+			countryClickIds = append(countryClickIds, gormModels.LinkCountryClicks{ID: item.ID})
 		}
 	}
 	if len(countryClicks) > 0 {

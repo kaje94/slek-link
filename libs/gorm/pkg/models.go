@@ -1,8 +1,6 @@
-package models
+package gormModels
 
-import (
-	"time"
-)
+import "time"
 
 type linkStatusType string
 

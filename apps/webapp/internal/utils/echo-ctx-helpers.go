@@ -7,8 +7,8 @@ import (
 	"net/url"
 
 	"github.com/gorilla/sessions"
+	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/models"
 	"github.com/labstack/echo/v4"
 	"github.com/valkey-io/valkey-go/valkeycompat"
 	"gorm.io/gorm"
@@ -33,10 +33,10 @@ func GetValkeyFromCtx(c echo.Context) (valkeycompat.Cmdable, error) {
 	return valkeycompatCmd, nil
 }
 
-func GetUserFromCtx(c echo.Context) (userInfo models.User) {
+func GetUserFromCtx(c echo.Context) (userInfo gormModels.User) {
 	session, ok := c.Get(string(SESSION_CONTEXT_KEY)).(*sessions.Session)
 	if !ok {
-		return models.User{}
+		return gormModels.User{}
 	}
 
 	if userInfoJSON, ok := session.Values["userInfo"].(string); ok {
@@ -53,7 +53,7 @@ func GetPathFromCtx(c echo.Context) string {
 	return c.Request().URL.Path
 }
 
-func GetUserFromCtxWithRedirect(c echo.Context) (userInfo models.User, err error) {
+func GetUserFromCtxWithRedirect(c echo.Context) (userInfo gormModels.User, err error) {
 	session, ok := c.Get(string(SESSION_CONTEXT_KEY)).(*sessions.Session)
 	originalURL := c.Request().URL.String()
 	loginWithOriginalUrl := "/login?originalURL=" + url.QueryEscape(originalURL)
