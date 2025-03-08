@@ -23,7 +23,7 @@ A fast, free, and easy-to-use URL shortener with built-in analytics for tracking
 - **Performance**: [Valkey](https://valkey.io/), [instant.page](https://instant.page/)
 - **Local Development**: [Devbox](https://www.jetpack.io/devbox/), [Taskfile](https://taskfile.dev/), [Process Compose](https://github.com/F1bonacc1/process-compose)
 - **Orchestration**: [Docker](https://www.docker.com/), [Kubernetes](https://kubernetes.io/), [Skaffold](https://skaffold.dev/), [Helm](https://helm.sh/)
-- **CI/CD**: [GitHub Actions](https://github.com/features/actions), [Dagger](https://dagger.io/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
+- **CI/CD**: [GitHub Actions](https://github.com/features/actions), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
 - **Other Resources**: [IllustrationKit](https://illustrationkit.com/illustrations/halo), [Feather Icons](https://feathericons.com/)
 
 ## Getting Started

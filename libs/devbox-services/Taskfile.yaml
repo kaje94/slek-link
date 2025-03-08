@@ -2,5 +2,5 @@ version: "3"
 output: "prefixed"
 tasks:
   start:
-    desc: Start all services(valkey,rabbitmq with management studio)
+    desc: Start all services(posgreSql,valkey,rabbitmq with management studio)
     cmd: devbox services up --process-compose-file ./libs/devbox-services/process-compose.yaml
