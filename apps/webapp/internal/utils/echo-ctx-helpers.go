@@ -58,7 +58,6 @@ func GetUserFromCtxWithRedirect(c echo.Context) (userInfo models.User, err error
 	originalURL := c.Request().URL.String()
 	loginWithOriginalUrl := "/login?originalURL=" + url.QueryEscape(originalURL)
 	if !ok {
-		// TODO: better to redirect towards a more meaningful page
 		err = c.Redirect(http.StatusTemporaryRedirect, loginWithOriginalUrl)
 		return
 	}

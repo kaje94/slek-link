@@ -7,6 +7,7 @@ type RootConfig struct {
 	WebAppConfig    WebAppConfig
 	Valkey          ValkeyConfig
 	AmqpUrl         string
+	PostgreSqlDsn   string
 }
 
 type WebAppConfig struct {

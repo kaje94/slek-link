@@ -15,7 +15,6 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	watermillMiddleware "github.com/ThreeDotsLabs/watermill/message/router/middleware"
-	"github.com/glebarez/sqlite"
 	"github.com/gorilla/sessions"
 	"github.com/kaje94/slek-link/internal/config"
 	"github.com/kaje94/slek-link/internal/handlers"
@@ -26,6 +25,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/valkey-io/valkey-go"
 	"github.com/valkey-io/valkey-go/valkeycompat"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -166,7 +166,7 @@ func sessionMiddleware(store sessions.Store) echo.MiddlewareFunc {
 
 func initDb() error {
 	var err error
-	db, err = gorm.Open(sqlite.Open("local.db"), &gorm.Config{
+	db, err = gorm.Open(postgres.Open(config.Config.PostgreSqlDsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
@@ -229,7 +229,24 @@ func setupAmqp() {
 		log.Fatalf("error getting amqp publisher: %s", err)
 	}
 
-	poisonQueue, err := watermillMiddleware.PoisonQueue(amqpPub, "url/visited/error")
+	ch, err := amqpPub.Connection().Channel()
+	if err != nil {
+		log.Fatalf("error getting amqp channel: %s", err)
+	}
+
+	urlVisitedQueueName := "url/visited"
+	_, err = ch.QueueDeclare(urlVisitedQueueName, true, false, false, false, nil)
+	if err != nil {
+		log.Fatalf("Failed to declare '%s' queue: %v", urlVisitedQueueName, err)
+	}
+
+	poisonQueueName := "url/visited/error"
+	_, err = ch.QueueDeclare(poisonQueueName, false, false, false, false, nil)
+	if err != nil {
+		log.Fatalf("Failed to declare '%s' queue: %v", poisonQueueName, err)
+	}
+
+	poisonQueue, err := watermillMiddleware.PoisonQueue(amqpPub, poisonQueueName)
 	if err != nil {
 		log.Fatalf("error getting error queue: %s", err)
 	}
@@ -246,7 +263,7 @@ func setupAmqp() {
 	}
 
 	// Add asyncAPI handlers
-	router.AddNoPublisherHandler("url_visited_handler", "url/visited", amqpSubscriber, func(msg *message.Message) error {
+	router.AddNoPublisherHandler("url_visited_handler", urlVisitedQueueName, amqpSubscriber, func(msg *message.Message) error {
 		return handlers.HandleUserUrlVisit(compat, db, msg)
 	})
 
