@@ -7,3 +7,13 @@ includes:
   devbox-services:
     taskfile: ./libs/devbox-services/Taskfile.yaml
     dir: ./libs/devbox-services
+
+tasks:
+  skaffold:run:
+    cmd: skaffold run
+    desc: Run a kubernetes pipeline locally
+  skaffold:dev:
+    aliases:
+      - skaffold:watch
+    cmd: skaffold dev
+    desc: Run a kubernetes pipeline locally in development mode, watch and re-iterate

@@ -1,0 +1,62 @@
+# macOS
+.DS_Store
+
+# Environment
+.env
+
+# Generated folders
+bin
+dist-ssr
+dist
+pb_data
+
+# Node
+node_modules
+
+# Temp files
+.parcel-cache
+tmp
+
+# Logs
+logs/
+*.log
+
+# Devbox
+.devbox
+devbox.d
+logfile
+
+# Templ files
+*_templ.go
+*_templ.txt
+
+# VS Code
+__debug_*
+
+# ==== Docker-specific Additions ====
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Development configurations
+**/.devcontainer/
+
+# Version control
+.git
+.gitignore
+
+# Editor directories
+.idea
+.vscode
+
+# ==== Safety Nets ====
+# Prevent accidental secret exposure
+**/*.secret
+**/*.privkey
+**/*.cert
+
+# Large data files
+*.csv
+*.zip
+*.tar.gz

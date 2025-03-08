@@ -1,0 +1,30 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: sleklink
+build:
+  artifacts:
+    - image: kajendranalagaratnam/sleklink
+      context: .
+      docker:
+        dockerfile: apps/webapp/Dockerfile
+deploy:
+  helm:
+    releases:
+      - name: webapp-release
+        chartPath: libs/helm
+        setValueTemplates:
+          webApp.port: "8080"
+          configMap.values.ENV_NAME: "{{.ENV_NAME}}"
+          configMap.values.GOOGLE_AUTH_CLIENT_ID: "{{.GOOGLE_AUTH_CLIENT_ID}}"
+          configMap.values.GOOGLE_AUTH_CLIENT_SECRET: "{{.GOOGLE_AUTH_CLIENT_SECRET}}"
+          configMap.values.WEBAPP_URL: "{{.WEBAPP_URL}}"
+          configMap.values.WEBAPP_PORT: "{{.WEBAPP_PORT}}"
+          configMap.values.COOKIE_SECRET: "{{.COOKIE_SECRET}}"
+          configMap.values.MAX_LINKS_PER_USER: "{{.MAX_LINKS_PER_USER}}"
+          configMap.values.POSTGRESQL_DSN: "{{.POSTGRESQL_DSN}}"
+portForward:
+  - resourceType: service
+    resourceName: webapp
+    port: 8080
+    localPort: 8080

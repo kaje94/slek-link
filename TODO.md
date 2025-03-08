@@ -39,6 +39,9 @@ You can run the application locally either using Kubernetes or by running comman
 
 Examples needs to be like
 
+To start devbox services
+
 ```
-devbox run task webapp:watch
+$devbox shell
+(devbox-shell)task devbox-services:start
 ```

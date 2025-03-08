@@ -3,7 +3,7 @@
 ###############
 
 # Using devbox as base build image
-FROM jetpackio/devbox:latest AS build-stage
+FROM jetpackio/devbox:0.14.0 AS build-stage
 
 # Installing your devbox project
 WORKDIR /code
@@ -16,6 +16,8 @@ USER root:root
 
 # Copy core files
 COPY . .
+RUN touch .env
+RUN devbox run -- echo "Installed Packages."
 
 # Build go app
 ENV CGO_ENABLED 0
