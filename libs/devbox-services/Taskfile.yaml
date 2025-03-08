@@ -4,11 +4,3 @@ tasks:
   start:
     desc: Start all services(valkey,rabbitmq with management studio)
     cmd: devbox services up --process-compose-file ./libs/devbox-services/process-compose.yaml
-  generate-asyncapi:
-    aliases:
-      - gen
-    desc: Generate go client code for asyncapi.yaml
-    cmd: bunx @asyncapi/cli generate fromTemplate ./asyncapi.yaml  @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o generated-asyncapi
-  watch-asyncapi:
-    desc: Generate go client & watch for changes in asyncapi.yaml
-    cmd: bunx @asyncapi/cli asyncapi.yaml  @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o generated-asyncapi --watch-template

@@ -7,6 +7,9 @@ includes:
   devbox-services:
     taskfile: ./libs/devbox-services/Taskfile.yaml
     dir: ./libs/devbox-services
+  asyncapi:
+    taskfile: ./libs/asyncapi/Taskfile.yaml
+    dir: ./libs/asyncapi
 
 tasks:
   skaffold:run:
