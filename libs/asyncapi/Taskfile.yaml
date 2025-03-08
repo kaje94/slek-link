@@ -10,3 +10,9 @@ tasks:
   watch:
     desc: Generate go client & watch for changes in asyncapi.yaml
     cmd: bunx @asyncapi/cli@2.16.5 asyncapi.yaml  @asyncapi/go-watermill-template --force-write -p moduleName=slek-link/asyncapi -o . --watch-template
+  format:
+    desc: Beautify the AsyncAPI spec file asyncapi.yaml file
+    cmd: bunx @asyncapi/cli@2.16.5 pretty ./asyncapi.yaml
+  validate:
+    desc: Validate asyncapi.yaml file for errors
+    cmd: bunx @asyncapi/cli@2.16.5 validate ./asyncapi.yaml

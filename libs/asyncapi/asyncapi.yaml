@@ -1,5 +1,5 @@
 asyncapi: 2.6.0
-
+id: 'https://github.com/kaje94/sleklink'
 info:
   title: Slek-Link AsyncAPI spec
   version: "1.0.0"
