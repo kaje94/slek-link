@@ -60,3 +60,9 @@ docker-compose*.yml
 *.csv
 *.zip
 *.tar.gz
+
+# Ignore root level devbox and use minimal devbox config
+devbox.json
+!/libs/devbox-minimal/devbox.json
+devbox.lock
+!/libs/devbox-minimal/devbox.lock
