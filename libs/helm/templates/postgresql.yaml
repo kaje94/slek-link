@@ -1,0 +1,38 @@
+{{- if or (not .Values.configMap) (not .Values.configMap.values) (not .Values.configMap.values.POSTGRESQL_DSN) (eq .Values.configMap.values.POSTGRESQL_DSN "") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.postgresql.serviceName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "{{ .Values.postgresql.postgresPassword }}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.postgresql.serviceName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: postgresql
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+{{- end }}

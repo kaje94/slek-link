@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.valkey.serviceName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.valkey.service.port }}
+      targetPort: 6379
+      protocol: TCP
+  selector:
+    app: {{ .Values.valkey.serviceName }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.valkey.serviceName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.valkey.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.valkey.serviceName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.valkey.serviceName }}
+    spec:
+      containers:
+        - name: valkey
+          image: "{{ .Values.valkey.image.repository }}:{{ .Values.valkey.image.tag }}"
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: "{{ .Values.valkey.resources.requests.cpu }}"
+              memory: "{{ .Values.valkey.resources.requests.memory }}"
+            limits:
+              cpu: "{{ .Values.valkey.resources.limits.cpu }}"
+              memory: "{{ .Values.valkey.resources.limits.memory }}"

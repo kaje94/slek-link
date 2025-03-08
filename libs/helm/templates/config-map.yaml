@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configmapName }}
+  namespace: {{ .Values.namespace }}
+data:
+  ENV_NAME: {{ .Values.configMap.values.ENV_NAME }}
+  GOOGLE_AUTH_CLIENT_ID: {{ .Values.configMap.values.GOOGLE_AUTH_CLIENT_ID }}
+  GOOGLE_AUTH_CLIENT_SECRET:
+    {{ .Values.configMap.values.GOOGLE_AUTH_CLIENT_SECRET }}
+  WEBAPP_URL: {{ .Values.configMap.values.WEBAPP_URL }}
+  WEBAPP_PORT: "{{ .Values.configMap.values.WEBAPP_PORT | toString }}"
+  COOKIE_SECRET: {{ .Values.configMap.values.COOKIE_SECRET }}
+  MAX_LINKS_PER_USER: "{{ .Values.configMap.values.MAX_LINKS_PER_USER | toString }}"
+  # Derived configs
+  VALKEY_HOST: "{{ .Values.valkey.serviceName }}:{{ .Values.valkey.service.port | toString }}"
+  AMQP_URL: "amqp://{{ .Values.rabbitmq.defaultUser }}:{{ .Values.rabbitmq.defaultPass }}@{{ .Values.rabbitmq.serviceName }}:5672/"
+  {{- if and .Values.configMap.values.POSTGRESQL_DSN (ne .Values.configMap.values.POSTGRESQL_DSN "") }}
+  POSTGRESQL_DSN: {{ .Values.configMap.values.POSTGRESQL_DSN }}
+  {{- else }}
+  POSTGRESQL_DSN: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ .Values.postgresql.serviceName }}:5432/{{ .Values.postgresql.postgresDatabase }}"
+  {{- end }}
+
