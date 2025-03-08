@@ -42,7 +42,8 @@ This project utilizes [Devbox](https://www.jetpack.io/devbox/) to streamline the
 1.  **Open Devbox Shell**: Navigate to the project directory and run `devbox shell` to enter the isolated development environment.
 2.  **Start Devbox Services**: Within the `devbox shell`, execute `devbox-services:start` to launch dependent services like RabbitMQ, Valkey, and PostgreSQL.
 3.  **Start Application**: In a separate terminal, run `devbox run task webapp:dev` to start the development server.
-    > Explore other available tasks with `devbox run task`.
+
+> Explore other available tasks with `devbox run task`.
 
 ### Running with Kubernetes
 
