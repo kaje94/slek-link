@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/kaje94/github.com/kaje94/slek-link/asyncapi/asyncapi"
+	"github.com/kaje94/slek-link/asyncapi/asyncapi"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 )
