@@ -22,7 +22,7 @@ func saveCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, cacheVal any)
 	}
 
 	if config.Config.Valkey.Url != "" && valkeyCompat != nil {
-		_, err = valkeyCompat.Set(context.Background(), cacheKey, jsonBytes, time.Minute*10).Result()
+		_, err = valkeyCompat.Set(context.Background(), cacheKey, jsonBytes, time.Hour*24).Result()
 		if err != nil {
 			return err
 		}
@@ -35,7 +35,7 @@ func getCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, data any) erro
 		return fmt.Errorf("valkey not configured")
 	}
 	if valkeyCompat != nil {
-		res, err := valkeyCompat.Cache(time.Second).Get(context.Background(), cacheKey).Result()
+		res, err := valkeyCompat.Cache(time.Hour).Get(context.Background(), cacheKey).Result()
 		if err != nil {
 			return err
 		}
