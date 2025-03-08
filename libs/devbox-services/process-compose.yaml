@@ -1,15 +1,21 @@
 processes:
+  postgresql:
+    command: "pg_ctl initdb && pg_ctl -o '-F -p 5432' start -o \"-k '$PGHOST'\" && createdb sleklinkdb"
+    is_daemon: true
+    shutdown: 
+      command: "pg_ctl stop -m fast && rip '$PGDATA'"
+
   valkey:
     command: valkey-server ./libs/devbox-services/valkey.conf --port $VALKEY_PORT
 
   rabbitmq:
-    command: 'rm -f "$RABBITMQ_ENABLED_PLUGINS_FILE" && rabbitmq-server'
+    command: 'rabbitmq-server'
     availability:
       restart: on_failure
       max_restarts: 5
     daemon: true
     shutdown:
-      command: "rabbitmqctl shutdown"
+      command: "rabbitmqctl shutdown && rip '$RABBITMQ_ENABLED_PLUGINS_FILE'"
 
   rabbitmq-logs:
     command: "tail -f $RABBITMQ_LOG_BASE/$RABBITMQ_NODENAME@$(hostname -s).log"
@@ -21,13 +27,3 @@ processes:
       rabbitmq:
         condition: service_started
     command: "rabbitmq-plugins enable rabbitmq_management"
-
-  create_queues:
-    depends_on:
-      rabbitmq:
-        condition: service_started
-    # Add all the queue names to this command
-    command: |
-      sleep 5;
-      curl --user "guest:guest" -X PUT "http://localhost:15672/api/queues/%2f/url%2Fvisited" -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"auto_delete\":false,\"durable\":true}";
-      curl --user "guest:guest" -X PUT "http://localhost:15672/api/queues/%2f/url%2Fvisited%2Ferror" -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"auto_delete\":false,\"durable\":false}";
