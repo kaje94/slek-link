@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
-	"github.com/kaje94/slek-link/internal/config"
+	"github.com/kaje94/slek-link/webapp/internal/config"
 	"github.com/labstack/echo/v4"
 	"github.com/valkey-io/valkey-go/valkeycompat"
 	"gorm.io/gorm"

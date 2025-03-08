@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/kaje94/slek-link/internal"
+	"github.com/kaje94/slek-link/webapp/internal"
 )
 
 func main() {

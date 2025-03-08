@@ -1,4 +1,4 @@
-module github.com/kaje94/slek-link
+module github.com/kaje94/slek-link/webapp
 
 go 1.23.3
 

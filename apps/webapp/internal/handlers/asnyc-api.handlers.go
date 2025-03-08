@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"slek-link/asyncapi/asyncapi"
 	"strconv"
 	"time"
 
+	"github.com/kaje94/slek-link/asyncapi/asyncapi"
+
 	"github.com/ThreeDotsLabs/watermill/message"
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
-	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/kaje94/slek-link/webapp/internal/utils"
 	"github.com/valkey-io/valkey-go/valkeycompat"
 	"gorm.io/gorm"
 )

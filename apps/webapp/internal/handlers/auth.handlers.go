@@ -10,8 +10,8 @@ import (
 
 	"github.com/gorilla/sessions"
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
-	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/kaje94/slek-link/webapp/internal/config"
+	"github.com/kaje94/slek-link/webapp/internal/utils"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"

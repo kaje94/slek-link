@@ -1,5 +1,5 @@
 
-module slek-link/asyncapi
+module github.com/kaje94/slek-link/asyncapi
 
 go 1.16
 

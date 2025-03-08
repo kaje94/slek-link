@@ -9,9 +9,9 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
-	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/pages"
-	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/kaje94/slek-link/webapp/internal/config"
+	"github.com/kaje94/slek-link/webapp/internal/pages"
+	"github.com/kaje94/slek-link/webapp/internal/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/oklog/ulid/v2"
 	datastar "github.com/starfederation/datastar/sdk/go"

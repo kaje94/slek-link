@@ -7,7 +7,7 @@ import (
 	"time"
 
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
-	"github.com/kaje94/slek-link/internal/config"
+	"github.com/kaje94/slek-link/webapp/internal/config"
 	"github.com/valkey-io/valkey-go/valkeycompat"
 )
 

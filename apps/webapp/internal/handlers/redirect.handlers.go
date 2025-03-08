@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"slek-link/asyncapi/asyncapi"
 	"time"
 
-	"github.com/kaje94/slek-link/internal/config"
-	"github.com/kaje94/slek-link/internal/utils"
+	"github.com/kaje94/slek-link/asyncapi/asyncapi"
+
+	"github.com/kaje94/slek-link/webapp/internal/config"
+	"github.com/kaje94/slek-link/webapp/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
