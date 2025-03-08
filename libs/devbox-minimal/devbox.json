@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.0/.schema/devbox.schema.json",
+  "packages": [
+    "go@1.23.3",
+    "templ@0.2.793",
+    "bun@1.1.34",
+    "go-task@3.41.0",
+    "tailwindcss_4@4.0.8"
+  ],
+  "env": {
+    "NIX_HARDENING_ENABLE": ""
+  }
+}

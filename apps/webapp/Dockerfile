@@ -9,15 +9,16 @@ FROM jetpackio/devbox:0.14.0 AS build-stage
 WORKDIR /code
 RUN mkdir -p /code && chown ${DEVBOX_USER}:${DEVBOX_USER} /code
 USER ${DEVBOX_USER}:${DEVBOX_USER}
-COPY --chown=${DEVBOX_USER}:${DEVBOX_USER} devbox.json devbox.json
-COPY --chown=${DEVBOX_USER}:${DEVBOX_USER} devbox.lock devbox.lock
+COPY --chown=${DEVBOX_USER}:${DEVBOX_USER} /libs/devbox-minimal/devbox.json devbox.json
+COPY --chown=${DEVBOX_USER}:${DEVBOX_USER} /libs/devbox-minimal/devbox.lock devbox.lock
 RUN devbox install
 USER root:root
 
 # Copy core files
 COPY . .
-RUN touch .env
 RUN devbox run -- echo "Installed Packages."
+RUN devbox run -- bun install --cwd ./apps/webapp/static
+RUN devbox run -- templ generate
 
 # Build go app
 ENV CGO_ENABLED 0

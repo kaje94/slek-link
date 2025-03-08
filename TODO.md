@@ -5,4 +5,3 @@
 - [ ] Add banner to github repo
 - [ ] Add E2E tests
 - [ ] Lazily load content if cache miss
-- [ ] Add readmes to individual workspaces
