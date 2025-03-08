@@ -16,14 +16,14 @@ A fast, free, and easy-to-use URL shortener with built-in analytics for tracking
 
 ## Technologies Used
 
-- **Webapp**: [Go](https://go.dev/) with [Go Templ](https://github.com/a-h/templ) and [Datastar](https://github.com/datastarlabs/datastar)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/), [DaisyUI](https://daisyui.com/)
+- **Webapp**: [Go](https://go.dev/) with [Go Templ](https://templ.guide/) and [Datastar](https://data-star.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [DaisyUI](https://daisyui.com/)
 - **Persistence**: [PostgreSQL](https://www.postgresql.org/) with [GORM](https://gorm.io/)
 - **Event Handling**: [RabbitMQ](https://www.rabbitmq.com/) with [AsyncAPI](https://www.asyncapi.com/)
-- **Caching**: [Valkey](https://valkey.io/)
+- **Performance**: [Valkey](https://valkey.io/), [instant.page](https://instant.page/)
 - **Local Development**: [Devbox](https://www.jetpack.io/devbox/), [Taskfile](https://taskfile.dev/), [Process Compose](https://github.com/F1bonacc1/process-compose)
 - **Orchestration**: [Docker](https://www.docker.com/), [Kubernetes](https://kubernetes.io/), [Skaffold](https://skaffold.dev/), [Helm](https://helm.sh/)
-- **CI/CD**: [GitHub Actions](https://github.com/features/actions), [Dagger](https://dagger.io/)
+- **CI/CD**: [GitHub Actions](https://github.com/features/actions), [Dagger](https://dagger.io/), [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
 - **Other Resources**: [IllustrationKit](https://illustrationkit.com/illustrations/halo), [Feather Icons](https://feathericons.com/)
 
 ## Getting Started
