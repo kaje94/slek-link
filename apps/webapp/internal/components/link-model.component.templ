@@ -7,10 +7,10 @@ import (
 )
 
 templ LinkModal(c echo.Context, isInDetailsPage bool) {
-	{{ upsertUrl := "/api/upsert-link" }}
+	{{ upsertUrl := "/api/datastar/upsert-link" }}
 	{{
 		if isInDetailsPage {
-			upsertUrl = "/api/upsert-link?isInDetailsPage=true"
+			upsertUrl = "/api/datastar/upsert-link?isInDetailsPage=true"
 		}
 	}}
 	<dialog class="modal" data-class="{'modal-open': $linkModalOpen}">

@@ -7,17 +7,12 @@ import (
 	"github.com/kaje94/slek-link/webapp/internal/components"
 	"github.com/kaje94/slek-link/webapp/internal/utils"
 	"github.com/labstack/echo/v4"
-	"net/http"
 	"slices"
+	"strconv"
 )
 
 func HandleDashboardsPage(c echo.Context) error {
 	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
-	if err != nil {
-		return err
-	}
-
-	db, err := utils.GetDbFromCtx(c)
 	if err != nil {
 		return err
 	}
@@ -27,10 +22,8 @@ func HandleDashboardsPage(c echo.Context) error {
 		return err
 	}
 
-	links, err := utils.GetLinksOfUser(compat, db, userInfo.ID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find links")
-	}
+	var links []gormModels.Link
+	utils.GetUserLinksCache(compat, userInfo.ID, &links)
 
 	slices.Reverse(links)
 
@@ -44,6 +37,7 @@ func HandleDashboardsPage(c echo.Context) error {
 }
 
 templ dashboardBodyContent(c echo.Context, links []gormModels.Link) {
+	{{ isLoading := links == nil }}
 	{{ linkModalOpen := c.QueryParam("linkModalOpen") }}
 	{{ initialUrl := c.QueryParam("initialUrl") }}
 	@components.LayoutWithSignals(c, fmt.Sprintf("{ searchInput:'', linkModalOpen:%t, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'%s', description:'' }", linkModalOpen == "true", initialUrl)) {
@@ -51,20 +45,38 @@ templ dashboardBodyContent(c echo.Context, links []gormModels.Link) {
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: ""},
 		})
-		<div id="dashboard-content-wrap" class="flex-1 flex flex-col">
-			if len(links)== 0 {
-				@DashboardEmpty()
-			} else {
-				@DashboardWithContent(c, links)
-			}
-		</div>
+		if isLoading {
+			@DashboardItemsSkeleton(c)
+		} else if len(links) >0 {
+			@DashboardWithContent(c, links)
+		} else {
+			@DashboardEmpty()
+		}
 		@components.LinkModal(c, false)
 		@components.DeleteLinkConfirmModal(c, false)
 	}
 }
 
+templ DashboardItemsSkeleton(c echo.Context) {
+	<div id="dashboard-content-wrap" class="flex-1 flex flex-col" data-on-load="@get('/api/datastar/lazy/dashboard')">
+		@DashboardSearchActions(c, true)
+		@DashboardItemsGridWrap() {
+			for index, _ := range make([]float64, 5) {
+				@DashboardItemSkeleton(index)
+			}
+		}
+	</div>
+}
+
+templ DashboardWithContent(c echo.Context, links []gormModels.Link) {
+	<div id="dashboard-content-wrap" class="flex-1 flex flex-col">
+		@DashboardSearchActions(c, false)
+		@DashboardItems(links)
+	</div>
+}
+
 templ DashboardEmpty() {
-	<div class="flex-1 flex flex-col">
+	<div id="dashboard-content-wrap" class="flex-1 flex flex-col">
 		<div class="flex flex-col flex-1 items-center justify-center">
 			<div class="max-w-lg h-full flex flex-col gap-4 justify-center items-center">
 				<div class="opacity-50">
@@ -104,19 +116,37 @@ templ listItemCol(label string, value string, index int) {
 	</div>
 }
 
-templ DashboardWithContent(c echo.Context, links []gormModels.Link) {
+templ listItemColSkeleton(label string, index int) {
+	<div class={ "flex gap-1 line-clamp-1 h-6 break-all", templ.KV("justify-end text-right md:justify-start md:text-left", index % 2 == 1) }>
+		<span class={ "md:hidden block font-extralight", templ.KV("text-right md:text-left", index % 2 == 1) }>
+			{ label }:
+		</span>
+		<div class="w-1/2 rounded bg-base-content/10 animate-pulse"></div>
+	</div>
+}
+
+templ DashboardItems(links []gormModels.Link) {
+	@DashboardItemsGridWrap() {
+		for _, item := range links {
+			@DashboardItem(item)
+		}
+	}
+}
+
+templ DashboardSearchActions(c echo.Context, isLoading bool) {
 	<div class="flex justify-between flex-col sm:flex-row-reverse gap-4">
-		<button class="btn btn-primary" data-on-click="$linkModalOpen=true">
+		<button data-on-click="$linkModalOpen=true" disabled?={ isLoading } class={ "btn btn-primary", templ.KV("animate-pulse", isLoading) }>
 			Shorten new Link
 		</button>
-		<label class="input input-bordered flex items-center gap-2">
+		<label class="input input-bordered flex items-center gap-2 w-full sm:max-w-sm" class={ templ.KV("animate-pulse", isLoading) }>
 			<input
 				type="text"
 				class="grow"
 				placeholder="Search..."
+				disabled?={ isLoading }
 				data-bind-searchInput
 				data-indicator-searching
-				data-on-input__debounce.1000ms={ fmt.Sprintf("@post('/api/dashboard-search',{headers:{'x-csrf-token': '%s'}})", utils.GetCSRFTokenFromCtx(c)) }
+				data-on-input__debounce.1000ms={ fmt.Sprintf("@post('/api/datastar/dashboard-search',{headers:{'x-csrf-token': '%s'}})", utils.GetCSRFTokenFromCtx(c)) }
 			/>
 			<span class="loading loading-ring" data-show="$searching"></span>
 			<span data-show="!$searching">
@@ -124,20 +154,43 @@ templ DashboardWithContent(c echo.Context, links []gormModels.Link) {
 			</span>
 		</label>
 	</div>
-	@DashboardItems(links)
 }
 
-templ DashboardItems(links []gormModels.Link) {
-	<div class="bg-base-content/10 flex flex-col gap-[1px] my-2" id="dashboard-items">
+templ DashboardItemsGridWrap() {
+	<div class="bg-base-content/10 flex flex-col gap-[1px] mt-4 mb-2" id="dashboard-items">
 		<div class="md:grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 font-extralight bg-base-100 hidden">
 			<div>Name</div>
 			<div>Created</div>
 			<div>State</div>
 			<div>Slug</div>
 		</div>
-		for _, item := range links {
-			@DashboardItem(item)
-		}
+		{ children... }
+	</div>
+}
+
+templ DashboardItemSkeleton(index int) {
+	<div
+		id={ "loader-item-" + strconv.Itoa(index) }
+		class="grid grid-cols-2 md:grid-cols-5 py-2 px-2 md:px-4 gap-2 duration-200 bg-base-100 line-clamp-1 items-center overflow-visible"
+	>
+		@listItemColSkeleton("Name", 0)
+		@listItemColSkeleton("Created", 1)
+		@listItemColSkeleton("State", 2)
+		@listItemColSkeleton("Slug", 3)
+		<div class="flex justify-end items-center gap-0.5 col-span-full md:col-span-1 order-first md:order-none">
+			<button
+				title="Edit Link"
+				disabled
+				class="btn btn-sm  px-1 md:px-3 opacity-50 animate-pulse"
+			>
+				<span class="hidden md:block">Edit</span>
+				@components.EditIcon()
+			</button>
+			<button disabled title="Delete Link" class="btn btn-sm  px-1 md:px-3 opacity-50 animate-pulse">
+				<span class="hidden md:block">Delete</span>
+				@components.TrashIcon()
+			</button>
+		</div>
 	</div>
 }
 

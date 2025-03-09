@@ -7,10 +7,10 @@ import (
 )
 
 templ DeleteLinkConfirmModal(c echo.Context, redirectToDashboard bool) {
-	{{ deleteUrl := "/api/delete-link" }}
+	{{ deleteUrl := "/api/datastar/delete-link" }}
 	{{
 		if redirectToDashboard {
-			deleteUrl = "/api/delete-link?redirectToDashboard=true"
+			deleteUrl = "/api/datastar/delete-link?redirectToDashboard=true"
 		}
 	}}
 	<dialog class="modal" data-class="{'modal-open': $deleteLinkId}">

@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func createBarChart(countryClicks []gormModels.LinkCountryClicks) *charts.Bar {
+func CreateBarChart(countryClicks []gormModels.LinkCountryClicks) *charts.Bar {
 	bar := charts.NewBar()
 	bar.SetGlobalOptions(
 		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(false)}),
@@ -38,7 +38,7 @@ func createBarChart(countryClicks []gormModels.LinkCountryClicks) *charts.Bar {
 	return bar
 }
 
-func createClicksTrendChart(monthlyClicks []gormModels.LinkMonthlyClicks) *charts.Line {
+func CreateClicksTrendChart(monthlyClicks []gormModels.LinkMonthlyClicks) *charts.Line {
 	lineChart := charts.NewLine()
 
 	slices.Reverse(monthlyClicks)
@@ -73,41 +73,7 @@ func ConvertChartToTemplComponent(chart Renderable) templ.Component {
 	})
 }
 
-func HandleLinkDetailsPage(c echo.Context) error {
-	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
-	if err != nil {
-		return err
-	}
-
-	id := c.Param("id")
-	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Id is required")
-	}
-
-	db, err := utils.GetDbFromCtx(c)
-	if err != nil {
-		return err
-	}
-
-	compat, err := utils.GetValkeyFromCtx(c)
-	if err != nil {
-		return err
-	}
-
-	link, err := utils.GetLinkOfUser(compat, db, userInfo.ID, id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find link")
-	}
-
-	if link.ID == "" {
-		return c.Redirect(http.StatusTemporaryRedirect, "/404")
-	}
-
-	monthlyClicks, err := utils.GetLinksMonthlyClicks(compat, db, link.ID)
-	if err != nil {
-		return err
-	}
-
+func GetTotalAndCurrentMonthClicks(monthlyClicks []gormModels.LinkMonthlyClicks) (gormModels.LinkMonthlyClicks, int) {
 	totalClicks := 0
 	var currentMonth gormModels.LinkMonthlyClicks
 	for _, item := range monthlyClicks {
@@ -119,23 +85,44 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	for _, item := range monthlyClicks {
 		totalClicks += item.Count
 	}
+	return currentMonth, totalClicks
+}
 
-	humanizedMonthlyCount := humanize.Comma(int64(currentMonth.Count))
-	humanizedTotalCount := humanize.Comma(int64(totalClicks))
-
-	var clicksTrendChart *charts.Line
-	if len(monthlyClicks) > 0 {
-		clicksTrendChart = createClicksTrendChart(monthlyClicks)
-	}
-
-	countryClicks, err := utils.GetCountryClicks(compat, db, link.ID)
+func HandleLinkDetailsPage(c echo.Context) error {
+	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
 	if err != nil {
 		return err
 	}
 
+	id := c.Param("id")
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id is required")
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	var link gormModels.Link
+	utils.GetUserLinkCache(compat, userInfo.ID, id, &link)
+
+	var monthlyClicks []gormModels.LinkMonthlyClicks
+	utils.GetMonthlyClicksCache(compat, id, &monthlyClicks)
+
+	currentMonth, totalClicks := GetTotalAndCurrentMonthClicks(monthlyClicks)
+
+	var clicksTrendChart *charts.Line
+	if len(monthlyClicks) > 0 {
+		clicksTrendChart = CreateClicksTrendChart(monthlyClicks)
+	}
+
+	var countryClicks []gormModels.LinkCountryClicks
+	utils.GetCountryClicksCache(compat, id, &countryClicks)
+
 	var countryClicksChart *charts.Bar
 	if len(countryClicks) > 0 {
-		countryClicksChart = createBarChart(countryClicks)
+		countryClicksChart = CreateBarChart(countryClicks)
 	}
 
 	isNewLinkStr := c.QueryParam("isNewLink")
@@ -144,20 +131,29 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	resp := components.RootLayout(
 		"Link Details | slek.link - Track and Analyze Your Link's Performance",
 		"Dive into detailed analytics for your shortened link on slek.link. Monitor clicks, track user behavior, and gain insights to optimize your link's performance.",
-		linkDetailsBodyContent(c, link, humanizedMonthlyCount, humanizedTotalCount, isNewLink, clicksTrendChart, countryClicksChart),
+		linkDetailsBodyContent(c, id, link, currentMonth, totalClicks, isNewLink, clicksTrendChart, countryClicksChart),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-templ linkDetailsBodyContent(c echo.Context, link gormModels.Link, monthlyCount string, totalCount string, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
+templ linkDetailsBodyContent(c echo.Context, linkId string, link gormModels.Link, currentMonth gormModels.LinkMonthlyClicks, totalClicks int, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
+	{{ isLoadingLink := link.ID == "" }}
+	{{ timeAgoStr := "" }}
+	{{ totalClicksStr := "" }}
+	{{ currentMonthClicksStr := "" }}
+	if link.ID !="" {
+		{{ timeAgoStr = humanize.Time(link.CreatedAt) }}
+		{{ totalClicksStr = humanize.Comma(int64(totalClicks)) }}
+		{{ currentMonthClicksStr = humanize.Comma(int64(currentMonth.Count)) }}
+	}
 	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
 			components.BreadcrumbItem{Label: "Home", Link: "/"},
 			components.BreadcrumbItem{Label: "Dashboard", Link: "/dashboard"},
 			components.BreadcrumbItem{Label: "Link Details", Link: ""},
 		})
-		if showNewLinkBanner {
+		if link.ID!="" && showNewLinkBanner {
 			<div role="alert" class="alert alert-success">
 				@components.InfoIcon()
 				<p>
@@ -169,91 +165,149 @@ templ linkDetailsBodyContent(c echo.Context, link gormModels.Link, monthlyCount 
 			</div>
 		}
 		<div class="flex justify-between gap-4 flex-wrap p-1 items-center mb-4">
-			@LinkDetailsBodyNameDesc(link)
-			<div class="flex justify-end gap-2">
-				<button
-					class="btn btn-outline"
-					data-on-click={ fmt.Sprintf("$linkModalOpen=true;$editLinkId='%s';$name='%s';$shortCode='%s';$url='%s';$description='%s'", link.ID, link.Name, link.ShortCode, link.LongURL, link.Description) }
-				>
-					<span class="mb-0.5">
-						@components.EditIcon()
-					</span>
-					Edit
-				</button>
-				<button class="btn btn-error btn-outline" data-on-click={ fmt.Sprintf("$deleteLinkId='%s'", link.ID) }>
-					<span class="mb-0.5">
-						@components.TrashIcon()
-					</span>
-					Delete
-				</button>
-			</div>
+			@LinkDetailsBodyNameDesc(link, linkId)
+			@LinkDetailsActionButtons(link, isLoadingLink)
 		</div>
 		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content/10">
 			@LinkDetailsBodyLinks(link)
-			@statSection("Total Clicks", totalCount, "Past 12 months")
-			@statSection("Clicks This Month", monthlyCount, "")
-			@statSection("Created", humanize.Time(link.CreatedAt), fmt.Sprintf("Created on %s", link.CreatedAt.Format(utils.LayoutHuman)))
-			@statSection("Status", string(link.Status), "")
-			if clicksTrendChart!=nil || countryClicksChart!=nil {
-				<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
-					if clicksTrendChart!=nil {
-						@statChartSection("Clicks Trend", "Clicks over the past 12 months", ConvertChartToTemplComponent(clicksTrendChart))
-					}
-					if countryClicksChart!=nil {
-						@statChartSection("Clicks by Country", "Top countries where the users who clicked on the link are from", ConvertChartToTemplComponent(countryClicksChart))
-					}
-				</div>
-			}
+			@StatSection("link-details-stat-total-clicks", "Total Clicks", totalClicksStr, "Past 12 months")
+			@StatSection("link-details-stat-current-month-clicks", "Clicks This Month", currentMonthClicksStr, "")
+			@StatSection("link-details-stat-created", "Created", timeAgoStr, fmt.Sprintf("Created on %s", link.CreatedAt.Format(utils.LayoutHuman)))
+			@StatSection("link-details-stat-status", "Status", string(link.Status), "")
+			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
+				@StatLineChartSection("link-details-stat-click-trend", linkId, "Clicks Trend", "Clicks over the past 12 months", clicksTrendChart)
+				@StatBarChartSection("link-details-stat-country-clicks", linkId, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicksChart)
+			</div>
 		</div>
 		@components.LinkModal(c, true)
 		@components.DeleteLinkConfirmModal(c, true)
 	}
 }
 
-templ LinkDetailsBodyNameDesc(link gormModels.Link) {
-	<div class="flex flex-col gap-0.5 flex-1" id={ fmt.Sprintf("link-details-body-title-%s", link.ID) }>
-		<h3 class="text-4xl display-font">{ link.Name }</h3>
-		<h5 class="text-lg opacity-70">{ link.Description }</h5>
+templ LinkDetailsBodyNameDesc(link gormModels.Link, linkId string) {
+	<div
+		class="flex flex-col gap-0.5 flex-1"
+		id="link-details-body-title"
+		if link.ID =="" {
+			data-on-load={ fmt.Sprintf("@get('/api/datastar/lazy/link-details/%s')", linkId) }
+		}
+	>
+		if link.Name !="" {
+			<h3 class="text-4xl display-font">{ link.Name }</h3>
+			<h5 class="text-lg opacity-70">{ link.Description }</h5>
+		} else {
+			<div class="h-9 min-w-xs max-w-sm bg-base-content/10 rounded animate-pulse"></div>
+		}
+	</div>
+}
+
+templ LinkDetailsActionButtons(link gormModels.Link, isLoading bool) {
+	<div class="flex justify-end gap-2" id="link-details-action-buttons">
+		<button
+			class={ "btn btn-outline", templ.KV("animate-pulse", isLoading) }
+			data-on-click={ fmt.Sprintf("$linkModalOpen=true;$editLinkId='%s';$name='%s';$shortCode='%s';$url='%s';$description='%s'", link.ID, link.Name, link.ShortCode, link.LongURL, link.Description) }
+			disabled?={  isLoading }
+		>
+			<span class="mb-0.5">
+				@components.EditIcon()
+			</span>
+			Edit
+		</button>
+		<button
+			class={ "btn btn-error btn-outline", templ.KV("animate-pulse", isLoading) }
+			disabled?={  isLoading }
+			data-on-click={ fmt.Sprintf("$deleteLinkId='%s'", link.ID) }
+		>
+			<span class="mb-0.5">
+				@components.TrashIcon()
+			</span>
+			Delete
+		</button>
 	</div>
 }
 
 templ LinkDetailsBodyLinks(link gormModels.Link) {
-	<div class="grid lg:grid-cols-2 gap-[1px] col-span-full" id={ fmt.Sprintf("link-details-body-links-%s", link.ID) }>
-		@statLinkSection("Original URL", link.LongURL, "")
-		@statLinkSection("Short URL", fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode), "")
+	{{ shortUrl := "" }}
+	if link.ShortCode!="" {
+		{{ shortUrl = fmt.Sprintf("%s/s/%s", config.Config.WebAppConfig.Url, link.ShortCode) }}
+	}
+	<div class="grid lg:grid-cols-2 gap-[1px] col-span-full" id="link-details-body-links">
+		@statLinkSection("link-details-stat-full-url", "Original URL", link.LongURL, "")
+		@statLinkSection("link-details-stat-slug", "Short URL", shortUrl, "")
 	</div>
 }
 
-templ statSection(title, value, desc string) {
-	@statSectionWrap() {
-		<div>{ title }</div>
-		<div class="text-3xl line-clamp-1 font-bold break-all">{ value }</div>
-		@statDesc(desc)
+templ StatSection(sectionId string, title, value, desc string) {
+	@statSectionWrap(sectionId) {
+		<div class={ templ.KV("opacity-40", value == "") }>{ title }</div>
+		if value!="" {
+			<div class="text-3xl line-clamp-1 font-bold break-all">{ value }</div>
+			@statDesc(desc)
+		} else {
+			<div class="h-8 w-1/3 bg-base-content/10 rounded animate-pulse"></div>
+			if desc !="" {
+				<div class="h-4 w-1/2 bg-base-content/10 rounded animate-pulse mt-1"></div>
+			}
+		}
 	}
 }
 
-templ statLinkSection(title, value, desc string) {
-	@statSectionWrap() {
-		<div>{ title }</div>
+templ statLinkSection(sectionId string, title, value, desc string) {
+	@statSectionWrap(sectionId) {
+		<div class={ templ.KV("opacity-40", value == "") }>{ title }</div>
 		<div class="gap-2 flex items-center">
-			<a class="text-lg line-clamp-1 break-all link-hover cursor-pointer hover:underline" href={ templ.SafeURL(value) } target="_blank">
-				{ value }
-			</a>
-			<button class="btn btn-xs mb-1" data-on-click={ fmt.Sprintf("@clipboard('%s')", value) }>
-				@components.CopyIcon()
-			</button>
+			if value != "" {
+				<a class="text-lg line-clamp-1 break-all link-hover cursor-pointer hover:underline" href={ templ.SafeURL(value) } target="_blank">
+					{ value }
+				</a>
+				<button class="btn btn-xs mb-1" data-on-click={ fmt.Sprintf("@clipboard('%s')", value) }>
+					@components.CopyIcon()
+				</button>
+			} else {
+				<div class="h-6 flex-1 bg-base-content/10 animate-pulse rounded"></div>
+				<div class="rounded-lg animate-pulse text-base-content/20">
+					@components.CopyIcon()
+				</div>
+			}
 		</div>
 		@statDesc(desc)
 	}
 }
 
-templ statChartSection(title string, desc string, chartComp templ.Component) {
-	@statSectionWrap() {
-		<div>{ title }</div>
-		@statDesc(desc)
+templ statChartWrap(sectionId string, title string, desc string, isLoading bool) {
+	@statSectionWrap(sectionId) {
+		<div class={ templ.KV("opacity-40", isLoading) }>{ title }</div>
+		if !isLoading {
+			@statDesc(desc)
+		} else {
+			<div class="h-4 w-1/2 bg-base-content/10 rounded animate-pulse mt-1"></div>
+		}
 		<div class="my-1 flex items-center justify-center min-h-[400px] h-full">
-			@chartComp
+			{ children... }
+			if isLoading {
+				@components.ChartIcon(templ.Attributes{"height": "200", "width": "200", "stroke-width": "3", "class": "animate-pulse text-base-content/20"})
+			}
 		</div>
+	}
+}
+
+templ StatLineChartSection(sectionId string, linkId string, title string, desc string, clicksTrendChart *charts.Line) {
+	@statChartWrap(sectionId, title, desc, clicksTrendChart == nil) {
+		if clicksTrendChart!=nil {
+			@ConvertChartToTemplComponent(clicksTrendChart)
+		} else {
+			<span data-on-load={ fmt.Sprintf("@get('/api/datastar/lazy/link-details/monthly-clicks/%s')", linkId) }></span>
+		}
+	}
+}
+
+templ StatBarChartSection(sectionId string, linkId string, title string, desc string, monthlyBarChart *charts.Bar) {
+	@statChartWrap(sectionId, title, desc, monthlyBarChart == nil) {
+		if monthlyBarChart!=nil {
+			@ConvertChartToTemplComponent(monthlyBarChart)
+		} else {
+			<span data-on-load={ fmt.Sprintf("@get('/api/datastar/lazy/link-details/country-clicks/%s')", linkId) }></span>
+		}
 	}
 }
 
@@ -263,8 +317,8 @@ templ statDesc(desc string) {
 	}
 }
 
-templ statSectionWrap() {
-	<div class="p-2 md:p-4 xl:p-6 bg-base-100">
+templ statSectionWrap(sectionId string) {
+	<div class="p-2 md:p-4 xl:p-6 bg-base-100" id={ sectionId }>
 		{ children... }
 	</div>
 }

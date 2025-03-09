@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/dustin/go-humanize"
 	"github.com/go-playground/validator/v10"
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/webapp/internal/config"
@@ -91,10 +92,19 @@ func UpsertLinkAPIHandler(c echo.Context) error {
 
 		isInDetailsPage := c.QueryParam("isInDetailsPage")
 		if isInDetailsPage != "" {
-			sse.MergeFragmentTempl(pages.LinkDetailsBodyNameDesc(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-title-%s", item.ID)))
-			sse.MergeFragmentTempl(pages.LinkDetailsBodyLinks(item), datastar.WithSelectorID(fmt.Sprintf("link-details-body-links-%s", item.ID)))
+			sse.MergeFragmentTempl(
+				pages.LinkDetailsBodyNameDesc(item, item.ID),
+				datastar.WithSelectorID("link-details-body-title"),
+			)
+			sse.MergeFragmentTempl(
+				pages.LinkDetailsBodyLinks(item),
+				datastar.WithSelectorID("link-details-body-links"),
+			)
 		} else {
-			sse.MergeFragmentTempl(pages.DashboardItem(item), datastar.WithSelectorID(fmt.Sprintf("link-item-%s", reqBody.EditLinkId)))
+			sse.MergeFragmentTempl(
+				pages.DashboardItem(item),
+				datastar.WithSelectorID(fmt.Sprintf("link-item-%s", reqBody.EditLinkId)),
+			)
 		}
 	} else {
 		userLinks, err := utils.GetLinksOfUser(compat, db, userInfo.ID)
@@ -203,7 +213,7 @@ func DeleteLinkAPIHandler(c echo.Context) error {
 				sse.MergeFragmentTempl(
 					pages.DashboardEmpty(),
 					datastar.WithSelectorID("dashboard-content-wrap"),
-					datastar.WithMergeMode(datastar.FragmentMergeModeInner),
+					datastar.WithViewTransitions(),
 				)
 			}
 			sse.MarshalAndMergeSignals(map[string]any{"deleteLinkId": "", "searchInput": ""})
@@ -282,18 +292,209 @@ func DashboardSearchAPIHandler(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		sse.MergeFragmentTempl(pages.DashboardItems(links), datastar.WithSelectorID("dashboard-items"))
+		sse.MergeFragmentTempl(
+			pages.DashboardItems(links),
+			datastar.WithSelectorID("dashboard-items"),
+			datastar.WithViewTransitions(),
+		)
 	} else {
 		links, err := utils.GetSearchLinks(compat, db, userInfo.ID, reqBody.Search)
 		if err != nil {
 			return err
 		}
 		if len(links) > 0 {
-			sse.MergeFragmentTempl(pages.DashboardItems(links), datastar.WithSelectorID("dashboard-items"))
+			sse.MergeFragmentTempl(
+				pages.DashboardItems(links),
+				datastar.WithSelectorID("dashboard-items"),
+				datastar.WithViewTransitions(),
+			)
 		} else {
-			sse.MergeFragmentTempl(pages.DashboardNoMatchingItems(), datastar.WithSelectorID("dashboard-items"))
+			sse.MergeFragmentTempl(
+				pages.DashboardNoMatchingItems(),
+				datastar.WithSelectorID("dashboard-items"),
+				datastar.WithViewTransitions(),
+			)
 		}
 	}
+
+	return nil
+}
+
+func DashboardLazyHandler(c echo.Context) error {
+	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
+	if err != nil {
+		return err
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	links, err := utils.GetLinksOfUser(compat, db, userInfo.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find links")
+	}
+
+	sse := datastar.NewSSE(c.Response().Writer, c.Request())
+	if len(links) > 0 {
+		sse.MergeFragmentTempl(
+			pages.DashboardWithContent(c, links),
+			datastar.WithSelectorID("dashboard-content-wrap"),
+			datastar.WithViewTransitions(),
+		)
+	} else {
+		sse.MergeFragmentTempl(
+			pages.DashboardEmpty(),
+			datastar.WithSelectorID("dashboard-content-wrap"),
+			datastar.WithViewTransitions(),
+		)
+	}
+
+	return nil
+}
+
+func LinkDetailsLazyHandler(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id is required")
+	}
+
+	userInfo, err := utils.GetUserFromCtxWithRedirect(c)
+	if err != nil {
+		return err
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(c.Response().Writer, c.Request())
+
+	link, err := utils.GetLinkOfUser(compat, db, userInfo.ID, id)
+	if err != nil {
+		sse.Redirect("/404")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find link")
+	}
+
+	sse.MergeFragmentTempl(
+		pages.LinkDetailsBodyNameDesc(link, id),
+		datastar.WithSelectorID("link-details-body-title"),
+		datastar.WithViewTransitions(),
+	)
+	sse.MergeFragmentTempl(
+		pages.LinkDetailsActionButtons(link, false),
+		datastar.WithSelectorID("link-details-action-buttons"),
+		datastar.WithViewTransitions(),
+	)
+	sse.MergeFragmentTempl(
+		pages.LinkDetailsBodyLinks(link),
+		datastar.WithSelectorID("link-details-body-links"),
+		datastar.WithViewTransitions(),
+	)
+	timeAgoStr := humanize.Time(link.CreatedAt)
+	sse.MergeFragmentTempl(
+		pages.StatSection("link-details-stat-created", "Created", timeAgoStr, fmt.Sprintf("Created on %s", link.CreatedAt.Format(utils.LayoutHuman))),
+		datastar.WithSelectorID("link-details-stat-created"),
+		datastar.WithViewTransitions(),
+	)
+	sse.MergeFragmentTempl(
+		pages.StatSection("link-details-stat-status", "Status", string(link.Status), ""),
+		datastar.WithSelectorID("link-details-stat-status"),
+		datastar.WithViewTransitions(),
+	)
+
+	return nil
+}
+
+func LinkMonthlyLazyHandler(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id is required")
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(c.Response().Writer, c.Request())
+
+	monthlyClicks, err := utils.GetLinksMonthlyClicks(compat, db, id)
+	if err != nil {
+		return err
+	}
+
+	currentMonth, totalClicks := pages.GetTotalAndCurrentMonthClicks(monthlyClicks)
+	totalClicksStr := humanize.Comma(int64(totalClicks))
+	currentMonthClicksStr := humanize.Comma(int64(currentMonth.Count))
+	clicksTrendChart := pages.CreateClicksTrendChart(monthlyClicks)
+
+	sse.MergeFragmentTempl(
+		pages.StatSection("link-details-stat-total-clicks", "Total Clicks", totalClicksStr, "Past 12 months"),
+		datastar.WithSelectorID("link-details-stat-total-clicks"),
+		datastar.WithViewTransitions(),
+	)
+	sse.MergeFragmentTempl(
+		pages.StatSection("link-details-stat-current-month-clicks", "Clicks This Month", currentMonthClicksStr, ""),
+		datastar.WithSelectorID("link-details-stat-current-month-clicks"),
+		datastar.WithViewTransitions(),
+	)
+	sse.MergeFragmentTempl(
+		pages.StatLineChartSection("link-details-stat-click-trend", id, "Clicks Trend", "Clicks over the past 12 months", clicksTrendChart),
+		datastar.WithSelectorID("link-details-stat-click-trend"),
+		datastar.WithViewTransitions(),
+	)
+
+	return nil
+}
+
+func LinkCountryLazyHandler(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id is required")
+	}
+
+	compat, err := utils.GetValkeyFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	db, err := utils.GetDbFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	sse := datastar.NewSSE(c.Response().Writer, c.Request())
+
+	countryClicks, err := utils.GetCountryClicks(compat, db, id)
+	if err != nil {
+		return err
+	}
+
+	countryClicksChart := pages.CreateBarChart(countryClicks)
+
+	sse.MergeFragmentTempl(
+		pages.StatBarChartSection("link-details-stat-country-clicks", id, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicksChart),
+		datastar.WithSelectorID("link-details-stat-country-clicks"),
+		datastar.WithViewTransitions(),
+	)
 
 	return nil
 }

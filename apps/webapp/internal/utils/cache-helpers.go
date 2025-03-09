@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	cacheVersion = "v5"
+	cacheVersion = "v14"
 )
 
 func saveCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, cacheVal any) error {
@@ -34,20 +34,22 @@ func getCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, data any) erro
 	if config.Config.Valkey.Url == "" {
 		return fmt.Errorf("valkey not configured")
 	}
-	if valkeyCompat != nil {
-		res, err := valkeyCompat.Cache(time.Hour).Get(context.Background(), cacheKey).Result()
-		if err != nil {
-			return err
-		}
+	if valkeyCompat == nil {
+		return fmt.Errorf("valkey compat not found")
+	}
 
-		if res == "" {
-			return fmt.Errorf("no cache found")
-		}
+	res, err := valkeyCompat.Cache(time.Hour).Get(context.Background(), cacheKey).Result()
+	if err != nil {
+		return err
+	}
 
-		err = json.Unmarshal([]byte(res), &data)
-		if err != nil {
-			return err
-		}
+	if res == "" {
+		return fmt.Errorf("no cache found")
+	}
+
+	err = json.Unmarshal([]byte(res), &data)
+	if err != nil {
+		return err
 	}
 	return nil
 }

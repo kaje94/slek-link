@@ -98,11 +98,16 @@ func RunServer() error {
 	auth.GET("/callback", handlers.HandleAuthCallback)
 	auth.GET("/logout", handlers.HandlerLogout)
 
-	api := router.Group("/api")
+	api := router.Group("/api/datastar")
 	api.POST("/upsert-link", handlers.UpsertLinkAPIHandler)
 	api.DELETE("/delete-link", handlers.DeleteLinkAPIHandler)
 	api.POST("/dashboard-search", handlers.DashboardSearchAPIHandler)
-	api.GET("/health", func(c echo.Context) error {
+	api.GET("/lazy/dashboard", handlers.DashboardLazyHandler)
+	api.GET("/lazy/link-details/:id", handlers.LinkDetailsLazyHandler)
+	api.GET("/lazy/link-details/monthly-clicks/:id", handlers.LinkMonthlyLazyHandler)
+	api.GET("/lazy/link-details/country-clicks/:id", handlers.LinkCountryLazyHandler)
+
+	router.GET("/api/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")
 	})
 

@@ -41,3 +41,7 @@ body {
   opacity: "0";
   transition: "opacity 1s ease-out";
 }
+
+.datastar-settling {
+  opacity: 0;
+}

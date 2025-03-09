@@ -1,7 +1,5 @@
 # TODO:
 
-- [ ] Add title property or daisyui tooltip to all links and buttons
-- [ ] Connect with sonarcloud and add sonarcloud badges to readme
-- [ ] Add E2E tests
-- [ ] Lazily load content if cache miss
-- [ ] Fix contact us page
+- [ ] Lazily load content if cache miss - Check https://data-star.dev/examples/lazy_load
+- [ ] Add E2E tests - Check https://playwright-community.github.io/playwright-go/
+- [ ] remove time.Sleep(time.Second \* 2)

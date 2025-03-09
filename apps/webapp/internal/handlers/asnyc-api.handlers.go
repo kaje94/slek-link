@@ -59,6 +59,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 		}
 		err = utils.CreateLinkMonthlyClicks(db, compat, currentMonth)
 		if err != nil {
+			utils.DeleteMonthlyClicksCache(compat, lm.LinkId)
 			return err
 		}
 	} else {
@@ -66,6 +67,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 		currentMonth.Count += 1
 		err = utils.UpdateLinkMonthlyClicks(compat, db, currentMonth)
 		if err != nil {
+			utils.DeleteMonthlyClicksCache(compat, lm.LinkId)
 			return err
 		}
 	}
@@ -98,6 +100,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 			}
 			err = utils.CreateLinkCountryClicks(compat, db, countryClicks)
 			if err != nil {
+				utils.DeleteCountryClicksCache(compat, lm.LinkId)
 				return err
 			}
 		} else {
@@ -105,6 +108,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 			matchingCountry.Count += 1
 			err = utils.UpdateLinkCountryClicks(compat, db, matchingCountry)
 			if err != nil {
+				utils.DeleteCountryClicksCache(compat, lm.LinkId)
 				return err
 			}
 		}
