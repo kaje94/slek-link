@@ -28,14 +28,17 @@ templ Navbar(c echo.Context) {
 		</div>
 		<div class="flex-none flex gap-2 items-center">
 			if userInfo.Email == "" {
-				<a href="/dashboard" class="btn btn-outline flex items-center gap-3 px-5 bg-base-300 border-base-content/75">
+				<button
+					data-on-click="window.location.href='/dashboard'"
+					class="btn btn-outline flex items-center gap-3 px-5 bg-base-300 border-base-content/75"
+				>
 					if (config.Config.WebAppConfig.GoogleClientId != "" && config.Config.WebAppConfig.GoogleClientSecret != "") {
 						<span class="w-5 h-5 ">
 							@GoogleIcon()
 						</span>
 					}
 					<span class="pt-0.5 font-medium">Sign In</span>
-				</a>
+				</button>
 			} else {
 				if showDashboardBtn {
 					<a class="btn btn-md btn-secondary" href="/dashboard">Dashboard</a>
@@ -60,7 +63,7 @@ templ Navbar(c echo.Context) {
 						tabindex="0"
 						class="menu dropdown-content bg-base-300 rounded-box z-[1] mt-1  w-52 p-2 shadow-2xl rounded-tr-none"
 					>
-						<li class="disabled"><a>{ userInfo.Name }</a></li>
+						<li class="disabled p-3">{ userInfo.Name }</li>
 						<li>
 							<a href={ templ.SafeURL(logoutWithOriginalUrl) }>Sign Out</a>
 						</li>
