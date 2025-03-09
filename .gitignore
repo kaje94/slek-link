@@ -25,6 +25,7 @@ logs/
 .devbox
 devbox.d
 logfile
+erl_crash.dump
 
 # Templ generated files
 *_templ.go
@@ -32,4 +33,3 @@ logfile
 
 # VS code temp tiles
 __debug_*
-
