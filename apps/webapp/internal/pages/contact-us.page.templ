@@ -53,26 +53,36 @@ templ contactUsBodyContent(c echo.Context) {
 			</p>
 			<div class="grid lg:grid-cols-2 gap-4 mt-4 lg:mt-8 items-center">
 				<div class="flex flex-col gap-4">
+					<div role="alert" class="alert alert-error w-full">
+						@components.InfoIcon()
+						<p>
+							Contact-us form service is unavailable at the moment. If you have any queries, please reach out to <a class="link-hover link font-bold" href="mailto:a.kajendran@gmail.com">a.kajendran@gmail.com</a>
+						</p>
+					</div>
 					<input
 						type="text"
-						class="input input-bordered"
+						class="input input-bordered w-full"
 						placeholder="Name"
+						disabled
 					/>
 					<input
 						type="text"
-						class="input  input-bordered"
+						class="input input-bordered w-full"
 						placeholder="user@email.com"
+						disabled
 					/>
 					<input
 						type="text"
-						class="input  input-bordered"
+						class="input input-bordered w-full"
 						placeholder="Subject"
+						disabled
 					/>
 					<textarea
-						class="textarea textarea-bordered min-h-32"
+						class="textarea textarea-bordered min-h-32 w-full"
 						placeholder="Your Message..."
+						disabled
 					></textarea>
-					<button class="btn btn-primary w-full">Submit</button>
+					<button class="btn btn-primary w-full" disabled>Submit</button>
 				</div>
 				<div class="p-10 hidden lg:block">
 					@components.ContactUsIllustration()
