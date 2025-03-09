@@ -22,6 +22,11 @@ spec:
         env:
         - name: POSTGRES_PASSWORD
           value: "{{ .Values.postgresql.postgresPassword }}"
+        resources:
+          requests:
+            memory: "128Mi"
+          limits:
+            memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service

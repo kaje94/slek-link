@@ -102,6 +102,9 @@ func RunServer() error {
 	api.POST("/upsert-link", handlers.UpsertLinkAPIHandler)
 	api.DELETE("/delete-link", handlers.DeleteLinkAPIHandler)
 	api.POST("/dashboard-search", handlers.DashboardSearchAPIHandler)
+	api.GET("/health", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OK")
+	})
 
 	// Server configuration
 	server := http.Server{

@@ -23,12 +23,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.configmapName }}
-          # Todo: add readiness and liveness probes
-          # readinessProbe:
-          #   initialDelaySeconds: 10
-          #   httpGet:
-          #     port: 8080
-          #     path: '/api/health'
+          Todo: add readiness and liveness probes
+          readinessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              port: 8080
+              path: '/api/health'
           resources:
             requests:
               memory: "128Mi"
