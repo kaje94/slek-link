@@ -7,7 +7,7 @@
     "bun@1.1.34",
     "go-task@3.41.0",
     "rabbitmq-server@latest",
-    "valkey@latest",
+    "valkey@7.2.7",
     "rip2@latest",
     "tailwindcss_4@4.0.8",
     "postgresql@latest",
