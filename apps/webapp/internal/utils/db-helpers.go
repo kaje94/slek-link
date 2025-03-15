@@ -2,7 +2,6 @@ package utils
 
 import (
 	"strings"
-	"time"
 
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/valkey-io/valkey-go/valkeycompat"
@@ -86,40 +85,9 @@ func GetLinksMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, linkId stri
 		return nil, results.Error
 	}
 
-	monthlyClicksUpdated := []gormModels.LinkMonthlyClicks{}
-	for i := 0; i < 12; i++ {
-		pastMonthTime := time.Now().AddDate(0, -i, 0)
-		pastMonth := int(pastMonthTime.Month())
-		pastMonthYear := pastMonthTime.Year()
-		found := false
-		for _, item := range monthlyClicks {
-			if item.Month == pastMonth && item.Year == pastMonthYear {
-				found = true
-				monthlyClicksUpdated = append(monthlyClicksUpdated, item)
-				break
-			}
-		}
+	CreateMonthlyClicksCache(compat, linkId, monthlyClicks)
 
-		if !found {
-			monthlyClicksUpdated = append(monthlyClicksUpdated, gormModels.LinkMonthlyClicks{
-				LinkID: linkId,
-				Year:   pastMonthYear,
-				Month:  int(pastMonth),
-				Count:  0,
-			})
-		}
-	}
-
-	monthlyClicksTrimmed := []gormModels.LinkMonthlyClicks{}
-	for _, item := range monthlyClicksUpdated {
-		if len(monthlyClicksTrimmed) > 0 || item.Count > 0 {
-			monthlyClicksTrimmed = append(monthlyClicksTrimmed, item)
-		}
-	}
-
-	CreateMonthlyClicksCache(compat, linkId, monthlyClicksTrimmed)
-
-	return monthlyClicksTrimmed, nil
+	return monthlyClicks, nil
 }
 
 func GetLinkOfUser(compat valkeycompat.Cmdable, db *gorm.DB, userId, linkId string) (gormModels.Link, error) {

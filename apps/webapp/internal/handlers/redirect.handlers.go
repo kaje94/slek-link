@@ -21,7 +21,8 @@ func HandleRedirect(c echo.Context) error {
 
 	fmt.Println("IP of the user clicking the link", c.RealIP())
 
-	clientIP := c.RealIP()
+	clientIP := "112.134.209.104"
+	//c.RealIP() // TODO: remove hardcoded ip
 
 	db, err := utils.GetDbFromCtx(c)
 	if err != nil {

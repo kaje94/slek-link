@@ -26,6 +26,8 @@ logs/
 devbox.d
 logfile
 erl_crash.dump
+pkg
+.envrc
 
 # Templ generated files
 *_templ.go
