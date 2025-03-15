@@ -15,9 +15,7 @@
   ],
   "include": ["github:jetify-com/devbox-plugins?dir=rabbitmq"],
   "env": {
-    "NIX_HARDENING_ENABLE": "",
-    "GOPATH": "$PWD",
-    "PATH": "$PATH:$PWD/bin"
+    "NIX_HARDENING_ENABLE": ""
   },
   "env_from": ".env",
   "shell": {
