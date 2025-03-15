@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	cacheVersion = "v14"
+	cacheVersion = "v17"
 )
 
 func saveCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, cacheVal any) error {

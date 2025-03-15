@@ -40,10 +40,12 @@ This project utilizes [Devbox](https://www.jetpack.io/devbox/) to streamline the
 
 ### Prerequisites
 
-1.  **Install Devbox**: Download and install [Devbox](https://www.jetpack.io/devbox/).
-2.  **Clone Repository**: Clone the repository to your local machine.
-3.  **Create .env File**: Duplicate `.env.example` and rename it to `.env`. Fill in the required environment variables.
-4.  **(Optional) Install VS Code Extensions :** Install the [Devbox VSCode extension](https://marketplace.visualstudio.com/items?itemName=jetpack-io.devbox) and other extensions recommended in [.vscode/extensions.json](.vscode/extensions.json).
+1. **Install Devbox**: Download and install [Devbox](https://www.jetpack.io/devbox/).
+2. **Clone Repository**: Clone the repository to your local machine.
+3. **Create .env File**: Copy `.env.example` to `.env` and update the required environment variables.
+4. **(Optional) Install Direnv**: Install [direnv](https://direnv.net/) and run `devbox generate direnv --env-file .env` to automatically load the Devbox environment and variables.
+5. **(Optional) Install VS Code Extensions**: Install the [Devbox VSCode extension](https://marketplace.visualstudio.com/items?itemName=jetpack-io.devbox) and [Direnv VSCode extension](https://marketplace.visualstudio.com/items?itemName=mkhl.direnv).  
+   → Learn more about configuring VS Code with Devbox [here](https://www.jetify.com/docs/devbox/ide_configuration/vscode/).
 
 ### Running Locally
 

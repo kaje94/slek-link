@@ -1,77 +1,18 @@
 package pages
 
 import (
-	"context"
 	"fmt"
 	"github.com/dustin/go-humanize"
-	"github.com/go-echarts/go-echarts/v2/charts"
-	"github.com/go-echarts/go-echarts/v2/opts"
-	"github.com/go-echarts/go-echarts/v2/types"
 	gormModels "github.com/kaje94/slek-link/gorm/pkg"
 	"github.com/kaje94/slek-link/webapp/internal/components"
 	"github.com/kaje94/slek-link/webapp/internal/config"
 	"github.com/kaje94/slek-link/webapp/internal/utils"
 	"github.com/labstack/echo/v4"
-	"io"
 	"net/http"
 	"slices"
 	"strconv"
 	"time"
 )
-
-func CreateBarChart(countryClicks []gormModels.LinkCountryClicks) *charts.Bar {
-	bar := charts.NewBar()
-	bar.SetGlobalOptions(
-		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(false)}),
-		charts.WithGridOpts(opts.Grid{Show: opts.Bool(false)}),
-		charts.WithInitializationOpts(opts.Initialization{Width: "100%", Theme: types.ThemeWonderland}))
-
-	countryCodes := []string{}
-	clicks := []opts.BarData{}
-	for _, item := range countryClicks {
-		countryCodes = append(countryCodes, item.CountryCode)
-		clicks = append(clicks, opts.BarData{Value: item.Count, Name: item.CountryName})
-	}
-
-	bar.SetXAxis(countryCodes)
-	bar.AddSeries("Clicks", clicks)
-	return bar
-}
-
-func CreateClicksTrendChart(monthlyClicks []gormModels.LinkMonthlyClicks) *charts.Line {
-	lineChart := charts.NewLine()
-
-	slices.Reverse(monthlyClicks)
-	lineChart.SetGlobalOptions(
-		charts.WithLegendOpts(opts.Legend{Show: opts.Bool(false)}),
-		charts.WithGridOpts(opts.Grid{Show: opts.Bool(false)}),
-		charts.WithInitializationOpts(opts.Initialization{Width: "100%", Theme: types.ThemeWonderland}))
-	items := make([]opts.LineData, 0)
-	months := make([]string, 0)
-
-	for _, item := range monthlyClicks {
-		items = append(items, opts.LineData{Value: item.Count})
-		months = append(months, time.Month(item.Month).String())
-	}
-
-	lineChart.SetXAxis(months).
-		AddSeries("Clicks", items).
-		SetSeriesOptions(charts.WithLineChartOpts(opts.LineChart{Smooth: opts.Bool(true)}))
-
-	return lineChart
-}
-
-// The charts all have a `Render(w io.Writer) error` method on them.
-// That method is very similar to templ's Render method.
-type Renderable interface {
-	Render(w io.Writer) error
-}
-
-func ConvertChartToTemplComponent(chart Renderable) templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		return chart.Render(w)
-	})
-}
 
 func GetTotalAndCurrentMonthClicks(monthlyClicks []gormModels.LinkMonthlyClicks) (gormModels.LinkMonthlyClicks, int) {
 	totalClicks := 0
@@ -86,6 +27,34 @@ func GetTotalAndCurrentMonthClicks(monthlyClicks []gormModels.LinkMonthlyClicks)
 		totalClicks += item.Count
 	}
 	return currentMonth, totalClicks
+}
+
+func FormatMonthlyClicks(linkId string, monthlyClicks []gormModels.LinkMonthlyClicks) []gormModels.LinkMonthlyClicks {
+	monthlyClicksUpdated := []gormModels.LinkMonthlyClicks{}
+	for i := 0; i < len(monthlyClicks); i++ {
+		pastMonthTime := time.Now().AddDate(0, -i, 0)
+		pastMonth := int(pastMonthTime.Month())
+		pastMonthYear := pastMonthTime.Year()
+		found := false
+		for _, item := range monthlyClicks {
+			if item.Month == pastMonth && item.Year == pastMonthYear {
+				found = true
+				monthlyClicksUpdated = append(monthlyClicksUpdated, item)
+				break
+			}
+		}
+
+		if !found {
+			monthlyClicksUpdated = append(monthlyClicksUpdated, gormModels.LinkMonthlyClicks{
+				LinkID: linkId,
+				Year:   pastMonthYear,
+				Month:  int(pastMonth),
+				Count:  0,
+			})
+		}
+	}
+	slices.Reverse(monthlyClicksUpdated)
+	return monthlyClicksUpdated
 }
 
 func HandleLinkDetailsPage(c echo.Context) error {
@@ -109,43 +78,55 @@ func HandleLinkDetailsPage(c echo.Context) error {
 
 	var monthlyClicks []gormModels.LinkMonthlyClicks
 	utils.GetMonthlyClicksCache(compat, id, &monthlyClicks)
+	if monthlyClicks != nil {
+		monthlyClicks = FormatMonthlyClicks(id, monthlyClicks)
+	}
 
 	currentMonth, totalClicks := GetTotalAndCurrentMonthClicks(monthlyClicks)
-
-	var clicksTrendChart *charts.Line
-	if len(monthlyClicks) > 0 {
-		clicksTrendChart = CreateClicksTrendChart(monthlyClicks)
-	}
 
 	var countryClicks []gormModels.LinkCountryClicks
 	utils.GetCountryClicksCache(compat, id, &countryClicks)
 
-	var countryClicksChart *charts.Bar
-	if len(countryClicks) > 0 {
-		countryClicksChart = CreateBarChart(countryClicks)
-	}
+	// var countryClicksChart *charts.Bar
+	// // TODO: temporarily removing cache
+	// if len(countryClicks) > 0 {
+	// 	countryClicksChart = CreateBarChart(countryClicks)
+	// }
 
 	isNewLinkStr := c.QueryParam("isNewLink")
 	isNewLink, _ := strconv.ParseBool(isNewLinkStr)
 
+	///
+	divStr := fmt.Sprintf("sdsd %f", float32(1)/float32(8))
+	fmt.Println(divStr)
+
 	resp := components.RootLayout(
 		"Link Details | slek.link - Track and Analyze Your Link's Performance",
 		"Dive into detailed analytics for your shortened link on slek.link. Monitor clicks, track user behavior, and gain insights to optimize your link's performance.",
-		linkDetailsBodyContent(c, id, link, currentMonth, totalClicks, isNewLink, clicksTrendChart, countryClicksChart),
+		linkDetailsBodyContent(c, id, link, currentMonth, totalClicks, isNewLink, monthlyClicks, countryClicks),
 	)
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 	return resp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-templ linkDetailsBodyContent(c echo.Context, linkId string, link gormModels.Link, currentMonth gormModels.LinkMonthlyClicks, totalClicks int, showNewLinkBanner bool, clicksTrendChart *charts.Line, countryClicksChart *charts.Bar) {
+templ linkDetailsBodyContent(c echo.Context, linkId string, link gormModels.Link, currentMonth gormModels.LinkMonthlyClicks, totalClicks int, showNewLinkBanner bool, monthlyClicks []gormModels.LinkMonthlyClicks, countryClicks []gormModels.LinkCountryClicks) {
 	{{ isLoadingLink := link.ID == "" }}
 	{{ timeAgoStr := "" }}
 	{{ totalClicksStr := "" }}
 	{{ currentMonthClicksStr := "" }}
+	{{ pathMonthText := "Past 12 months" }}
+	{{ clicksSubText := "Clicks over time" }}
 	if link.ID !="" {
 		{{ timeAgoStr = humanize.Time(link.CreatedAt) }}
 		{{ totalClicksStr = humanize.Comma(int64(totalClicks)) }}
 		{{ currentMonthClicksStr = humanize.Comma(int64(currentMonth.Count)) }}
+		if len(monthlyClicks)>1 {
+			{{ pathMonthText = fmt.Sprintf("Past %d months", len(monthlyClicks)) }}
+			{{ clicksSubText = fmt.Sprintf("Clicks over the past %d months", len(monthlyClicks)) }}
+		} else if len(monthlyClicks)>0 {
+			{{ pathMonthText = "Past month" }}
+			{{ clicksSubText = "Clicks over past month" }}
+		}
 	}
 	@components.LayoutWithSignals(c, "{ linkModalOpen:false, linkModalError:'', mutating: false, editLinkId:'', deleteLinkId: '', name: '', shortCode:'', url:'', description:'' }") {
 		@components.BreadCrumb([]components.BreadcrumbItem{
@@ -170,13 +151,13 @@ templ linkDetailsBodyContent(c echo.Context, linkId string, link gormModels.Link
 		</div>
 		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content/10">
 			@LinkDetailsBodyLinks(link)
-			@StatSection("link-details-stat-total-clicks", "Total Clicks", totalClicksStr, "Past 12 months")
+			@StatSection("link-details-stat-total-clicks", "Total Clicks", totalClicksStr, pathMonthText)
 			@StatSection("link-details-stat-current-month-clicks", "Clicks This Month", currentMonthClicksStr, "")
 			@StatSection("link-details-stat-created", "Created", timeAgoStr, fmt.Sprintf("Created on %s", link.CreatedAt.Format(utils.LayoutHuman)))
 			@StatSection("link-details-stat-status", "Status", string(link.Status), "")
 			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
-				@StatLineChartSection("link-details-stat-click-trend", linkId, "Clicks Trend", "Clicks over the past 12 months", clicksTrendChart)
-				@StatBarChartSection("link-details-stat-country-clicks", linkId, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicksChart)
+				@StatLineChartSection("link-details-stat-click-trend", linkId, "Clicks Trend", clicksSubText, monthlyClicks)
+				@StatBarChartSection("link-details-stat-country-clicks", linkId, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicks)
 			</div>
 		</div>
 		@components.LinkModal(c, true)
@@ -260,9 +241,11 @@ templ statLinkSection(sectionId string, title, value, desc string) {
 				<a class="text-lg line-clamp-1 break-all link-hover cursor-pointer hover:underline" href={ templ.SafeURL(value) } target="_blank">
 					{ value }
 				</a>
-				<button class="btn btn-xs mb-1" data-on-click={ fmt.Sprintf("@clipboard('%s')", value) }>
-					@components.CopyIcon()
-				</button>
+				<div class="tooltip" data-tip={ fmt.Sprintf("Copy %s to clipboard", title) }>
+					<button class="btn btn-xs mb-1" data-on-click={ fmt.Sprintf("@clipboard('%s')", value) }>
+						@components.CopyIcon()
+					</button>
+				</div>
 			} else {
 				<div class="h-6 flex-1 bg-base-content/10 animate-pulse rounded"></div>
 				<div class="rounded-lg animate-pulse text-base-content/20">
@@ -282,32 +265,12 @@ templ statChartWrap(sectionId string, title string, desc string, isLoading bool)
 		} else {
 			<div class="h-4 w-1/2 bg-base-content/10 rounded animate-pulse mt-1"></div>
 		}
-		<div class="my-1 flex items-center justify-center min-h-[400px] h-full">
+		<div class="my-1 flex items-center justify-center min-h-[450px] h-full">
 			{ children... }
 			if isLoading {
 				@components.ChartIcon(templ.Attributes{"height": "200", "width": "200", "stroke-width": "3", "class": "animate-pulse text-base-content/20"})
 			}
 		</div>
-	}
-}
-
-templ StatLineChartSection(sectionId string, linkId string, title string, desc string, clicksTrendChart *charts.Line) {
-	@statChartWrap(sectionId, title, desc, clicksTrendChart == nil) {
-		if clicksTrendChart!=nil {
-			@ConvertChartToTemplComponent(clicksTrendChart)
-		} else {
-			<span data-on-load={ fmt.Sprintf("@get('/api/datastar/lazy/link-details/monthly-clicks/%s')", linkId) }></span>
-		}
-	}
-}
-
-templ StatBarChartSection(sectionId string, linkId string, title string, desc string, monthlyBarChart *charts.Bar) {
-	@statChartWrap(sectionId, title, desc, monthlyBarChart == nil) {
-		if monthlyBarChart!=nil {
-			@ConvertChartToTemplComponent(monthlyBarChart)
-		} else {
-			<span data-on-load={ fmt.Sprintf("@get('/api/datastar/lazy/link-details/country-clicks/%s')", linkId) }></span>
-		}
 	}
 }
 
@@ -321,4 +284,90 @@ templ statSectionWrap(sectionId string) {
 	<div class="p-2 md:p-4 xl:p-6 bg-base-100" id={ sectionId }>
 		{ children... }
 	</div>
+}
+
+templ StatLineChartSection(sectionId string, linkId string, title string, desc string, monthlyClicks []gormModels.LinkMonthlyClicks) {
+	@statChartWrap(sectionId, title, desc, monthlyClicks == nil) {
+		if monthlyClicks!=nil {
+			@chartEmptyWrap(len(monthlyClicks) == 0) {
+				@chartCssWrap() {
+					{{ maxClicks := getMaxMonthlyClicks(monthlyClicks) }}
+					for _, item := range monthlyClicks {
+						{{ monthTime := time.Date(item.Year, time.Month(item.Month), 1, 0, 0, 0, 0, time.UTC) }}
+						<tr>
+							<th scope="row">{ monthTime.Format("Jan") }</th>
+							<td style={ templ.SafeCSS(fmt.Sprintf("--size: %.5f;", float32(item.Count)/float32(maxClicks))) } class="rounded-t">
+								<span class="tooltip">{ fmt.Sprintf("%s %d",monthTime.Format("January"),item.Year) } <br/> { strconv.Itoa(item.Count) } Clicks </span>
+							</td>
+						</tr>
+					}
+				}
+			}
+		} else {
+			<span data-on-load={ fmt.Sprintf("@get('/api/datastar/lazy/link-details/monthly-clicks/%s')", linkId) }></span>
+		}
+	}
+}
+
+templ StatBarChartSection(sectionId string, linkId string, title string, desc string, countryClicks []gormModels.LinkCountryClicks) {
+	@statChartWrap(sectionId, title, desc, countryClicks == nil) {
+		if countryClicks!=nil {
+			@chartEmptyWrap(len(countryClicks) == 0) {
+				@chartCssWrap() {
+					{{ maxClicks := getMaxCountryClicks(countryClicks) }}
+					for _, item := range countryClicks {
+						<tr>
+							<th scope="row">{ item.CountryCode }</th>
+							<td style={ templ.SafeCSS(fmt.Sprintf("--size: %.5f;", float32(item.Count)/float32(maxClicks))) } class="rounded-t">
+								<span class="tooltip">{ item.CountryName } <br/> { strconv.Itoa(item.Count) } Clicks </span>
+							</td>
+						</tr>
+					}
+				}
+			}
+		} else {
+			<span data-on-load={ fmt.Sprintf("@get('/api/datastar/lazy/link-details/country-clicks/%s')", linkId) }></span>
+		}
+	}
+}
+
+func getMaxMonthlyClicks(monthlyClicks []gormModels.LinkMonthlyClicks) int {
+	count := 0
+	for _, item := range monthlyClicks {
+		if item.Count > count {
+			count = item.Count
+		}
+	}
+	return count
+}
+
+func getMaxCountryClicks(countryClicks []gormModels.LinkCountryClicks) int {
+	count := 0
+	for _, item := range countryClicks {
+		if item.Count > count {
+			count = item.Count
+		}
+	}
+	return count
+}
+
+templ chartCssWrap() {
+	<div class="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full flex items-center justify-center flex-1 pt-5">
+		<table class="charts-css column hide-da data-start show-labels show-primary-axis show-data-axes show-6-secondary-axes data-spacing-2">
+			<tbody class="min-h-[430px]">
+				{ children... }
+			</tbody>
+		</table>
+	</div>
+}
+
+templ chartEmptyWrap(isEmpty bool) {
+	if isEmpty {
+		<div>
+			@components.ChartIcon(templ.Attributes{"height": "200", "width": "200", "stroke-width": "3", "class": "opacity-30"})
+			<div class="font-light opacity-40 text-center">No data yet</div>
+		</div>
+	} else {
+		{ children... }
+	}
 }

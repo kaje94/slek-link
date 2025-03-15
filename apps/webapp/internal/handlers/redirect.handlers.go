@@ -21,7 +21,7 @@ func HandleRedirect(c echo.Context) error {
 
 	fmt.Println("IP of the user clicking the link", c.RealIP())
 
-	clientIP := "112.134.209.104"
+	clientIP := "101.208.0.0"
 	//c.RealIP() // TODO: remove hardcoded ip
 
 	db, err := utils.GetDbFromCtx(c)
@@ -51,9 +51,13 @@ func HandleRedirect(c echo.Context) error {
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = asyncapi.PublishUrlVisited(ctx, amqpPub, urlVisitedPayload)
-	if err != nil {
-		return err
+
+	purpose := c.Request().Header.Get("Purpose")
+	if purpose != "prefetch" {
+		err = asyncapi.PublishUrlVisited(ctx, amqpPub, urlVisitedPayload)
+		if err != nil {
+			return err
+		}
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, link.LongURL)

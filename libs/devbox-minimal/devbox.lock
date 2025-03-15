@@ -196,51 +196,51 @@
         }
       }
     },
-    "templ@0.2.793": {
-      "last_modified": "2024-12-23T21:10:33Z",
-      "resolved": "github:NixOS/nixpkgs/de1864217bfa9b5845f465e771e0ecb48b30e02d#templ",
+    "templ@0.3.833": {
+      "last_modified": "2025-03-09T21:26:12Z",
+      "resolved": "github:NixOS/nixpkgs/e05f8bda630a0836d777d84de14b3c16eb758514#templ",
       "source": "devbox-search",
-      "version": "0.2.793",
+      "version": "0.3.833",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/kk11sv333sh7j2jrlg45qkd1xh99cklw-templ-0.2.793",
+              "path": "/nix/store/hfm05gc8cqfa0ai41h5ibdl38cpp4iy6-templ-0.3.833",
               "default": true
             }
           ],
-          "store_path": "/nix/store/kk11sv333sh7j2jrlg45qkd1xh99cklw-templ-0.2.793"
+          "store_path": "/nix/store/hfm05gc8cqfa0ai41h5ibdl38cpp4iy6-templ-0.3.833"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/79imhbhg4cbwzrjnpql848qaakjfy27w-templ-0.2.793",
+              "path": "/nix/store/bir5sx0qak6sb4dm25candhcbipia007-templ-0.3.833",
               "default": true
             }
           ],
-          "store_path": "/nix/store/79imhbhg4cbwzrjnpql848qaakjfy27w-templ-0.2.793"
+          "store_path": "/nix/store/bir5sx0qak6sb4dm25candhcbipia007-templ-0.3.833"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/racq0ff3hv70lin8f3r9j9jyif0jvqnd-templ-0.2.793",
+              "path": "/nix/store/lj68rc0hwbbfrskjbvgvzqji3bajnjkx-templ-0.3.833",
               "default": true
             }
           ],
-          "store_path": "/nix/store/racq0ff3hv70lin8f3r9j9jyif0jvqnd-templ-0.2.793"
+          "store_path": "/nix/store/lj68rc0hwbbfrskjbvgvzqji3bajnjkx-templ-0.3.833"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/x87v4qhyb979169digqamcdzgdq54682-templ-0.2.793",
+              "path": "/nix/store/2an85n9i2in58z4pmyvny6f3qbzymw3j-templ-0.3.833",
               "default": true
             }
           ],
-          "store_path": "/nix/store/x87v4qhyb979169digqamcdzgdq54682-templ-0.2.793"
+          "store_path": "/nix/store/2an85n9i2in58z4pmyvny6f3qbzymw3j-templ-0.3.833"
         }
       }
     }

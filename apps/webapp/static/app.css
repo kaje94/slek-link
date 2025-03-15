@@ -59,6 +59,7 @@ body {
   --legend-border-width: 0.5px;
 }
 
-.charts-css.bar {
-  --labels-size: 36px;
+.charts-css .tooltip{
+  background-color: var(--color-neutral);
+  color: var(--color-neutral-content);
 }

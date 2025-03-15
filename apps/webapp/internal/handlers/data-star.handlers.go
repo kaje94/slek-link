@@ -440,14 +440,34 @@ func LinkMonthlyLazyHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	if monthlyClicks != nil {
+		monthlyClicks = pages.FormatMonthlyClicks(id, monthlyClicks)
+	}
 
 	currentMonth, totalClicks := pages.GetTotalAndCurrentMonthClicks(monthlyClicks)
 	totalClicksStr := humanize.Comma(int64(totalClicks))
 	currentMonthClicksStr := humanize.Comma(int64(currentMonth.Count))
-	clicksTrendChart := pages.CreateClicksTrendChart(monthlyClicks)
+	pathMonthText := "Past 12 months"
+	clicksSubText := "Clicks over time"
+	if len(monthlyClicks) > 1 {
+		pathMonthText = fmt.Sprintf("Past %d months", len(monthlyClicks))
+		clicksSubText = fmt.Sprintf("Clicks over the past %d months", len(monthlyClicks))
+	} else if len(monthlyClicks) > 0 {
+		pathMonthText = "Past month"
+		clicksSubText = "Clicks over past month"
+	}
+
+	if monthlyClicks == nil {
+		fmt.Println(" month is nil")
+		monthlyClicks = []gormModels.LinkMonthlyClicks{}
+	}
+
+	if monthlyClicks == nil {
+		fmt.Println(" month is nil2")
+	}
 
 	sse.MergeFragmentTempl(
-		pages.StatSection("link-details-stat-total-clicks", "Total Clicks", totalClicksStr, "Past 12 months"),
+		pages.StatSection("link-details-stat-total-clicks", "Total Clicks", totalClicksStr, pathMonthText),
 		datastar.WithSelectorID("link-details-stat-total-clicks"),
 		datastar.WithViewTransitions(),
 	)
@@ -457,7 +477,7 @@ func LinkMonthlyLazyHandler(c echo.Context) error {
 		datastar.WithViewTransitions(),
 	)
 	sse.MergeFragmentTempl(
-		pages.StatLineChartSection("link-details-stat-click-trend", id, "Clicks Trend", "Clicks over the past 12 months", clicksTrendChart),
+		pages.StatLineChartSection("link-details-stat-click-trend", id, "Clicks Trend", clicksSubText, monthlyClicks),
 		datastar.WithSelectorID("link-details-stat-click-trend"),
 		datastar.WithViewTransitions(),
 	)
@@ -488,10 +508,17 @@ func LinkCountryLazyHandler(c echo.Context) error {
 		return err
 	}
 
-	countryClicksChart := pages.CreateBarChart(countryClicks)
+	if countryClicks == nil {
+		countryClicks = []gormModels.LinkCountryClicks{}
+		fmt.Println(("SDSD is nil"))
+	}
+
+	if countryClicks == nil {
+		fmt.Println(("SDSD is nil2"))
+	}
 
 	sse.MergeFragmentTempl(
-		pages.StatBarChartSection("link-details-stat-country-clicks", id, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicksChart),
+		pages.StatBarChartSection("link-details-stat-country-clicks", id, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicks),
 		datastar.WithSelectorID("link-details-stat-country-clicks"),
 		datastar.WithViewTransitions(),
 	)

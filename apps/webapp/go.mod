@@ -6,7 +6,6 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.4.4
 	github.com/a-h/templ v0.3.833
 	github.com/dustin/go-humanize v1.0.1
-	github.com/go-echarts/go-echarts/v2 v2.5.1
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/gorilla/sessions v1.4.0
 	github.com/labstack/echo/v4 v4.12.0

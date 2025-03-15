@@ -17,8 +17,16 @@ func CreateLink(db *gorm.DB, compat valkeycompat.Cmdable, newLink gormModels.Lin
 	CreateUserLinkCache(compat, *newLink.UserID, newLink.ID, newLink)
 	CreateMonthlyClicksCache(compat, newLink.ID, []gormModels.LinkMonthlyClicks{})
 	CreateCountryClicksCache(compat, newLink.ID, []gormModels.LinkCountryClicks{})
-	DeleteUserLinksCache(compat, *newLink.UserID)
 	DeleteDashboardSearchCache(compat, *newLink.UserID)
+
+	var existingLinksCache []gormModels.Link
+	GetUserLinksCache(compat, *newLink.UserID, &existingLinksCache)
+	if existingLinksCache != nil {
+		existingLinksCache = append(existingLinksCache, newLink)
+		CreateUserLinksCache(compat, *newLink.UserID, existingLinksCache)
+	} else {
+		DeleteUserLinksCache(compat, *newLink.UserID)
+	}
 	return nil
 }
 
@@ -35,7 +43,6 @@ func UpdateLinkMonthlyClicks(compat valkeycompat.Cmdable, db *gorm.DB, monthlyCl
 	if result.Error != nil {
 		return result.Error
 	}
-	DeleteMonthlyClicksCache(compat, monthlyClicks.LinkID)
 	return nil
 }
 
@@ -52,7 +59,6 @@ func UpdateLinkCountryClicks(compat valkeycompat.Cmdable, db *gorm.DB, countryCl
 	if result.Error != nil {
 		return result.Error
 	}
-	DeleteCountryClicksCache(compat, countryClicks.LinkID)
 	return nil
 }
 
@@ -170,8 +176,23 @@ func UpdateLink(compat valkeycompat.Cmdable, db *gorm.DB, link gormModels.Link) 
 	}
 	CreateUserLinkCache(compat, *link.UserID, link.ID, link)
 	CreateSlugCache(compat, link.ShortCode, link)
-	DeleteUserLinksCache(compat, *link.UserID)
 	DeleteDashboardSearchCache(compat, *link.UserID)
+
+	var existingLinksCache []gormModels.Link
+	GetUserLinksCache(compat, *link.UserID, &existingLinksCache)
+	if existingLinksCache != nil {
+		updatedLinks := []gormModels.Link{}
+		for _, item := range existingLinksCache {
+			if item.ID == link.ID {
+				updatedLinks = append(updatedLinks, link)
+			} else {
+				updatedLinks = append(updatedLinks, item)
+			}
+		}
+		CreateUserLinksCache(compat, *link.UserID, updatedLinks)
+	} else {
+		DeleteUserLinksCache(compat, *link.UserID)
+	}
 	return nil
 }
 
