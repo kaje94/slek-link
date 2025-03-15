@@ -31,7 +31,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 		return nil
 	}
 
-	monthlyClicks, err := utils.GetLinksMonthlyClicks(compat, db, lm.LinkId) ////// todo: fix this since its empty
+	monthlyClicks, err := utils.GetLinksMonthlyClicks(compat, db, lm.LinkId)
 	if err != nil {
 		return err
 	}

@@ -87,12 +87,6 @@ func HandleLinkDetailsPage(c echo.Context) error {
 	var countryClicks []gormModels.LinkCountryClicks
 	utils.GetCountryClicksCache(compat, id, &countryClicks)
 
-	// var countryClicksChart *charts.Bar
-	// // TODO: temporarily removing cache
-	// if len(countryClicks) > 0 {
-	// 	countryClicksChart = CreateBarChart(countryClicks)
-	// }
-
 	isNewLinkStr := c.QueryParam("isNewLink")
 	isNewLink, _ := strconv.ParseBool(isNewLinkStr)
 

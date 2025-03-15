@@ -23,7 +23,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.configmapName }}
-          Todo: add readiness and liveness probes
           readinessProbe:
             initialDelaySeconds: 10
             httpGet:
