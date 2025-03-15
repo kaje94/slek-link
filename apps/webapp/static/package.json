@@ -4,8 +4,9 @@
   "scripts": {
     "rename-dist-files": "bun run rename-dist-files.ts",
     "build-js": "bun build ./scripts.ts --outdir ./public/dist --minify",
-    "build-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css --minify",
-    "build": "rimraf ./public/dist && bun run build-js && bun run build-css && bun run rename-dist-files ./public/dist",
+    "build-temp-css": "tailwindcss -i ./app.css -o ./public/dist/temp/styles.css --minify",
+    "build-purge-css": "bunx purgecss --css public/dist/temp/styles.css --content ../internal/**/*.templ --output public/dist -s datastar-swapping -s datastar-settling",
+    "build": "rimraf ./public/dist && bun run build-js && bun run build-temp-css && bun run build-purge-css && bun run rename-dist-files ./public/dist && rimraf ./public/dist/temp",
     "dev-js": "bun build ./scripts.ts --outdir ./public/dist",
     "dev-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css",
     "dev": "bun run dev-js && bun run dev-css",
