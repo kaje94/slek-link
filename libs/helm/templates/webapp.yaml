@@ -23,11 +23,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.configmapName }}
-          readinessProbe:
-            initialDelaySeconds: 10
-            httpGet:
-              port: 8080
-              path: '/api/health'
+          # readinessProbe:
+          #   initialDelaySeconds: 10
+          #   httpGet:
+          #     port: 8080
+          #     path: '/api/health'
           resources:
             requests:
               memory: "128Mi"
