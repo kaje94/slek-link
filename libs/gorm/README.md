@@ -1,6 +1,6 @@
 # slek-link: gorm
 
-This workspace contains gorm models as well as the DB migration script needed for Slke-link
+This workspace contains gorm models as well as the DB migration script needed for Slek-link
 
 ### Directory Structure
 
