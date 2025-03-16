@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type rootConfig struct {
@@ -60,6 +61,8 @@ func init() {
 
 func getEnvVal(key string) string {
 	envVal := os.Getenv(key)
+	envVal = strings.TrimSpace(envVal)
+	envVal = strings.Trim(envVal, `"`)
 	if envVal == "" {
 		log.Fatalf("env for %s is required", key)
 	}
