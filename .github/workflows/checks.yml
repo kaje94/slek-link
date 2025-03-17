@@ -1,0 +1,23 @@
+name: Checks
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.12.0
+        with:
+          enable-cache: "true"
+          devbox-version: "0.14.0"
+          project-path: "./libs/devbox-minimal"
+      - name: Build Webapp
+        run: devbox run -- task webapp:build
