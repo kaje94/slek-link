@@ -37,7 +37,7 @@ var valkeyClient valkey.Client
 func RunServer() error {
 	// Create new echo router
 	router := echo.New()
-	router.IPExtractor = echo.ExtractIPFromXFFHeader()
+	router.IPExtractor = echo.ExtractIPDirect()
 
 	// Middleware
 	router.Pre(middleware.RemoveTrailingSlash())

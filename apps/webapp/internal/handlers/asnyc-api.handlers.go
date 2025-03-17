@@ -19,7 +19,7 @@ import (
 func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.Message) error {
 	log.Printf("received message payload: %s", string(msg.Payload))
 	year := time.Now().Year()
-	month := 2
+	month := time.Now().Month()
 
 	var lm asyncapi.UrlVisitedPayload
 	err := json.Unmarshal(msg.Payload, &lm)
@@ -91,7 +91,7 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 	countryCode, countryName := utils.GetCountry(lm.IpAddress)
 	println("payload country", countryCode, countryName)
 
-	if countryCode != "" {
+	if countryCode != "" && countryCode != "-" {
 		countryClicks, err := utils.GetCountryClicks(compat, db, lm.LinkId)
 		if err != nil {
 			return err
