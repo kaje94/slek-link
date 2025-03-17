@@ -21,6 +21,14 @@ func HandleRedirect(c echo.Context) error {
 
 	fmt.Println("IP of the user clicking the link", c.RealIP())
 
+	// TODO; remove
+	for name, values := range c.Request().Header {
+		// Loop over all values for the name.
+		for _, value := range values {
+			fmt.Println("Headers", name, value)
+		}
+	}
+
 	clientIP := c.RealIP()
 
 	db, err := utils.GetDbFromCtx(c)
