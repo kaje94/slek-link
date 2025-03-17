@@ -4,14 +4,15 @@
   "scripts": {
     "rename-dist-files": "bun run rename-dist-files.ts",
     "build-js": "bun build ./scripts.ts --outdir ./public/dist --minify",
-    "build-temp-css": "tailwindcss -i ./app.css -o ./public/dist/temp/styles.css --minify",
-    "build-purge-css": "bunx purgecss --css public/dist/temp/styles.css --content ../internal/**/*.templ --output public/dist -s datastar-swapping -s datastar-settling",
-    "build": "rimraf ./public/dist && bun run build-js && bun run build-temp-css && bun run build-purge-css && bun run rename-dist-files ./public/dist && rimraf ./public/dist/temp",
+    "build-css": "bun run purge-charts-css && tailwindcss -i ./app.css -o ./public/dist/styles.css --minify",
+    "purge-charts-css": "bunx purgecss --css node_modules/charts.css/dist/charts.css --content ../internal/**/*.templ --output .",
+    "build": "rimraf ./public/dist && bun run build-js && bun run build-css && bun run rename-dist-files ./public/dist",
+    "copy-charts-css": "cp node_modules/charts.css/dist/charts.css .",
     "dev-js": "bun build ./scripts.ts --outdir ./public/dist",
-    "dev-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css",
+    "dev-css": "bun run copy-charts-css && tailwindcss -i ./app.css -o ./public/dist/styles.css",
     "dev": "bun run dev-js && bun run dev-css",
     "watch-js": "bun build ./scripts.ts --outdir ./public/dist --watch",
-    "watch-css": "tailwindcss -i ./app.css -o ./public/dist/styles.css --watch",
+    "watch-css": "bun run copy-charts-css && tailwindcss -i ./app.css -o ./public/dist/styles.css --watch",
     "watch": "concurrently 'bun run watch-js' 'bun run watch-css'"
   },
   "dependencies": {
@@ -25,6 +26,7 @@
     "concurrently": "^9.1.2",
     "@types/node": "^20.0.0",
     "typescript": "^5.8.2",
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "cp": "^0.2.0"
   }
 }

@@ -35,3 +35,6 @@ pkg
 
 # VS code temp tiles
 __debug_*
+
+# Other
+charts.css

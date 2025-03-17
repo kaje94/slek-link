@@ -1,5 +1,5 @@
+@import "./charts.css";
 @import "tailwindcss";
-@import "charts.css/dist/charts.css";
 @plugin "daisyui" {
   themes: forest --default;
   logs: false;
