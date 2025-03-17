@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Create empty .env file
+        run: touch .env
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.12.0
         with:
