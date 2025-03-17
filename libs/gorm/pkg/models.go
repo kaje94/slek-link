@@ -41,6 +41,5 @@ type LinkCountryClicks struct {
 	ID          string `gorm:"primaryKey"`
 	LinkID      string `gorm:"foreignKey:Link.ID;index"`
 	CountryCode string `gorm:"countryCode"`
-	CountryName string `gorm:"countryName"`
 	Count       int    `gorm:"default:0"`
 }

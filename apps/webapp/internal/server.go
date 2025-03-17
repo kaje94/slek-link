@@ -37,7 +37,6 @@ var valkeyClient valkey.Client
 func RunServer() error {
 	// Create new echo router
 	router := echo.New()
-	router.IPExtractor = echo.ExtractIPFromRealIPHeader()
 
 	// Middleware
 	router.Pre(middleware.RemoveTrailingSlash())
@@ -118,12 +117,6 @@ func RunServer() error {
 		ReadTimeout:  20 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  60 * time.Second,
-	}
-
-	// load ip to country mapping
-	err := utils.Load("db-ip-to-country.csv.gz")
-	if err != nil {
-		fmt.Println(err)
 	}
 
 	slog.Info("Starting server...", "port", config.Config.WebAppConfig.Port)

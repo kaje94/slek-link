@@ -33,5 +33,4 @@ RUN devbox run task webapp:build
 FROM cgr.dev/chainguard/static:latest AS run-stage
 COPY --from=build-stage /code/apps/webapp/bin/main .
 COPY --from=build-stage /code/apps/webapp/static/public /static/public
-COPY --from=build-stage /code/apps/webapp/db-ip-to-country.csv.gz .
 ENTRYPOINT ["./main"]

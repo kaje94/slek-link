@@ -27,6 +27,23 @@ func main() {
 	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		// your migrations here
 		// Refer https://github.com/go-gormigrate/gormigrate on how to add migrations if needed
+		{
+			// drop `country_name` column from `link_country_clicks` table
+			ID: "202503172200",
+			Migrate: func(tx *gorm.DB) error {
+				// when table already exists, define only columns that are about to change
+				type LinkCountryClicks struct {
+					CountryName string `gorm:"countryName"`
+				}
+				return tx.Migrator().DropColumn(&LinkCountryClicks{}, "CountryName")
+			},
+			Rollback: func(tx *gorm.DB) error {
+				type LinkCountryClicks struct {
+					CountryName string `gorm:"countryName"`
+				}
+				return db.Migrator().AddColumn(&LinkCountryClicks{}, "CountryName")
+			},
+		},
 	})
 
 	m.InitSchema(func(tx *gorm.DB) error {

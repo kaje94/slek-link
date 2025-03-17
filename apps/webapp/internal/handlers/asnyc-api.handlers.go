@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kaje94/slek-link/asyncapi/asyncapi"
@@ -88,10 +89,10 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 	}
 	utils.CreateMonthlyClicksCache(compat, lm.LinkId, newMonthlyClicksList)
 
-	countryCode, countryName := utils.GetCountry(lm.IpAddress)
-	println("payload country", countryCode, countryName)
+	println("payload country", lm.CountryCode)
 
-	if countryCode != "" && countryCode != "-" {
+	if lm.CountryCode != "" {
+		countryCode := strings.ToLower(lm.CountryCode)
 		countryClicks, err := utils.GetCountryClicks(compat, db, lm.LinkId)
 		if err != nil {
 			return err
@@ -115,7 +116,6 @@ func HandleUserUrlVisit(compat valkeycompat.Cmdable, db *gorm.DB, msg *message.M
 				ID:          fmt.Sprintf("%s-%s", lm.LinkId, countryCode),
 				LinkID:      lm.LinkId,
 				CountryCode: countryCode,
-				CountryName: countryName,
 				Count:       1,
 			}
 			err = utils.CreateLinkCountryClicks(compat, db, countryClickItem)

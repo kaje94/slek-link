@@ -19,17 +19,10 @@ func HandleRedirect(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "/404")
 	}
 
-	fmt.Println("IP of the user clicking the link", c.RealIP())
+	// Cf-Ipcountry added by cloudflare
+	countryCode := c.Request().Header.Get("Cf-Ipcountry")
 
-	// TODO; remove
-	for name, values := range c.Request().Header {
-		// Loop over all values for the name.
-		for _, value := range values {
-			fmt.Println("Headers", name, value)
-		}
-	}
-
-	clientIP := c.RealIP()
+	fmt.Println("Country code of the user", countryCode)
 
 	db, err := utils.GetDbFromCtx(c)
 	if err != nil {
@@ -47,9 +40,9 @@ func HandleRedirect(c echo.Context) error {
 	}
 
 	urlVisitedPayload := asyncapi.UrlVisitedPayload{
-		LinkId:    link.ID,
-		Timestamp: time.Now().Format(time.RFC3339),
-		IpAddress: clientIP,
+		LinkId:      link.ID,
+		Timestamp:   time.Now().Format(time.RFC3339),
+		CountryCode: countryCode,
 	}
 
 	amqpPub, err := asyncapi.GetAMQPPublisher(config.Config.AmqpUrl)

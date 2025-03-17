@@ -22,7 +22,7 @@ func saveCache(valkeyCompat valkeycompat.Cmdable, cacheKey string, cacheVal any)
 	}
 
 	if config.Config.Valkey.Url != "" && valkeyCompat != nil {
-		_, err = valkeyCompat.Set(context.Background(), cacheKey, jsonBytes, time.Hour*24).Result()
+		_, err = valkeyCompat.Set(context.Background(), cacheKey, jsonBytes, time.Hour).Result()
 		if err != nil {
 			return err
 		}

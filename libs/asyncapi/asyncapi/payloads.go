@@ -12,7 +12,7 @@
 type UrlVisitedPayload struct {
   LinkId string `json:"linkId"`
   Timestamp string `json:"timestamp"`
-  IpAddress string `json:"ipAddress"`
+  CountryCode string `json:"countryCode"`
   AdditionalProperties map[string]interface{} `json:"additionalProperties"`
 }
     

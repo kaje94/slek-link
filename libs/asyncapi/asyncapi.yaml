@@ -72,9 +72,9 @@ components:
           type: string
           format: date-time
           description: Date and time of the visit.
-        ipAddress:
+        countryCode:
           type: string
-          description: IP address of the user.
+          description: country code of the user.
       required:
         - linkId
         - timestamp
