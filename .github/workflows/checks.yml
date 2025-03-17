@@ -1,13 +1,6 @@
 name: Checks
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-    types: [opened, synchronize]
 jobs:
   build:
     runs-on: ubuntu-latest
