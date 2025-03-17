@@ -16,7 +16,7 @@ data:
   VALKEY_HOST: "{{ .Values.valkey.serviceName }}:{{ .Values.valkey.service.port | toString }}"
   AMQP_URL: "amqp://{{ .Values.rabbitmq.defaultUser }}:{{ .Values.rabbitmq.defaultPass }}@{{ .Values.rabbitmq.serviceName }}:5672/"
   {{- if and .Values.configMap.values.POSTGRESQL_DSN (ne .Values.configMap.values.POSTGRESQL_DSN "") }}
-  POSTGRESQL_DSN: {{ .Values.configMap.values.POSTGRESQL_DSN | quote | nindent 4  }}
+  POSTGRESQL_DSN: {{ .Values.configMap.values.POSTGRESQL_DSN | quote }}
   {{- else }}
   POSTGRESQL_DSN: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ .Values.postgresql.serviceName }}:5432/{{ .Values.postgresql.postgresDatabase }}"
   {{- end }}
