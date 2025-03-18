@@ -477,7 +477,7 @@ func LinkMonthlyLazyHandler(c echo.Context) error {
 		datastar.WithViewTransitions(),
 	)
 	sse.MergeFragmentTempl(
-		pages.StatLineChartSection("link-details-stat-click-trend", id, "Clicks Trend", clicksSubText, monthlyClicks),
+		pages.StatMonthlyClicksChartSection("link-details-stat-click-trend", id, "Clicks Trend", clicksSubText, monthlyClicks),
 		datastar.WithSelectorID("link-details-stat-click-trend"),
 		datastar.WithViewTransitions(),
 	)
@@ -518,7 +518,7 @@ func LinkCountryLazyHandler(c echo.Context) error {
 	}
 
 	sse.MergeFragmentTempl(
-		pages.StatBarChartSection("link-details-stat-country-clicks", id, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicks),
+		pages.StatCountryClicksChartSection("link-details-stat-country-clicks", id, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicks),
 		datastar.WithSelectorID("link-details-stat-country-clicks"),
 		datastar.WithViewTransitions(),
 	)

@@ -144,15 +144,15 @@ templ linkDetailsBodyContent(c echo.Context, linkId string, link gormModels.Link
 			@LinkDetailsBodyNameDesc(link, linkId)
 			@LinkDetailsActionButtons(link, isLoadingLink)
 		</div>
-		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content/10">
+		<div class="grid md:grid-cols-2 xl:grid-cols-4 gap-[1px] bg-base-content/10 overflow-x-clip">
 			@LinkDetailsBodyLinks(link)
 			@StatSection("link-details-stat-total-clicks", "Total Clicks", totalClicksStr, pathMonthText)
 			@StatSection("link-details-stat-current-month-clicks", "Clicks This Month", currentMonthClicksStr, "")
 			@StatSection("link-details-stat-created", "Created", timeAgoStr, fmt.Sprintf("Created on %s", link.CreatedAt.Format(utils.LayoutHuman)))
 			@StatSection("link-details-stat-status", "Status", string(link.Status), "")
 			<div class="grid lg:grid-cols-2 gap-[1px] col-span-full">
-				@StatLineChartSection("link-details-stat-click-trend", linkId, "Clicks Trend", clicksSubText, monthlyClicks)
-				@StatBarChartSection("link-details-stat-country-clicks", linkId, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicks)
+				@StatMonthlyClicksChartSection("link-details-stat-click-trend", linkId, "Clicks Trend", clicksSubText, monthlyClicks)
+				@StatCountryClicksChartSection("link-details-stat-country-clicks", linkId, "Clicks by Country", "Top countries where the users who clicked on the link are from", countryClicks)
 			</div>
 		</div>
 		@components.LinkModal(c, true)
@@ -281,7 +281,7 @@ templ statSectionWrap(sectionId string) {
 	</div>
 }
 
-templ StatLineChartSection(sectionId string, linkId string, title string, desc string, monthlyClicks []gormModels.LinkMonthlyClicks) {
+templ StatMonthlyClicksChartSection(sectionId string, linkId string, title string, desc string, monthlyClicks []gormModels.LinkMonthlyClicks) {
 	@statChartWrap(sectionId, title, desc, monthlyClicks == nil) {
 		if monthlyClicks!=nil {
 			@chartEmptyWrap(len(monthlyClicks) == 0) {
@@ -304,7 +304,7 @@ templ StatLineChartSection(sectionId string, linkId string, title string, desc s
 	}
 }
 
-templ StatBarChartSection(sectionId string, linkId string, title string, desc string, countryClicks []gormModels.LinkCountryClicks) {
+templ StatCountryClicksChartSection(sectionId string, linkId string, title string, desc string, countryClicks []gormModels.LinkCountryClicks) {
 	@statChartWrap(sectionId, title, desc, countryClicks == nil) {
 		if countryClicks!=nil {
 			@chartEmptyWrap(len(countryClicks) == 0) {
@@ -313,7 +313,7 @@ templ StatBarChartSection(sectionId string, linkId string, title string, desc st
 					for _, item := range countryClicks {
 						{{ countryName := utils.CountryMap[strings.ToLower(item.CountryCode)] }}
 						<tr>
-							<th scope="row">{ item.CountryCode }</th>
+							<th scope="row">{ strings.ToUpper(item.CountryCode) }</th>
 							<td style={ templ.SafeCSS(fmt.Sprintf("--size: %.5f;", float32(item.Count)/float32(maxClicks))) } class="rounded-t">
 								<span class="tooltip">{ countryName } <br/> { strconv.Itoa(item.Count) } Clicks </span>
 							</td>
