@@ -7,7 +7,7 @@ webApp:
   appName: webapp
   image:
     name: kajendranalagaratnam/sleklink
-    version: 1.0.3
+    version: 1.0.4
   port: 8080
 valkey:
   serviceName: valkey
