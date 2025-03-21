@@ -1,15 +1,8 @@
-name: Checks
+name: DB-Migrate
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-    types: [opened, synchronize]
 jobs:
-  build:
+  migration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,5 +14,7 @@ jobs:
           enable-cache: "true"
           devbox-version: "0.14.0"
           project-path: "./libs/devbox-minimal"
-      - name: Build Webapp
-        run: devbox run -- task webapp:build
+      - name: Run DB Migration Script
+        run: devbox run -- task gorm:migrate
+        env:
+          POSTGRESQL_DSN: ${{ secrets.DB_MIGRATE_POSTGRESQL_DSN }}
