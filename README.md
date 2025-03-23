@@ -8,6 +8,7 @@ A fast, free, and easy-to-use URL shortener with built-in analytics for tracking
 
 <br>
 
+![](https://api.checklyhq.com/v1/badges/checks/c5fe672f-7d4d-4d70-90cc-22e4e79a282f?style=flat&theme=default)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kaje94_slek-link&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kaje94_slek-link)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=kaje94_slek-link&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=kaje94_slek-link)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=kaje94_slek-link&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=kaje94_slek-link)
