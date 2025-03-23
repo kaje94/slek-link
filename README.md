@@ -13,7 +13,6 @@ A fast, free, and easy-to-use URL shortener with built-in analytics for tracking
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=kaje94_slek-link&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=kaje94_slek-link)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=kaje94_slek-link&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=kaje94_slek-link)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=kaje94_slek-link&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=kaje94_slek-link)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kaje94_slek-link&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kaje94_slek-link)
 
 ## Features
 
