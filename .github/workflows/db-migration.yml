@@ -1,4 +1,4 @@
-name: DB-Migrate
+name: Migrate Database
 on:
   workflow_dispatch:
 jobs:
