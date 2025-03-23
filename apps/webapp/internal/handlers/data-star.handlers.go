@@ -383,7 +383,7 @@ func LinkDetailsLazyHandler(c echo.Context) error {
 	sse := datastar.NewSSE(c.Response().Writer, c.Request())
 
 	link, err := utils.GetLinkOfUser(compat, db, userInfo.ID, id)
-	if err != nil {
+	if err != nil || link.ID == "" {
 		sse.Redirect("/404")
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find link")
 	}
