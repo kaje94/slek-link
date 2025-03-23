@@ -23,6 +23,7 @@ deploy:
           configMap.values.COOKIE_SECRET: "{{.COOKIE_SECRET}}"
           configMap.values.MAX_LINKS_PER_USER: "{{.MAX_LINKS_PER_USER}}"
           configMap.values.POSTGRESQL_DSN: "{{.POSTGRESQL_DSN}}"
+          configMap.values.SENTRY_DSN: "{{.SENTRY_DSN}}"
 portForward:
   - resourceType: service
     resourceName: webapp

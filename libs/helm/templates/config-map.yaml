@@ -11,6 +11,7 @@ data:
   WEBAPP_URL: {{ .Values.configMap.values.WEBAPP_URL }}
   WEBAPP_PORT: "{{ .Values.configMap.values.WEBAPP_PORT | toString }}"
   COOKIE_SECRET: {{ .Values.configMap.values.COOKIE_SECRET }}
+  SENTRY_DSN: {{ .Values.configMap.values.SENTRY_DSN }}
   MAX_LINKS_PER_USER: "{{ .Values.configMap.values.MAX_LINKS_PER_USER | toString }}"
   # Derived configs
   VALKEY_HOST: "{{ .Values.valkey.serviceName }}:{{ .Values.valkey.service.port | toString }}"

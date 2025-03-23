@@ -43,5 +43,5 @@ jobs:
         if: ${{ github.event.inputs.updateCode == 'true' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: "Update webapp docker image version to ${{ github.event.inputs.version }}"
+          message: "chore: ⬆️ bump up webapp docker image version to ${{ github.event.inputs.version }}"
           branch: ${{ github.ref_name }}

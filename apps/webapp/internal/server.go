@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/kaje94/slek-link/asyncapi/asyncapi"
 
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -47,6 +48,9 @@ func RunServer() error {
 	router.Use(middleware.Logger())
 	router.Use(middleware.Gzip())
 	router.Use(middleware.Recover())
+
+	// configure sentry as a middleware
+	setSentryMiddleware(router)
 
 	// Session middleware
 	store := sessions.NewCookieStore([]byte(config.Config.WebAppConfig.CookieSecret))
@@ -214,6 +218,35 @@ func setCacheMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Set(string(utils.VALKEY_CONTEXT_KEY), compat)
 		return next(c)
 	}
+}
+
+func setSentryMiddleware(router *echo.Echo) error {
+	if config.Config.SentryDsn != "" {
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn: config.Config.SentryDsn,
+		}); err != nil {
+			return fmt.Errorf("failed to initialize sentry", err)
+		}
+
+		router.HTTPErrorHandler = func(err error, c echo.Context) {
+			// Get status code
+			statusCode := http.StatusInternalServerError
+			if he, ok := err.(*echo.HTTPError); ok {
+				statusCode = he.Code
+			}
+
+			// Capture 500 errors
+			if statusCode == http.StatusInternalServerError {
+				hub := sentry.CurrentHub().Clone()
+				hub.Scope().SetRequest(c.Request())
+				hub.CaptureException(err)
+			}
+
+			// Call default handler to render response
+			router.DefaultHTTPErrorHandler(err, c)
+		}
+	}
+	return nil
 }
 
 func setupAmqp() {

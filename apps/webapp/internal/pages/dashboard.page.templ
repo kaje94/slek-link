@@ -7,7 +7,7 @@ import (
 	"github.com/kaje94/slek-link/webapp/internal/components"
 	"github.com/kaje94/slek-link/webapp/internal/utils"
 	"github.com/labstack/echo/v4"
-	"slices"
+	"sort"
 	"strconv"
 )
 
@@ -24,8 +24,6 @@ func HandleDashboardsPage(c echo.Context) error {
 
 	var links []gormModels.Link
 	utils.GetUserLinksCache(compat, userInfo.ID, &links)
-
-	slices.Reverse(links)
 
 	resp := components.RootLayout(
 		"Dashboard | slek.link - Manage and Track Your Links",
@@ -126,6 +124,7 @@ templ listItemColSkeleton(label string, index int) {
 }
 
 templ DashboardItems(links []gormModels.Link) {
+	{{ sort.Slice(links, func(i, j int) bool { return links[i].CreatedAt.Before(links[j].CreatedAt) }) }}
 	@DashboardItemsGridWrap() {
 		for _, item := range links {
 			@DashboardItem(item)

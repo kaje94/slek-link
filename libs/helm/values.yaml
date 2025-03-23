@@ -62,3 +62,4 @@ configMap:
     COOKIE_SECRET: "some-long-secret"
     MAX_LINKS_PER_USER: "5"
     POSTGRESQL_DSN: ""
+    SENTRY_DSN: ""

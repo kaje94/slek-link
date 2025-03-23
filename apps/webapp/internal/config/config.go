@@ -15,6 +15,7 @@ type rootConfig struct {
 	Valkey          valkeyConfig
 	AmqpUrl         string
 	PostgreSqlDsn   string
+	SentryDsn       string
 }
 
 type webAppConfig struct {
@@ -45,6 +46,7 @@ var Config = rootConfig{
 	},
 	AmqpUrl:       getEnvVal("AMQP_URL"),
 	PostgreSqlDsn: getEnvVal("POSTGRESQL_DSN"),
+	SentryDsn:     getEnvValWithFallback("SENTRY_DSN", ""),
 }
 
 func init() {
