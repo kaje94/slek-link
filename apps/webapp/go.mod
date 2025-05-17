@@ -11,7 +11,7 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/starfederation/datastar v0.21.4
-	github.com/valkey-io/valkey-go v1.0.52
+	github.com/valkey-io/valkey-go v1.0.60
 	github.com/valkey-io/valkey-go/valkeycompat v1.0.52
 	golang.org/x/oauth2 v0.24.0
 	gorm.io/driver/postgres v1.5.11
