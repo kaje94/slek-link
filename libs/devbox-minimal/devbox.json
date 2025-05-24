@@ -3,7 +3,7 @@
   "packages": [
     "go@1.23.3",
     "templ@0.3.833",
-    "bun@1.1.34",
+    "bun@1.2.13",
     "go-task@3.41.0",
     "tailwindcss_4@4.0.8"
   ],
