@@ -100,6 +100,34 @@
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
       "resolved": "github:NixOS/nixpkgs/2d068ae5c6516b2d04562de50a58c682540de9bf?lastModified=1740303746&narHash=sha256-XcdiWLEhjJkMxDLKQJ0CCivmYYCvA5MDxu9pMybM5kM%3D"
     },
+    "glibcLocales@latest": {
+      "last_modified": "2026-07-23T05:10:05Z",
+      "resolved": "github:NixOS/nixpkgs/7525d999cd850b9a488817abc89c75dc733acf17#glibcLocales",
+      "source": "devbox-search",
+      "version": "2.42-67",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8zkbf0gj49l4kz5y0ffw0wikarlp8i7s-glibc-locales-2.42-67",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8zkbf0gj49l4kz5y0ffw0wikarlp8i7s-glibc-locales-2.42-67"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/99jy9rzfzr9hf8lryisxn39nbc8xfw5d-glibc-locales-2.42-67",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/99jy9rzfzr9hf8lryisxn39nbc8xfw5d-glibc-locales-2.42-67"
+        }
+      }
+    },
     "go-task@3.41.0": {
       "last_modified": "2025-02-07T11:26:36Z",
       "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#go-task",
@@ -597,52 +625,52 @@
         }
       }
     },
-    "valkey@latest": {
-      "last_modified": "2025-02-07T11:26:36Z",
+    "valkey@7.2.7": {
+      "last_modified": "2024-11-10T13:26:24Z",
       "plugin_version": "0.0.1",
-      "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#valkey",
+      "resolved": "github:NixOS/nixpkgs/aebe249544837ce42588aa4b2e7972222ba12e8f#valkey",
       "source": "devbox-search",
-      "version": "8.0.2",
+      "version": "7.2.7",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/y4jvh5nz4mfxgbxkyzz734g52s1vssrb-valkey-8.0.2",
+              "path": "/nix/store/yd7527f8vfwl3bavx5qkgvr3a7vlvp67-valkey-7.2.7",
               "default": true
             }
           ],
-          "store_path": "/nix/store/y4jvh5nz4mfxgbxkyzz734g52s1vssrb-valkey-8.0.2"
+          "store_path": "/nix/store/yd7527f8vfwl3bavx5qkgvr3a7vlvp67-valkey-7.2.7"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/r3ml6233a5gz75kl7fkqlrdx1kb41a0r-valkey-8.0.2",
+              "path": "/nix/store/wjljfsnirw5khhb78xbwk4s021mjarfb-valkey-7.2.7",
               "default": true
             }
           ],
-          "store_path": "/nix/store/r3ml6233a5gz75kl7fkqlrdx1kb41a0r-valkey-8.0.2"
+          "store_path": "/nix/store/wjljfsnirw5khhb78xbwk4s021mjarfb-valkey-7.2.7"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/4gsyc6spbk2c5rgq74lkf9ghil5a0rqf-valkey-8.0.2",
+              "path": "/nix/store/kxw8rhj0byw4k038n31qna0qngkdrvhi-valkey-7.2.7",
               "default": true
             }
           ],
-          "store_path": "/nix/store/4gsyc6spbk2c5rgq74lkf9ghil5a0rqf-valkey-8.0.2"
+          "store_path": "/nix/store/kxw8rhj0byw4k038n31qna0qngkdrvhi-valkey-7.2.7"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/1i73ygjixgfq2cn4jsd76jwii9v5ydgi-valkey-8.0.2",
+              "path": "/nix/store/k03as9clgr1dl5h3z0rvmv6dyslpkwy3-valkey-7.2.7",
               "default": true
             }
           ],
-          "store_path": "/nix/store/1i73ygjixgfq2cn4jsd76jwii9v5ydgi-valkey-8.0.2"
+          "store_path": "/nix/store/k03as9clgr1dl5h3z0rvmv6dyslpkwy3-valkey-7.2.7"
         }
       }
     }
