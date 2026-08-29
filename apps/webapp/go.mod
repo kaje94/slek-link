@@ -8,7 +8,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/gorilla/sessions v1.4.0
-	github.com/labstack/echo/v4 v4.12.0
+	github.com/labstack/echo/v4 v4.15.3
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/starfederation/datastar v0.21.4
 	github.com/valkey-io/valkey-go v1.0.52
