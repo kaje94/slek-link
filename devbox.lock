@@ -100,6 +100,34 @@
     "github:NixOS/nixpkgs/nixpkgs-unstable": {
       "resolved": "github:NixOS/nixpkgs/2d068ae5c6516b2d04562de50a58c682540de9bf?lastModified=1740303746&narHash=sha256-XcdiWLEhjJkMxDLKQJ0CCivmYYCvA5MDxu9pMybM5kM%3D"
     },
+    "glibcLocales@latest": {
+      "last_modified": "2026-08-27T07:16:00Z",
+      "resolved": "github:NixOS/nixpkgs/c27cdad491a991b11ed731760aa2ef8db0cb0410#glibcLocales",
+      "source": "devbox-search",
+      "version": "2.42-84",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/iacrshzwi3r6k7jr98p94v3naji51f04-glibc-locales-2.42-84",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/iacrshzwi3r6k7jr98p94v3naji51f04-glibc-locales-2.42-84"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/f65j04fnffn1wb67s11m8mhghf3xzpc1-glibc-locales-2.42-84",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/f65j04fnffn1wb67s11m8mhghf3xzpc1-glibc-locales-2.42-84"
+        }
+      }
+    },
     "go-task@3.41.0": {
       "last_modified": "2025-02-07T11:26:36Z",
       "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#go-task",
@@ -405,51 +433,51 @@
         }
       }
     },
-    "rip2@latest": {
-      "last_modified": "2025-02-07T11:26:36Z",
-      "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#rip2",
+    "rip2@0.9.6": {
+      "last_modified": "2026-08-27T07:16:00Z",
+      "resolved": "github:NixOS/nixpkgs/c27cdad491a991b11ed731760aa2ef8db0cb0410#rip2",
       "source": "devbox-search",
-      "version": "0.9.3",
+      "version": "0.9.6",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/gci51za6d0b6qgq5ymwdqyqxz24ckdxh-rip2-0.9.3",
+              "path": "/nix/store/l9r4fgb5bj9xc8kl89d6677f83bq7qj3-rip2-0.9.6",
               "default": true
             }
           ],
-          "store_path": "/nix/store/gci51za6d0b6qgq5ymwdqyqxz24ckdxh-rip2-0.9.3"
+          "store_path": "/nix/store/l9r4fgb5bj9xc8kl89d6677f83bq7qj3-rip2-0.9.6"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/n8zwhf1l4a8n32rp52fa141gh6pw8d1w-rip2-0.9.3",
+              "path": "/nix/store/j2fk876ma97x9p62dy67cwb76q5hiwsg-rip2-0.9.6",
               "default": true
             }
           ],
-          "store_path": "/nix/store/n8zwhf1l4a8n32rp52fa141gh6pw8d1w-rip2-0.9.3"
+          "store_path": "/nix/store/j2fk876ma97x9p62dy67cwb76q5hiwsg-rip2-0.9.6"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/fim40323ckbxfqp1i7kgr0wg5zkazaiw-rip2-0.9.3",
+              "path": "/nix/store/qfjrqygwqi9fw0jj6mkscbsjkaccp88p-rip2-0.9.6",
               "default": true
             }
           ],
-          "store_path": "/nix/store/fim40323ckbxfqp1i7kgr0wg5zkazaiw-rip2-0.9.3"
+          "store_path": "/nix/store/qfjrqygwqi9fw0jj6mkscbsjkaccp88p-rip2-0.9.6"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/zwqjkvf5a7kj3srw604x9ngadnxwd723-rip2-0.9.3",
+              "path": "/nix/store/ys4jh086aw7jap9136h80ggc8x5qyc8b-rip2-0.9.6",
               "default": true
             }
           ],
-          "store_path": "/nix/store/zwqjkvf5a7kj3srw604x9ngadnxwd723-rip2-0.9.3"
+          "store_path": "/nix/store/ys4jh086aw7jap9136h80ggc8x5qyc8b-rip2-0.9.6"
         }
       }
     },
@@ -599,7 +627,7 @@
     },
     "valkey@latest": {
       "last_modified": "2025-02-07T11:26:36Z",
-      "plugin_version": "0.0.1",
+      "plugin_version": "0.0.2",
       "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#valkey",
       "source": "devbox-search",
       "version": "8.0.2",
